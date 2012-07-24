@@ -156,6 +156,25 @@ class ExportCommand extends AbstractCommand
 
 
 		//
+		// Optimize Images !
+		//
+		$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking trimage installation for optimising Images'));
+		$retval = -1;
+		$ret = array();
+		exec('trimage --help 2>&1', $ret, $retval);
+		if ($retval == 0) {
+			$imgPath = $this->buildTempPath(false, "img");
+
+			$ret = array();
+			$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Starting image optimization'));
+			exec(sprintf('trimage -d %s 2> /dev/null', realpath($imgPath)), $ret, $retval);
+
+			foreach ($ret as $r) {
+				$output->writeln(" " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, str_replace($imgPath, "", $r)));
+			}
+		}
+
+		//
 		// build javascript api documentation
 		//
 		$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking yuidoc installation'));
@@ -164,7 +183,6 @@ class ExportCommand extends AbstractCommand
 		$ret = array();
 		exec('yuidoc -v 2>&1', $ret, $retval);
 		if ($retval == 1) {
-
 			$ret = json_decode(file_get_contents($this->rootPath . "/../yuidoc.json"));
 			$ret->version = sprintf("%d.%d.%d", $this->buildOptions["version.major"], $this->buildOptions["version.minor"], $this->buildOptions["version.build"]);
 			file_put_contents($this->rootPath . "/../yuidoc.json", json_encode($ret));
@@ -174,6 +192,20 @@ class ExportCommand extends AbstractCommand
 			exec(sprintf('yuidoc -o "%s" 2>&1', $this->buildTempPath(false, "apidoc/")), $ret, $retval);
 		} else {
 			$output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, 'Yuidoc not found in path. Cannot build API Doc :('));
+		}
+
+
+		//
+		// Append Changelogs
+		//
+		if (realpath($this->buildPath . "/changelogs") !== false) {
+			$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Append Changelogs'));
+			$finder = new Finder();
+			$logPath = $this->buildTempPath(false, 'changelogs/');
+			foreach ($finder->in($this->buildPath . "/changelogs")->files()->name('*.md') as $file) {
+				$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending Changelog: ' . $file->getPathName()));
+				$this->fsys->copy($file->getPathName(), $logPath . "/" . $file->getFileName());
+			}
 		}
 	}
 
