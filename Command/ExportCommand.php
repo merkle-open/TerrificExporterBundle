@@ -301,6 +301,10 @@ class ExportCommand extends AbstractCommand
 			$command = $this->getApplication()->find('build:validatejs');
 			$returnCode = $command->run($input, $output);
 
+			$command = $this->getApplication()->find('build:validatehtml');
+			$returnCode = $command->run($input, $output);
+
+
 			$command = $this->getApplication()->find('assetic:dump');
 			$returnCode = $command->run($input, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
