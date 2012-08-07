@@ -21,9 +21,11 @@ namespace Terrific\ExporterBundle\Command {
 	use DOMXpath;
 
 
+	/**
+	 *
+	 */
 	class HTMLValidationCommand extends AbstractCommand
 	{
-		private $cURL;
 
 		/**
 		 *
@@ -35,84 +37,24 @@ namespace Terrific\ExporterBundle\Command {
 				->setDescription('Validates HTML');
 		}
 
-		protected function outputMessages(\DOMNodeList $dNodeList, OutputInterface $output)
-		{
-			foreach ($dNodeList as $e) {
-				try {
+		protected function validatePageContent($content, OutputInterface $output) {
 
-					switch (strtoupper($e->tagName)) {
-						case "M:ERROR":
-							$msgLvl = AbstractCommand::MSG_LEVEL_ERROR;
-							break;
+			$dom = $this->sendToW3Validator('HTML', $content);
 
-						case "M:WARNING":
-							$msgLvl = AbstractCommand::MSG_LEVEL_WARN;
-							break;
-
-						default:
-							$msgLvl = AbstractCommand::MSG_LEVEL_INFO;
-							break;
-					}
-
-
-					$msg = $e->getElementsByTagName("message")->item(0)->nodeValue;
-					if ($e->getElementsByTagName("line")->length > 0) {
-						$line = $e->getElementsByTagName("line")->item(0)->nodeValue;
-						$col = $e->getElementsByTagName("col")->item(0)->nodeValue;
-						$pos = $e->getElementsByTagName("source")->item(0)->nodeValue;
-						$pos = str_replace(array('&#34;', '&#62;', '&#60;'), array('"', '>', '<'), $pos);
-
-						$output->writeln("    ".$this->getMessage($msgLvl, sprintf("Line %d Col %d", $line, $col)));
-						$output->writeln("           " . trim($msg));
-						$output->writeln("           " . trim(urldecode($pos)));
-						$output->writeln("");
-					} else {
-						$output->writeln("    ".$this->getMessage($msgLvl, trim($msg)));
-					}
-
-
-				} catch (\Exception $ex) {
-
-				}
-			}
-
-		}
-
-		/**
-		 *
-		 * @param $content
-		 */
-		protected function validatePageContent($content, OutputInterface $output)
-		{
-			curl_setopt_array($this->cURL, array(
-				CURLOPT_URL => "http://validator.w3.org/check",
-				CURLOPT_POST => true,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_POSTFIELDS => array(
-					"fragment" => $content,
-					"output" => "soap12"
-				)
-			));
-
-			$ret = curl_exec($this->cURL);
-
-			$dom = new DOMDocument();
-			$dom->loadXML($ret);
 			$xpath = new DOMXpath($dom);
 			$xpath->registerNamespace("m", "http://www.w3.org/2005/10/markup-validator");
 
 			$errorCount = (int)$xpath->query("//m:errorcount")->item(0)->nodeValue;
 			$output->writeln($this->getMessage(($errorCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_ERROR), sprintf("Found %d Errors", $errorCount)));
 			$errors = $xpath->query("//m:error");
-			$this->outputMessages($errors, $output);
+			$this->outputW3Messages($errors, $output);
 
 
 			$warnCount = (int)$xpath->query("//m:warningcount")->item(0)->nodeValue;
 			$warnCount -= 1;
 			$output->writeln($this->getMessage(($warnCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_WARN), sprintf("Found %d Warnings", $warnCount)));
 			$warnings = $xpath->query("//m:warning");
-			$this->outputMessages($warnings, $output);
-
+			$this->outputW3Messages($warnings, $output);
 		}
 
 
@@ -126,8 +68,7 @@ namespace Terrific\ExporterBundle\Command {
 			parent::execute($input, $output);
 			$this->cURL = curl_init();
 
-
-			$output->writeln('<info>[INFO]</info> Validating HTML');
+			$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating HTML"));
 
 			$pageManager = $this->getContainer()->get("terrific.composer.page.manager");
 			$http = $this->getContainer()->get("http_kernel");

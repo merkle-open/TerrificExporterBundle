@@ -15,6 +15,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use DOMDocument;
+
 
 abstract class AbstractCommand extends ContainerAwareCommand
 {
@@ -29,6 +31,8 @@ abstract class AbstractCommand extends ContainerAwareCommand
 	protected $modulePath;
 	protected $buildPath;
 	protected $buildOptions;
+	protected $cURL;
+
 
 	/**
 	 * @param InputInterface $input
@@ -97,5 +101,96 @@ abstract class AbstractCommand extends ContainerAwareCommand
 		return $ret;
 	}
 
+
+	/**
+	 * @param \DOMNodeList $dNodeList
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
+	protected function outputW3Messages(\DOMNodeList $dNodeList, OutputInterface $output)
+	{
+		foreach ($dNodeList as $e) {
+			try {
+
+				switch (strtoupper($e->tagName)) {
+					case "M:ERROR":
+						$msgLvl = AbstractCommand::MSG_LEVEL_ERROR;
+						break;
+
+					case "M:WARNING":
+						$msgLvl = AbstractCommand::MSG_LEVEL_WARN;
+						break;
+
+					default:
+						$msgLvl = AbstractCommand::MSG_LEVEL_INFO;
+						break;
+				}
+
+
+				$msg = $e->getElementsByTagName("message")->item(0)->nodeValue;
+				if ($e->getElementsByTagName("line")->length > 0) {
+					$line = $e->getElementsByTagName("line")->item(0)->nodeValue;
+					$col = $e->getElementsByTagName("col")->item(0)->nodeValue;
+					$pos = $e->getElementsByTagName("source")->item(0)->nodeValue;
+					$pos = str_replace(array('&#34;', '&#62;', '&#60;'), array('"', '>', '<'), $pos);
+
+					$output->writeln("    " . $this->getMessage($msgLvl, sprintf("Line %d Col %d", $line, $col)));
+					$output->writeln("           " . trim($msg));
+					$output->writeln("           " . trim(urldecode($pos)));
+					$output->writeln("");
+				} else {
+					$output->writeln("    " . $this->getMessage($msgLvl, trim($msg)));
+				}
+
+
+			} catch (\Exception $ex) {
+
+			}
+		}
+	}
+
+
+	/**
+	 *
+	 * @param $content
+	 * @return DOMDocument
+	 */
+	protected function sendToW3Validator($mode, $content)
+	{
+		sleep(2);
+
+		$postFields = null;
+		switch ($mode) {
+			case "HTML":
+				$url = "http://validator.w3.org/check";
+				$postFields = array(
+					"fragment" => $content,
+					"output" => "soap12"
+				);
+				break;
+
+			case "CSS":
+				$url = "http://jigsaw.w3.org/css-validator/validator";
+				$postFields = array(
+					'uri' => '',
+					"text" => urlencode($content),
+					"output" => "soap12"
+				);
+				break;
+		}
+
+		curl_setopt_array($this->cURL, array(
+			CURLOPT_URL => $url,
+			CURLOPT_POST => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_POSTFIELDS => $postFields
+		));
+
+		$ret = curl_exec($this->cURL);
+
+		$dom = new DOMDocument();
+		$dom->loadXML($ret);
+
+		return $dom;
+	}
 
 }
