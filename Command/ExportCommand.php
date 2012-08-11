@@ -39,9 +39,9 @@ class ExportCommand extends AbstractCommand
         $this
             ->setName('build:export')
             ->setDescription('Builds a release')
-            ->addOption('validation', null, InputOption::VALUE_OPTIONAL, "Validate export?", true)
-            ->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images", false)
-            ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc', false);
+            ->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")
+            ->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")
+            ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
     }
 
 
@@ -161,7 +161,7 @@ class ExportCommand extends AbstractCommand
         //
         // Optimize Images !
         //
-        if (!$input->hasOption('no-image-optimization')) {
+        if (!$input->hasParameterOption('--no-image-optimization')) {
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking trimage installation for optimising Images'));
             $retval = -1;
             $ret = array();
@@ -182,7 +182,7 @@ class ExportCommand extends AbstractCommand
         //
         // build javascript api documentation
         //
-        if (!$input->hasOption('no-js-doc')) {
+        if (!$input->hasParameterOption('--no-js-doc')) {
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking yuidoc installation'));
             $retval = -1;
             $ret = array();
@@ -317,7 +317,7 @@ class ExportCommand extends AbstractCommand
 
             $this->fsys = $this->getContainer()->get("filesystem");
 
-            if (!$input->getOption('validation')) {
+            if (!$input->hasParameterOption('--no-validation')) {
                 $command = $this->getApplication()->find('build:validatecss');
                 $returnCode = $command->run($cmdInput, $output);
 
@@ -327,7 +327,6 @@ class ExportCommand extends AbstractCommand
                 $command = $this->getApplication()->find('build:validatehtml');
                 $returnCode = $command->run($cmdInput, $output);
             }
-
 
             $command = $this->getApplication()->find('assetic:dump');
             $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());

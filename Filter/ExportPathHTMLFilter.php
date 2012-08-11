@@ -119,7 +119,10 @@ namespace Terrific\ExporterBundle\Filter {
             });
 
             $pInfo = pathinfo($link);
-            return in_array(strtoupper($pInfo["extension"]), $allowedExtensions);
+            if (isset($pInfo["extension"])) {
+                return in_array(strtoupper($pInfo["extension"]), $allowedExtensions);
+            }
+            return false;
         }
 
 
