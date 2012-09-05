@@ -220,11 +220,9 @@ class ExportCommand extends AbstractCommand
     {
         $moduleManager = $this->getContainer()->get("terrific.composer.module.manager");
         $modules = $moduleManager->getModules();
-        $templating = $this->getContainer()->get('templating');
+        $http = $this->getContainer()->get("http_kernel");
 
-        $request = new Request();
-        $this->getContainer()->enterScope('request');
-        $this->getContainer()->set('request', $request, 'request');
+        //$this->getContainer()->set('request', $request, 'request');
 
         $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building modules"));
         foreach ($modules as $mod) {
@@ -232,12 +230,9 @@ class ExportCommand extends AbstractCommand
             $m = $moduleManager->getModuleByName($mod->getName());
 
             foreach ($m->getTemplates() as $tpl) {
-                $ret = $templating->render('TerrificComposerBundle:Module:details.ajax.html.twig', array(
-                    'layout' => $moduleManager->getModuleLayout(),
-                    'module' => $mod->getName(),
-                    'template' => $tpl->getName(),
-                    'skins' => array()
-                ));
+                $request = Request::create(sprintf("/terrific/composer/module/details/%s", $mod->getName()));
+                $resp = $http->handle($request);
+                $ret = $resp->getContent();
 
                 file_put_contents($tempPath . "/" . $tpl->getName() . ".html", $ret);
             }
@@ -332,6 +327,9 @@ class ExportCommand extends AbstractCommand
             $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
             $tempPath = $this->buildTempPath(true);
+
+            $this->getContainer()->enterScope('request');
+
             $this->exportAssets($input, $output);
             $this->exportModules($input, $output);
             $this->exportLayouts($input, $output);
