@@ -175,7 +175,6 @@ class ExportCommand extends AbstractCommand
             }
         }
 
-
         //
         // appending images
         //
@@ -213,10 +212,8 @@ class ExportCommand extends AbstractCommand
         //
         if (!$input->hasParameterOption('--no-image-optimization') && $this->getContainer()->getParameter('terrific_exporter.optimize_images')) {
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking trimage installation for optimising Images'));
-            $retval = -1;
-            $ret = array();
-            exec('trimage --help 2>&1', $ret, $retval);
-            if ($retval == 0) {
+
+            if ($this->checkCommand('trimage --help 2>&1', 0)) {
                 $imgPath = $this->buildTempPath(false, "img");
 
                 $ret = array();
@@ -234,10 +231,8 @@ class ExportCommand extends AbstractCommand
         //
         if (!$input->hasParameterOption('--no-js-doc') && $this->getContainer()->getParameter('terrific_exporter.build_js_doc')) {
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking yuidoc installation'));
-            $retval = -1;
-            $ret = array();
-            exec('yuidoc -v 2>&1', $ret, $retval);
-            if ($retval == 1) {
+
+            if ($this->checkCommand('yuidoc -v 2>&1', 1)) {
                 $ret = json_decode(file_get_contents($this->rootPath . "/../yuidoc.json"));
                 $ret->version = sprintf("%d.%d.%d", $this->buildOptions["version.major"], $this->buildOptions["version.minor"], $this->buildOptions["version.build"]);
                 file_put_contents($this->rootPath . "/../yuidoc.json", json_encode($ret));
@@ -399,6 +394,16 @@ class ExportCommand extends AbstractCommand
             $tempPath = $this->buildTempPath(true);
 
             $this->getContainer()->enterScope('request');
+
+
+            //
+            // build sprites
+            //
+            if ($this->getContainer()->getParameter('terrific_exporter.build_sprites')) {
+                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Build Sprites"));
+                $command = $this->getApplication()->find('build:sprites');
+                $returnCode = $command->run($cmdInput, $output);
+            }
 
             $this->exportAssets($input, $output);
 

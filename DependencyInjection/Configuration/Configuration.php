@@ -41,24 +41,51 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->booleanNode('export_modules')->defaultTrue()->end()
                 ->booleanNode('base_files_workaround')->defaultTrue()->end()
                 ->booleanNode('append_changelogs')->defaultTrue()->end()
+                ->booleanNode('build_sprites')->defaultTrue()->end()
+
                 ->arrayNode('module_export_list')
-                    ->requiresAtLeastOneElement()
-                    ->prototype('array')
-                        ->children()
-                            ->scalarNode('name')->end()
-                        ->end()
-                    ->end()
+                ->requiresAtLeastOneElement()
+                ->prototype('array')
+                ->children()
+                ->scalarNode('name')->end()
                 ->end()
+                ->end()
+                ->end()
+
                 ->arrayNode('layout_export_list')
-                    ->requiresAtLeastOneElement()
-                       ->prototype('array')
-                        ->children()
-                          ->scalarNode('url')->end()
-                      ->end()
-                    ->end()
-                ->end()
+                ->requiresAtLeastOneElement()
+                ->prototype('array')
+                ->children()
+                ->scalarNode('url')->end()
+                ->end()->end()->end()
+
+            /* Sprite Settings */
+                ->arrayNode('sprites')
+                ->requiresAtLeastOneElement()
+                ->prototype('array')
+                ->children()
+                ->scalarNode('directory')->end()
+
+                #->arrayNode('files')
+                #->prototype('array')->children()
+                #->scalarNode('name')->end()
+                #->end()->end()->end()
+
+                ->scalarNode('target')->end()
+                ->scalarNode('type')->defaultValue('vertical')->validate()->IfNotInArray(array('vertical', 'horizontal', 'clustered'))->thenInvalid("Invalid value given. Valid values are 'vertical', 'horizontal' and 'clustered")->end()->end()
+                ->arrayNode('item')
+                ->addDefaultsIfNotSet()
+                ->children()
+                ->scalarNode('height')->defaultValue(50)->end()
+                ->scalarNode('width')->defaultValue(50)->end()
+                ->end()->end()
+
+                ->end()->end()->end()
+
+
+            /* Export type */
                 ->scalarNode('export_type')->defaultValue('zip')->validate()->IfNotInArray(array('zip', 'folder'))->thenInvalid("Invalid value given. Valid values are 'zip' and 'folder'.")->end()
-            ->end();
+                ->end();
 
             return $treeBuilder;
         }
