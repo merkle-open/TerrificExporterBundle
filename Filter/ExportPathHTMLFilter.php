@@ -86,6 +86,8 @@ namespace Terrific\ExporterBundle\Filter {
             $ret = array_values(iterator_to_array($f->name($fileName)));
             if (count($ret) != 1) {
                 throw new \Exception('Multiple pictures found using the same name.');
+            } elseif (count($ret) == 0) {
+                throw new \Exception("No picture found using the given name.");
             }
 
             return $ret[0];
@@ -133,7 +135,7 @@ namespace Terrific\ExporterBundle\Filter {
         {
             $ret = $in;
             $matches = array();
-            if (preg_match_all('#<script.*src="([^"\']*)".*>#', $in, $matches) !== false) {
+            if (preg_match_all('#<script.*src=[\'"]([^"\']*)[\'"].*>#', $in, $matches) !== false) {
 
                 for ($i = 0; $i < count($matches[0]); $i++) {
                     $nLink = $this->clearLink($matches[1][$i]);
@@ -160,7 +162,7 @@ namespace Terrific\ExporterBundle\Filter {
         {
             $ret = $in;
             $matches = array();
-            if (preg_match_all('#<link.*href="([^"\']*)".*/>#', $in, $matches) !== false) {
+            if (preg_match_all('#<link.*href=[\'"]([^"\']*)[\'"].*/>#', $in, $matches) !== false) {
                 for ($i = 0; $i < count($matches[0]); $i++) {
                     $link = $this->clearLink($matches[1][$i]);
 

@@ -12,7 +12,7 @@
     bootstrap                   = "Tests/bootstrap.php">
 
     <testsuites>
-        <testsuite name="TerrificExporterBundle Test Suite">
+        <testsuite name="TerrificExporterBundleTestSuite">
             <directory>Tests</directory>
         </testsuite>
     </testsuites>
