@@ -22,143 +22,169 @@ use DOMXPath;
 
 class CSSValidationCommand extends AbstractCommand
 {
-	/**
-	 *
-	 */
-	protected function configure()
-	{
-		$this
-			->setName('build:validatecss')
-			->setDescription('Validates Stylesheets');
-	}
+    /**
+     *
+     */
+    protected function configure()
+    {
+        $this
+            ->setName('build:validatecss')
+            ->setDescription('Validates Stylesheets');
+    }
 
-	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 * @return int|void
-	 */
-	protected function execute(InputInterface $input, OutputInterface $output)
-	{
-		parent::execute($input, $output);
-		//$this->cURL = curl_init();
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        parent::execute($input, $output);
+        //$this->cURL = curl_init();
 
-		require_once($this->rootPath . "/../vendor/cssmin/cssmin.php");
+        require_once($this->rootPath . "/../vendor/cssmin/cssmin.php");
 
-		$assets = $this->getContainer()->get('assetic.asset_manager');
+        $assets = $this->getContainer()->get('assetic.asset_manager');
 
-		$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating CSS"));
+        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating CSS"));
 
-		foreach ($assets->getNames() as $name) {
-			foreach ($assets->get($name) as $leaf) {
-				$leaf->load();
-				$this->validate($leaf, $output);
-			}
-		}
+        foreach ($assets->getNames() as $name) {
+            foreach ($assets->get($name) as $leaf) {
+                $leaf->load();
+                $this->validate($leaf, $output);
+            }
+        }
 
-		//curl_close($this->cURL);
-	}
+        //curl_close($this->cURL);
+    }
 
-	/**
-	 * @param $selector
-	 * @param $moduleName
-	 */
-	protected function checkCssSelectors($selectors, $moduleName, $skin, OutputInterface $output)
-	{
-		$ret = array();
+    /**
+     * @param $selector
+     * @param $moduleName
+     */
+    protected function checkCssSelectors($selectors, $moduleName, $skin, OutputInterface $output)
+    {
+        $ret = array();
 
-		foreach ($selectors as $selector) {
-			$valid = false;
+        foreach ($selectors as $selector) {
+            $valid = false;
 
-			foreach (array($moduleName, $skin) as $css) {
-				if ($css == "") {
-					continue;
-				}
+            if ($skin != "") {
 
-				if (strpos($selector, "mod" . $css) !== false) {
-					$valid = true;
-				}
+            }
+            $validModule = (strpos($selector, "mod" . $moduleName) !== false);
+            $validSkin = (strpos($selector, "skin" . $moduleName . $skin) !== false);
 
-				if (!$valid) {
-					$modName = strtolower(preg_replace('/([A-Z])/', '-$1', $css));
-					if (strpos($selector, "mod" . $modName) !== false) {
-						$valid = true;
-					}
-				}
-			}
+            if (!$valid) {
+                $modName = strtolower(preg_replace('/([A-Z])/', '-$1', $moduleName));
+                $skinName = strtolower(preg_replace('/([A-Z])/', '-$1', $moduleName . $skin));
 
-			if (!$valid) {
-				$ret[] = "  " . $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, "Incomplete CSS Rule, no valid module identifier found -> " . $selector);
-			}
-		}
+                $validModule = (strpos($selector, "mod" . $modName) !== false);
+                $validSkin = (strpos($selector, "skin" . $skinName) !== false);
+            } else {
+                break;
+            }
 
-		return $ret;
-	}
+            $valid = $validModule || $validSkin;
 
-	protected function validateCssContent($content, OutputInterface $output)
-	{
+            if (trim($skin) !== "" && !$validSkin && $validModule) {
+                $ret[] = "  " . $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, "Module CSS Rule in Skin found -> " . $selector);
+            }
 
-		$dom = $this->sendToW3Validator('CSS', $content);
+            if (!$valid) {
+                $ret[] = "  " . $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, "Incomplete CSS Rule, no valid module identifier found -> " . $selector);
+            }
+        }
 
-		$xpath = new DOMXpath($dom);
-		$xpath->registerNamespace("m", "http://www.w3.org/2005/07/css-validator");
+        return $ret;
+    }
 
-		$errorCount = (int)$xpath->query("//m:errorcount")->item(0)->nodeValue;
-		$output->writeln($this->getMessage(($errorCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_ERROR), sprintf("Found %d Errors", $errorCount)));
-		$errors = $xpath->query("//m:error");
-		//$this->outputW3Messages($errors, $output);
+    protected function validateCssContent($content, OutputInterface $output)
+    {
 
+        $dom = $this->sendToW3Validator('CSS', $content);
 
-		$warnCount = (int)$xpath->query("//m:warningcount")->item(0)->nodeValue;
-		$warnCount -= 1;
-		$output->writeln($this->getMessage(($warnCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_WARN), sprintf("Found %d Warnings", $warnCount)));
-		$warnings = $xpath->query("//m:warning");
-		//$this->outputW3Messages($warnings, $output);
-	}
+        $xpath = new DOMXpath($dom);
+        $xpath->registerNamespace("m", "http://www.w3.org/2005/07/css-validator");
+
+        $errorCount = (int)$xpath->query("//m:errorcount")->item(0)->nodeValue;
+        $output->writeln($this->getMessage(($errorCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_ERROR), sprintf("Found %d Errors", $errorCount)));
+        $errors = $xpath->query("//m:error");
+        //$this->outputW3Messages($errors, $output);
 
 
-	/**
-	 *
-	 */
-	protected function validate(AssetInterface $asset, OutputInterface $output)
-	{
-		if (strtolower(substr($asset->getTargetPath(), -3)) !== 'css') {
-			return;
-		}
+        $warnCount = (int)$xpath->query("//m:warningcount")->item(0)->nodeValue;
+        $warnCount -= 1;
+        $output->writeln($this->getMessage(($warnCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_WARN), sprintf("Found %d Warnings", $warnCount)));
+        $warnings = $xpath->query("//m:warning");
+        //$this->outputW3Messages($warnings, $output);
+    }
 
-		$msg = array();
-		$matches = array();
+    /**
+     * @param $str
+     */
+    protected function toCamelCase($str)
+    {
+        $ret = "";
+        $splits = explode("-", $str);
 
-		preg_match('/Terrific\/Module\/([\w\d]+)\//', $asset->getSourcePath(), $matches);
-		$moduleName = (isset($matches[1]) ? $matches[1] : null);
+        foreach ($splits as $s) {
+            $ret .= ucfirst($s);
+        }
 
-		$skin = "";
+        return $ret;
+    }
 
-		$content = $asset->getContent();
+    /**
+     *
+     */
+    protected function validate(AssetInterface $asset, OutputInterface $output)
+    {
+        if (strtolower(substr($asset->getTargetPath(), -3)) !== 'css') {
+            return;
+        }
 
-		$output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating : " . basename($asset->getSourcePath())));
-		//$this->validateCssContent($content, $output);
+        $msg = array();
+        $matches = array();
 
-		/*
-				// TODO: Fix line break !
-				$i = 1;
-				foreach (explode('\n', str_replace('\r', '\n', $content)) as $line) {
-					if (strpos($line, 'a') !== false) {
-						$msg[] = $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, "Found tab in line " . $i);
-					}
-					$i++;
-				}
-				*/
+        $skin = "";
+        if (preg_match('/Terrific\/Module\/([\w\d]+)\/Resources\/public\/css\/skin\/([\w\d-]+)/', $asset->getSourcePath(), $matches) !== false) {
+            if (isset($matches[2])) {
+                $skin = $this->toCamelCase(strtolower($matches[2]));
+            }
+        } else if (preg_match('/Terrific\/Module\/([\w\d]+)\//', $asset->getSourcePath(), $matches) !== false) {
+        } else {
+            return;
+        }
 
-		$cssParser = new \CssParser($content);
-		foreach ($cssParser->getTokens() as $token) {
-			if ($token instanceof \CssRulesetStartToken && $moduleName != null) {
-				$msg = array_merge($msg, $this->checkCssSelectors($token->Selectors, $moduleName, $skin, $output));
-			}
-		}
+        $moduleName = (isset($matches[1]) ? $matches[1] : null);
+
+        $content = $asset->getContent();
+
+        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating : " . basename($asset->getSourcePath())));
+        //$this->validateCssContent($content, $output);
+
+        /*
+                  // TODO: Fix line break !
+                  $i = 1;
+                  foreach (explode('\n', str_replace('\r', '\n', $content)) as $line) {
+                      if (strpos($line, 'a') !== false) {
+                          $msg[] = $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, "Found tab in line " . $i);
+                      }
+                      $i++;
+                  }
+                  */
+
+        $cssParser = new \CssParser($content);
+        foreach ($cssParser->getTokens() as $token) {
+            if ($token instanceof \CssRulesetStartToken && $moduleName != null) {
+                $msg = array_merge($msg, $this->checkCssSelectors($token->Selectors, $moduleName, $skin, $output));
+            }
+        }
 
 
-		if (count($msg) > 0) {
-			$output->writeln($msg);
-		}
-	}
+        if (count($msg) > 0) {
+            $output->writeln($msg);
+        }
+    }
 }
