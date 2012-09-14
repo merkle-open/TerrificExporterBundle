@@ -37,13 +37,16 @@ abstract class AbstractCommand extends ContainerAwareCommand
     /**
      *
      */
-    protected function retrieveExportPath($toEnd = true)
+    protected function retrieveExportPath($toEnd = true, $lang = "")
     {
         $buildPath = $this->getContainer()->getParameter('terrific_exporter.build_path');
 
         $ret = $this->rootPath . "/../";
         $ret .= $buildPath . "/";
         if ($toEnd) {
+            if ($lang != "") {
+                $ret .= strtoupper($lang) . "_";
+            }
             $ret .= $this->buildExportName(($this->getContainer()->getParameter('terrific_exporter.export_type') == "zip"));
         }
 

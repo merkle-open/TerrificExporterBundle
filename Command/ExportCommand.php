@@ -75,7 +75,8 @@ class ExportCommand extends AbstractCommand
             ->setDescription('Builds a release')
             ->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")
             ->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")
-            ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
+            ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')
+            ->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
     }
 
 
@@ -393,12 +394,9 @@ class ExportCommand extends AbstractCommand
             }
 
             $command = $this->getApplication()->find('assetic:dump');
-            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+//            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
             $tempPath = $this->buildTempPath(true);
-
-            $this->getContainer()->enterScope('request');
-            //$this->getContainer()->get("session")->setLocale('en');
 
             //
             // build sprites
@@ -407,6 +405,12 @@ class ExportCommand extends AbstractCommand
                 $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Build Sprites"));
                 $command = $this->getApplication()->find('build:sprites');
                 $returnCode = $command->run($cmdInput, $output);
+            }
+
+            $this->getContainer()->enterScope('request');
+
+            if ($input->getOption("export-lang") != "") {
+                $this->getContainer()->get("session")->setLocale($input->getOption("export-lang"));
             }
 
             $this->exportAssets($input, $output);
@@ -433,7 +437,7 @@ class ExportCommand extends AbstractCommand
             $finder = new Finder();
             if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "zip") {
                 // build zip
-                $file = $this->retrieveExportPath();
+                $file = $this->retrieveExportPath(true, $input->getOption("export-lang"));
                 $zip = new ZipArchive();
                 $zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
@@ -445,7 +449,7 @@ class ExportCommand extends AbstractCommand
                 $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Exported to file: " . realpath($file)));
             } else if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "folder") {
                 //$path = $this->rootPath . "/../build/" . $this->buildExportName(false);
-                $path = $this->retrieveExportPath();
+                $path = $this->retrieveExportPath(true, $input->getOption("export-lang"));
 
 
                 if (file_exists($path) || mkdir($path)) {
