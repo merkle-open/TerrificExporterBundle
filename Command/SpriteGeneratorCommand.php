@@ -49,7 +49,6 @@ class SpriteGeneratorCommand extends AbstractCommand
      */
     protected function generateSpriteFromFileList(array $filelist, $targetFile, $options)
     {
-        var_dump($targetFile, $options);
         if ($this->method == "gd") {
             throw new \Exception("Sprite generation using GDLib is currently not supported.");
 
@@ -126,6 +125,7 @@ class SpriteGeneratorCommand extends AbstractCommand
 
         $spriteList = $this->getContainer()->getParameter('terrific_exporter.sprites');
         foreach ($spriteList as $sp) {
+            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building Sprite " . $sp["target"]));
             if ($sp["directory"] != "") {
                 $this->generateSpriteFromDirectory($sp["directory"], $sp["target"], array(
                     "width" => $sp["item"]["width"],
@@ -133,7 +133,6 @@ class SpriteGeneratorCommand extends AbstractCommand
                     "type" => $sp["type"]
                 ));
             } else if (count($sp["files"]) > 0) {
-                var_dump($sp["files"]);
             }
         }
     }
