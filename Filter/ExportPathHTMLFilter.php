@@ -180,8 +180,6 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterJS($in)
         {
-            $closure = $this->closures["filterJS"];
-
             $ret = $this->rebuildURL($in, '#<script.*src=[\'"]([^"\']*)[\'"].*>#', array("JS"), "JS");
 
             return $ret;
@@ -192,8 +190,6 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterCSS($in)
         {
-            $closure = $this->closures["filterCSS"];
-
             $ret = $this->rebuildURL($in, '#<link.*href=[\'"]([^"\']*)[\'"].*/>#', array("CSS"), "CSS");
 
             return $ret;
