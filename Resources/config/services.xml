@@ -6,9 +6,7 @@
 
 
     <services>
-        <service id="terrific.exporter.build_options" class="Terrific\ExporterBundle\Service\BuildOptions">
-            <argument>%kernel.root_dir%/../build/build.ini</argument>
-        </service>
+        <service id="terrific.exporter.build_options" class="Terrific\ExporterBundle\Service\BuildOptions" />
 
         <service id="terrific.exporter.filter.html" class="Terrific\ExporterBundle\Filter\ExportPathHTMLFilter">
             <argument>%kernel.root_dir%/../</argument>

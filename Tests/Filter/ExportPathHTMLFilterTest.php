@@ -38,11 +38,11 @@ class ExportPathHTMLFilterTest extends \PHPUnit_Framework_TestCase
     {
         $test = '<script type="text/javascript" src="/js/jquerytest.js"></script>';
         $ret = $this->object->filterJS($test);
-        $this->assertSame($ret, '<script type="text/javascript" src="../js/jquerytest.js"></script>');
+        $this->assertSame('<script type="text/javascript" src="../js/jquerytest.js"></script>', $ret);
 
         $test = "<script type='text/javascript' src='/js/jquerytest.js'></script>";
         $ret = $this->object->filterJS($test);
-        $this->assertSame($ret, "<script type='text/javascript' src='../js/jquerytest.js'></script>");
+        $this->assertSame("<script type='text/javascript' src='../js/jquerytest.js'></script>", $ret);
     }
 
     /**
@@ -51,27 +51,13 @@ class ExportPathHTMLFilterTest extends \PHPUnit_Framework_TestCase
      */
     public function testFilterCSS()
     {
-        $test ="<link rel='stylesheet' href='/css/compiled/base.css' />";
+        $test = "<link rel='stylesheet' href='/css/compiled/base.css' />";
         $ret = $this->object->filterCSS($test);
-        $this->assertSame($ret, "<link rel='stylesheet' href='../css/base.css' />");
+        $this->assertSame("<link rel='stylesheet' href='../css/base.css' />", $ret);
 
-        $test ='<link href="/css/compiled/base.css" />';
+        $test = '<link href="/css/compiled/base.css" />';
         $ret = $this->object->filterCSS($test);
-        $this->assertSame($ret, '<link href="../css/base.css" />');
-
-
-    }
-
-    /**
-     * @covers Terrific\ExporterBundle\Filter\ExportPathHTMLFilter::filterDATA
-     * @todo   Implement testFilterDATA().
-     */
-    public function testFilterDATA()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
+        $this->assertSame('<link href="../css/base.css" />', $ret);
     }
 
     /**
@@ -80,17 +66,27 @@ class ExportPathHTMLFilterTest extends \PHPUnit_Framework_TestCase
      */
     public function testFilterHTML()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-
-        return;
-        
         $test = '<img src="/bundles/terrificmoduletest/img/blubb.jpg" />';
         $ret = $this->object->filterHTML($test);
-        $this->assertSame($ret, '<img src="../img/Test/blubb.jpg" />');
+        $this->assertSame('<img src="../img/Test/blubb.jpg" />', $ret);
 
+        $test = '<img data-bigsrc="/bundles/terrificmoduletest/img/blubb.jpg" />';
+        $ret = $this->object->filterHTML($test);
+        $this->assertSame('<img data-bigsrc="../img/Test/blubb.jpg" />', $ret);
+
+        $test = '<a href="#"></a>';
+        $ret = $this->object->filterHTML($test);
+        $this->assertSame('<a href="#"></a>', $ret);
+    }
+
+    /**
+     *
+     */
+    public function testGetModuleFromPath()
+    {
+        $test = "/data/vhosts.d/webasto-internet.local/htdocs/src/Terrific/Module/MainNavigation/Resources/img/test.jpg";
+        $ret = $this->object->getModuleFromPath($test);
+        $this->assertSame("MainNavigation", $ret);
     }
 
     /**

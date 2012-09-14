@@ -17,10 +17,9 @@ namespace Terrific\ExporterBundle\Service {
         private $file = null;
 
         /**
-         *
          * @param $file
          */
-        public function __construct($file)
+        public function setFile($file)
         {
             $this->file = $file;
             if (!file_exists($this->file)) {
@@ -28,6 +27,22 @@ namespace Terrific\ExporterBundle\Service {
             }
 
             $this->data = new ArrayObject(parse_ini_file($this->file, true));
+        }
+
+        /**
+         * @return null
+         */
+        public function getFile()
+        {
+            return $this->file;
+        }
+
+        /**
+         *
+         * @param $file
+         */
+        public function __construct()
+        {
         }
 
         /**

@@ -34,6 +34,55 @@ namespace Terrific\ExporterBundle\Filter {
         }
 
         /**
+         *
+         */
+        public function rebuildURL($in, $pattern, $extensions, $type)
+        {
+            $linksDone = array();
+
+            $ret = $in;
+            $matches = array();
+            if (preg_match_all($pattern, $in, $matches) !== false) {
+
+                for ($i = 0; $i < count($matches[0]); $i++) {
+                    if (in_array($matches[1][$i], $linksDone)) {
+                        continue;
+                    }
+
+                    $linksDone[] = $matches[1][$i];
+                    $link = $this->clearLink($matches[1][$i]);
+
+                    if ($this->validateExtension($link, $extensions)) {
+                        $cStr = $matches[0][$i];
+
+                        switch ($type) {
+                            case "JS":
+                                if (strpos($link, 'dependencies') !== false) {
+                                    $nLink = "../js/dependencies/" . basename($link);
+                                } else {
+                                    $nLink = "../js/" . basename($link);
+                                }
+                                break;
+
+                            case "CSS":
+                                $nLink = "../css/" . basename($link);
+                                break;
+
+                            case "HTML":
+                                $nLink = $this->rebuildImageLink($link);
+                                break;
+                        }
+
+                        $ncStr = str_replace($matches[1][$i], $nLink, $cStr);
+                        $ret = str_replace($cStr, $ncStr, $ret);
+                    }
+                }
+            }
+            return $ret;
+        }
+
+
+        /**
          * @param $nLink
          * @return string
          */
@@ -63,14 +112,13 @@ namespace Terrific\ExporterBundle\Filter {
          * @param $path
          * @return null
          */
-        protected function getModuleFromPath($path)
+        public function getModuleFromPath($path)
         {
-            $matches = array();
-            if (preg_match('/\/Terrific\/Module\/([^\/]+)\//', $path, $matches) !== false) {
-                return $matches[1];
-            }
+            $pos = strpos($path, "/Terrific/Module/");
+            $module = substr($path, $pos + 17);
 
-            return null;
+            $module = substr($module, 0, strpos($module, "/"));
+            return $module;
         }
 
         /**
@@ -84,7 +132,7 @@ namespace Terrific\ExporterBundle\Filter {
             $f->files()->in($this->appPath . "/web/img")->in($this->appPath . "/src/Terrific/Module")->depth("< 99");
 
             $ret = array_values(iterator_to_array($f->name($fileName)));
-            if (count($ret) != 1) {
+            if (count($ret) > 1) {
                 throw new \Exception('Multiple pictures found using the same name.');
             } elseif (count($ret) == 0) {
                 throw new \Exception("No picture found using the given name.");
@@ -115,8 +163,7 @@ namespace Terrific\ExporterBundle\Filter {
          */
         protected function validateExtension($link, $allowedExtensions = array())
         {
-            array_walk($allowedExtensions, function(&$item, $key)
-            {
+            array_walk($allowedExtensions, function (&$item, $key) {
                 $item = strtoupper($item);
             });
 
@@ -133,25 +180,10 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterJS($in)
         {
-            $ret = $in;
-            $matches = array();
-            if (preg_match_all('#<script.*src=[\'"]([^"\']*)[\'"].*>#', $in, $matches) !== false) {
+            $closure = $this->closures["filterJS"];
 
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    $nLink = $this->clearLink($matches[1][$i]);
+            $ret = $this->rebuildURL($in, '#<script.*src=[\'"]([^"\']*)[\'"].*>#', array("JS"), "JS");
 
-                    if ($this->validateExtension($nLink, array('JS'))) {
-                        if (strpos($nLink, 'dependencies') !== false) {
-                            $nLink = "../js/dependencies/" . basename($nLink);
-                        } else {
-                            $nLink = "../js/" . basename($nLink);
-                        }
-
-                        $nLink = str_replace($matches[1][$i], $nLink, $matches[0][$i]);
-                        $ret = str_replace($matches[0][$i], $nLink, $ret);
-                    }
-                }
-            }
             return $ret;
         }
 
@@ -160,29 +192,11 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterCSS($in)
         {
-            $ret = $in;
-            $matches = array();
-            if (preg_match_all('#<link.*href=[\'"]([^"\']*)[\'"].*/>#', $in, $matches) !== false) {
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    $link = $this->clearLink($matches[1][$i]);
+            $closure = $this->closures["filterCSS"];
 
-                    if ($this->validateExtension($link, array('CSS'))) {
-                        $cStr = $matches[0][$i];
-                        $ncStr = str_replace($matches[1][$i], '../css/' . basename($link), $cStr);
-                        $ret = str_replace($cStr, $ncStr, $ret);
-                    }
-                }
-            }
+            $ret = $this->rebuildURL($in, '#<link.*href=[\'"]([^"\']*)[\'"].*/>#', array("CSS"), "CSS");
+
             return $ret;
-        }
-
-        /**
-         * @param $in
-         * @return mixed
-         */
-        public function filterDATA($in)
-        {
-            return $in;
         }
 
         /**
@@ -190,39 +204,8 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterHTML($in)
         {
-
-            $ret = $in;
-            $matches = array();
-            if (preg_match_all('#src[= ]*[\'"]([^"\']*)#', $in, $matches) !== false) {
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    $nLink = $matches[1][$i];
-                    $nLink = $this->clearLink($nLink);
-
-                    if ($this->validateExtension($nLink, array('GIF', 'PNG', 'JPG'))) {
-                        $nLink = $this->rebuildImageLink($nLink);
-                        $nRet = str_replace($matches[1][$i], $nLink, $matches[0][$i]);
-                        $ret = str_replace($matches[0][$i], $nRet, $ret);
-                    }
-                }
-            }
-
-
-            $matches = array();
-            if (preg_match_all('#data-[^=]*=[\'"]([^\'"]*)#', $ret, $matches) !== false) {
-
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    $nLink = $matches[1][$i];
-                    $nLink = $this->clearLink($nLink);
-
-                    if ($this->validateExtension($nLink, array('GIF', 'PNG', 'JPG'))) {
-                        $nLink = $this->rebuildImageLink($nLink);
-
-                        $nRet = str_replace($matches[1][$i], $nLink, $matches[0][$i]);
-                        $ret = str_replace($matches[0][$i], $nRet, $ret);
-                    }
-                }
-
-            }
+            $ret = $this->rebuildURL($in, '#data-[^=]*=[\'"]([^\'"]*)#', array("GIF", "PNG", "JPG"), "HTML");
+            $ret = $this->rebuildURL($in, '#src[= ]*[\'"]([^"\']*)#', array("GIF", "PNG", "JPG"), "HTML");
 
             return $ret;
         }
@@ -238,7 +221,6 @@ namespace Terrific\ExporterBundle\Filter {
             $ret = $in;
             $ret = $this->filterCSS($ret);
             $ret = $this->filterJS($ret);
-            $ret = $this->filterDATA($ret);
             $ret = $this->filterHTML($ret);
 
             return $ret;

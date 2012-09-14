@@ -43,6 +43,9 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->booleanNode('append_changelogs')->defaultTrue()->end()
                 ->booleanNode('build_sprites')->defaultTrue()->end()
 
+                ->scalarNode('build_settings')->defaultValue('build/build.ini')->end()
+                ->scalarNode('build_path')->defaultValue('build')->end()
+
                 ->arrayNode('module_export_list')
                 ->requiresAtLeastOneElement()
                 ->prototype('array')
@@ -84,7 +87,8 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
 
 
             /* Export type */
-                ->scalarNode('export_type')->defaultValue('zip')->validate()->IfNotInArray(array('zip', 'folder'))->thenInvalid("Invalid value given. Valid values are 'zip' and 'folder'.")->end()
+                ->scalarNode('export_type')->defaultValue('zip')->validate()
+                    ->IfNotInArray(array('zip', 'folder'))->thenInvalid("Invalid value given. Valid values are 'zip' and 'folder'.")->end()
                 ->end();
 
             return $treeBuilder;

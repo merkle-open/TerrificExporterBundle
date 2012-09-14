@@ -35,6 +35,22 @@ abstract class AbstractCommand extends ContainerAwareCommand
 
 
     /**
+     *
+     */
+    protected function retrieveExportPath($toEnd = true)
+    {
+        $buildPath = $this->getContainer()->getParameter('terrific_exporter.build_path');
+
+        $ret = $this->rootPath . "/../";
+        $ret .= $buildPath . "/";
+        if ($toEnd) {
+            $ret .= $this->buildExportName(($this->getContainer()->getParameter('terrific_exporter.export_type') == "zip"));
+        }
+
+        return $ret;
+    }
+
+    /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|void
@@ -46,13 +62,14 @@ abstract class AbstractCommand extends ContainerAwareCommand
 
         $this->rootPath = $this->getContainer()->getParameter('kernel.root_dir');
         $this->modulePath = realpath($this->rootPath . "/../src/Terrific/Module");
-        $this->buildPath = realpath($this->rootPath . "/../build");
+        $this->buildPath = realpath($this->retrieveExportPath(false));
 
         if ($this->modulePath === false) {
             throw new \Exception("Couldn't find module path : " . $this->modulePath);
         }
 
         $this->buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
+        $this->buildOptions->setFile($this->rootPath . "/../" . $this->getContainer()->getParameter("terrific_exporter.build_settings"));
     }
 
     /**

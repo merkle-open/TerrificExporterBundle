@@ -161,16 +161,18 @@ class ExportCommand extends AbstractCommand
         //
         // appending module documentation
         //
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending module documentation'));
-        foreach ($modules as $mod) {
-            if ($moduleExportList == null || in_array($mod->getName(), $moduleExportList)) {
-                $tempPath = $this->buildTempPath(false, "modules/" . $mod->getName());
+        if ($this->getContainer()->getParameter('terrific_exporter.export_modules')) {
+            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending module documentation'));
+            foreach ($modules as $mod) {
+                if ($moduleExportList == null || in_array($mod->getName(), $moduleExportList)) {
+                    $tempPath = $this->buildTempPath(false, "modules/" . $mod->getName());
 
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Appending documentation for module : " . $mod->getName()));
+                    $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Appending documentation for module : " . $mod->getName()));
 
-                $finder = new Finder();
-                foreach ($finder->in($this->modulePath . "/" . $mod->getName())->files()->name('*.md') as $f) {
-                    $this->fsys->copy($f->getPathName(), $tempPath . "/" . $f->getFileName());
+                    $finder = new Finder();
+                    foreach ($finder->in($this->modulePath . "/" . $mod->getName())->files()->name('*.md') as $f) {
+                        $this->fsys->copy($f->getPathName(), $tempPath . "/" . $f->getFileName());
+                    }
                 }
             }
         }
@@ -252,6 +254,7 @@ class ExportCommand extends AbstractCommand
                 $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Append Changelogs'));
                 $finder = new Finder();
                 $logPath = $this->buildTempPath(false, 'changelogs/');
+
                 foreach ($finder->in($this->buildPath . "/changelogs")->files()->name('*.md') as $file) {
                     $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending Changelog: ' . $file->getPathName()));
                     $this->fsys->copy($file->getPathName(), $logPath . "/" . $file->getFileName());
@@ -335,6 +338,7 @@ class ExportCommand extends AbstractCommand
         return $ret;
     }
 
+
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
@@ -389,7 +393,7 @@ class ExportCommand extends AbstractCommand
             }
 
             $command = $this->getApplication()->find('assetic:dump');
-            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+//            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
             $tempPath = $this->buildTempPath(true);
 
@@ -429,7 +433,7 @@ class ExportCommand extends AbstractCommand
             $finder = new Finder();
             if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "zip") {
                 // build zip
-                $file = $this->rootPath . "/../build/" . $this->buildExportName();
+                $file = $this->retrieveExportPath();
                 $zip = new ZipArchive();
                 $zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
@@ -440,7 +444,9 @@ class ExportCommand extends AbstractCommand
                 $zip->close();
                 $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Exported to file: " . realpath($file)));
             } else if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "folder") {
-                $path = $this->rootPath . "/../build/" . $this->buildExportName(false);
+                //$path = $this->rootPath . "/../build/" . $this->buildExportName(false);
+                $path = $this->retrieveExportPath();
+
 
                 if (file_exists($path) || mkdir($path)) {
                     foreach ($finder->in($tempPath)->depth("0")->directories() as $dir) {
