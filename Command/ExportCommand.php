@@ -394,7 +394,7 @@ class ExportCommand extends AbstractCommand
             }
 
             $command = $this->getApplication()->find('assetic:dump');
-//            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
             $tempPath = $this->buildTempPath(true);
 

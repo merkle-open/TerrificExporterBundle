@@ -17,10 +17,10 @@
         "symfony/framework-bundle": "2.0.*",
         "symfony/form": "2.0.*",
         "symfony/validator": "2.0.*",
-		"symfony/finder": "2.0.*"
+		"symfony/finder": "2.0.*",
+        "symfony/console": "2.0.*"
     },
     "require-dev": {
-        "symfony/console": "2.0.*",
         "symfony/yaml": "2.0.*",
         "symfony/filesystem": "2.0.*"
     },

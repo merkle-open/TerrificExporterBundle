@@ -74,6 +74,10 @@ class ExportPathHTMLFilterTest extends \PHPUnit_Framework_TestCase
         $ret = $this->object->filterHTML($test);
         $this->assertSame('<img data-bigsrc="../img/Test/blubb.jpg" />', $ret);
 
+        $test = '<area shape="poly" coords="388,398,388,406,397,405,397,398"  alt="Country selection" href="es" data-img="/bundles/terrificmoduletest/img/blubb.jpg?1"   data-tip="es" />';
+        $ret = $this->object->filterHTML($test);
+        $this->assertSame('<area shape="poly" coords="388,398,388,406,397,405,397,398"  alt="Country selection" href="es" data-img="../img/Test/blubb.jpg"   data-tip="es" />', $ret);
+
         $test = '<a href="#"></a>';
         $ret = $this->object->filterHTML($test);
         $this->assertSame('<a href="#"></a>', $ret);

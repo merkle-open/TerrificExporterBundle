@@ -78,6 +78,7 @@ namespace Terrific\ExporterBundle\Filter {
                     }
                 }
             }
+
             return $ret;
         }
 
@@ -201,7 +202,7 @@ namespace Terrific\ExporterBundle\Filter {
         public function filterHTML($in)
         {
             $ret = $this->rebuildURL($in, '#data-[^=]*=[\'"]([^\'"]*)#', array("GIF", "PNG", "JPG"), "HTML");
-            $ret = $this->rebuildURL($in, '#src[= ]*[\'"]([^"\']*)#', array("GIF", "PNG", "JPG"), "HTML");
+            $ret = $this->rebuildURL($ret, '# src[= ]*[\'"]([^"\']*)#', array("GIF", "PNG", "JPG"), "HTML");
 
             return $ret;
         }
