@@ -75,7 +75,6 @@ class DocumentationCommand extends AbstractCommand
 
     }
 
-
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
@@ -88,11 +87,15 @@ class DocumentationCommand extends AbstractCommand
         $finder = new Finder();
         $finder->files()->in(__DIR__ . "/../../../../../src/Terrific/Module")->name("*.js")->depth("<= 99");
 
+
         $ret = array();
         foreach ($finder as $file) {
-            $ret = $this->findCommonFunctions(realpath($file->getPathName()), $ret);
+//            $ret = $this->findCommonFunctions(realpath($file->getPathName()), $ret);
+            $this->parseJavascript($file->getPathName());
+
         }
 
+        return;
 
         foreach ($ret as $js => $funcList) {
 

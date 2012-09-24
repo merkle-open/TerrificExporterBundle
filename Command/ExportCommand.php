@@ -178,6 +178,18 @@ class ExportCommand extends AbstractCommand
             }
         }
 
+        if ($this->getContainer()->getParameter('terrific_exporter.export_fonts')) {
+            $finder = new Finder();
+            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending fonts'));
+
+            $depPath = $this->buildTempPath(false, "font");
+            foreach ($finder->in(realpath($this->rootPath . "/../web/font"))->files()->name('*.*') as $f) {
+                $file = $depPath . "/" . $f->getFileName();
+                copy($f->getPathName(), $file);
+            }
+        }
+
+
         //
         // appending images
         //
@@ -262,6 +274,7 @@ class ExportCommand extends AbstractCommand
                 }
             }
         }
+
     }
 
     /**

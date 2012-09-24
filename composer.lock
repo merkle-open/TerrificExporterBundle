@@ -1,13 +1,21 @@
 {
-    "hash": "a3a1eed2705638ba41ffda556154c2bf",
+    "hash": "dd01ca87b506e52e9f6fda4f55250602",
     "packages": [
         {
             "package": "doctrine/common",
             "version": "2.2.3"
         },
         {
+            "package": "pear-pear.weltraumschaf.de/EBNF",
+            "version": "1.2.0"
+        },
+        {
             "package": "symfony/config",
             "version": "v2.0.16"
+        },
+        {
+            "package": "symfony/console",
+            "version": "v2.0.17"
         },
         {
             "package": "symfony/dependency-injection",

@@ -39,6 +39,7 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->booleanNode('export_rewrite_routes')->defaultFalse()->end()
                 ->booleanNode('export_layouts')->defaultTrue()->end()
                 ->booleanNode('export_modules')->defaultTrue()->end()
+                ->booleanNode('export_fonts')->defaultTrue()->end()
                 ->booleanNode('base_files_workaround')->defaultTrue()->end()
                 ->booleanNode('append_changelogs')->defaultTrue()->end()
                 ->booleanNode('build_sprites')->defaultTrue()->end()
