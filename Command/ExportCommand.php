@@ -467,7 +467,7 @@ class ExportCommand extends AbstractCommand
 
                 if (file_exists($path) || mkdir($path)) {
                     foreach ($finder->in($tempPath)->depth("0")->directories() as $dir) {
-                        $this->fsys->rename($dir->getPathName(), $path . "/" . $dir->getRelativePathName());
+                        $this->fsys->mirror($dir->getPathName(), $path . "/" . $dir->getRelativePathName(), null, array('copy_on_windows' => true));
                     }
                 }
                 $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Exported to directory: " . realpath($path)));
