@@ -134,9 +134,9 @@ namespace Terrific\ExporterBundle\Filter {
 
             $ret = array_values(iterator_to_array($f->name($fileName)));
             if (count($ret) > 1) {
-                throw new \Exception('Multiple pictures found using the same name.');
+                throw new \Exception('Multiple pictures found using the same name: '.$link);
             } elseif (count($ret) == 0) {
-                throw new \Exception("No picture found using the given name.");
+                throw new \Exception("No picture found using the given name: ".$link);
             }
 
             return $ret[0];
