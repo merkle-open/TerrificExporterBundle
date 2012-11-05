@@ -9,6 +9,7 @@
 
 namespace Terrific\ExporterBundle\Filter {
     use Symfony\Component\Finder\Finder;
+    use Symfony\Component\Config\FileLocator;
 
     /**
      *
@@ -16,6 +17,7 @@ namespace Terrific\ExporterBundle\Filter {
     class ExportPathHTMLFilter
     {
         protected $appPath = "";
+        protected $fileLocator = null;
 
         /**
          * @param $appPath
@@ -38,12 +40,16 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function rebuildURL($in, $pattern, $extensions, $type)
         {
-            $linksDone = array();
+            array_walk($extensions, function (&$item, $key) {
+                $item = strtoupper($item);
+            });
 
+            $linksDone = array();
             $ret = $in;
             $matches = array();
-            if (preg_match_all($pattern, $in, $matches) !== false) {
 
+            $start = microtime();
+            if (preg_match_all($pattern, $in, $matches) !== false) {
                 for ($i = 0; $i < count($matches[0]); $i++) {
                     if (in_array($matches[1][$i], $linksDone)) {
                         continue;
@@ -129,17 +135,14 @@ namespace Terrific\ExporterBundle\Filter {
         {
             $fileName = basename($link);
 
-            $f = new Finder();
-            $f->files()->in($this->appPath . "/web/img")->in($this->appPath . "/src/Terrific/Module")->depth("< 99");
-
-            $ret = array_values(iterator_to_array($f->name($fileName)));
+            $ret = $this->fileLocator->locate($fileName, null, false);
             if (count($ret) > 1) {
-                throw new \Exception('Multiple pictures found using the same name: '.$link);
+                throw new \Exception('Multiple pictures found using the same name: ' . $link);
             } elseif (count($ret) == 0) {
-                throw new \Exception("No picture found using the given name: ".$link);
+                throw new \Exception("No picture found using the given name: " . $link);
             }
 
-            return $ret[0];
+            return new \SplFileInfo($ret[0]);
         }
 
 
@@ -164,10 +167,6 @@ namespace Terrific\ExporterBundle\Filter {
          */
         protected function validateExtension($link, $allowedExtensions = array())
         {
-            array_walk($allowedExtensions, function (&$item, $key) {
-                $item = strtoupper($item);
-            });
-
             $pInfo = pathinfo($link);
             if (isset($pInfo["extension"])) {
                 return in_array(strtoupper($pInfo["extension"]), $allowedExtensions);
@@ -176,7 +175,7 @@ namespace Terrific\ExporterBundle\Filter {
         }
 
 
-        /**
+        /***
          * @param $in
          */
         public function filterJS($in)
@@ -201,7 +200,7 @@ namespace Terrific\ExporterBundle\Filter {
          */
         public function filterHTML($in)
         {
-            $ret = $this->rebuildURL($in, '#data-[^=]*=[\'"]([^\'"]*)#', array("GIF", "PNG", "JPG"), "HTML");
+            $ret = $this->rebuildURL($in, '#data-[^=]+=[\'"]([^\'"]+)#', array("GIF", "PNG", "JPG"), "HTML");
             $ret = $this->rebuildURL($ret, '# src[= ]*[\'"]([^"\']*)#', array("GIF", "PNG", "JPG"), "HTML");
 
             return $ret;
@@ -229,6 +228,29 @@ namespace Terrific\ExporterBundle\Filter {
         public function __construct($appPath)
         {
             $this->setAppPath($appPath);
+
+            $findingPaths = array($this->appPath . "/web/img");
+
+            $f = new Finder();
+            $f->directories()->in($this->appPath . "/src/Terrific/Module");
+
+            foreach ($f as $dir) {
+                $f2 = new Finder();
+
+                $imgDir = $dir->getRealpath() . "/Resources/public/img";
+
+                if (file_exists($imgDir)) {
+                    $findingPaths[] = $imgDir;
+
+                    $f2->directories()->in($imgDir);
+
+                    foreach ($f2 as $e) {
+                        $findingPaths[] = $e->getRealpath();
+                    }
+                }
+            }
+
+            $this->fileLocator = new FileLocator($findingPaths);
         }
     }
 }
