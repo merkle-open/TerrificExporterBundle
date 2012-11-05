@@ -345,7 +345,6 @@ class ExportCommand extends AbstractCommand
     protected function buildExportName($asFile = true)
     {
         $ret = sprintf("%s-%d.%d.%d", $this->buildOptions["version.name"], $this->buildOptions["version.major"], $this->buildOptions["version.minor"], $this->buildOptions["version.build"]);
-
         if ($asFile) {
             $ret .= ".zip";
         }
@@ -405,6 +404,9 @@ class ExportCommand extends AbstractCommand
                     $returnCode = $command->run($cmdInput, $output);
                 }
             }
+
+
+            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start dumping assets"));
 
             $command = $this->getApplication()->find('assetic:dump');
             $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
