@@ -14,6 +14,7 @@ namespace Terrific\ExporterBundle\DependencyInjection {
     use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
     use Symfony\Component\Config\FileLocator;
     use Terrific\ExporterBundle\DependencyInjection\Configuration\Configuration;
+    use Terrific\ExporterBundle\Factory\LazyAssetManager;
 
 
     /**
@@ -28,7 +29,6 @@ namespace Terrific\ExporterBundle\DependencyInjection {
 
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
             $loader->load('services.xml');
-
 
             // flat version !
             foreach ($config as $key => $val) {

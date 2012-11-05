@@ -63,6 +63,11 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->scalarNode('url')->end()
                 ->end()->end()->end()
 
+                ->arrayNode("assetic_export_list")
+                ->requiresAtLeastOneElement()
+                ->prototype('scalar')
+                ->end()->end()
+
             /* Sprite Settings */
                 ->arrayNode('sprites')
                 ->requiresAtLeastOneElement()
@@ -91,6 +96,8 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->scalarNode('export_type')->defaultValue('zip')->validate()
                     ->IfNotInArray(array('zip', 'folder'))->thenInvalid("Invalid value given. Valid values are 'zip' and 'folder'.")->end()
                 ->end();
+
+
 
             return $treeBuilder;
         }

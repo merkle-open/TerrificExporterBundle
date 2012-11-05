@@ -317,17 +317,16 @@ class ExportCommand extends AbstractCommand
         $pageManager = $this->getContainer()->get("terrific.composer.page.manager");
         $http = $this->getContainer()->get("http_kernel");
 
-
         $exportList = $this->retrieveLayoutList('url');
 
         $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building layouts"));
         $tempPath = $this->buildTempPath(false, "layouts");
+
         foreach ($pageManager->getPages() as $page) {
             if ($exportList == null || in_array($page->getUrl(), $exportList)) {
                 $request = Request::create($page->getUrl());
                 $resp = $http->handle($request);
                 $ret = $resp->getContent();
-
 
                 if ($this->getContainer()->getParameter('terrific_exporter.build_local_paths')) {
                     $ret = $exportFilter->filter($ret);
@@ -407,7 +406,11 @@ class ExportCommand extends AbstractCommand
             }
 
             $command = $this->getApplication()->find('assetic:dump');
-            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+
+            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start Asset export"));
+            #$returnCode = $command->run($cmdInput, $output);
+            //            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+
 
             $tempPath = $this->buildTempPath(true);
 
