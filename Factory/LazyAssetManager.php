@@ -63,7 +63,6 @@ namespace Terrific\ExporterBundle\Factory {
                     $nRet[] = $asset;
                 }
             }
-            var_dump($nRet);
             return $nRet;
         }
 
