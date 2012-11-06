@@ -429,6 +429,7 @@ class ExportCommand extends AbstractCommand
 
             if ($input->getOption("export-lang") != "") {
                 $this->getContainer()->get("session")->setLocale($input->getOption("export-lang"));
+                $this->getContainer()->get("translator")->setLocale($input->getOption("export-lang"));
             }
 
             $this->exportAssets($input, $output);

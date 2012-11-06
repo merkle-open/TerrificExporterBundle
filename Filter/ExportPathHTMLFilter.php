@@ -48,7 +48,6 @@ namespace Terrific\ExporterBundle\Filter {
             $ret = $in;
             $matches = array();
 
-            $start = microtime();
             if (preg_match_all($pattern, $in, $matches) !== false) {
                 for ($i = 0; $i < count($matches[0]); $i++) {
                     if (in_array($matches[1][$i], $linksDone)) {

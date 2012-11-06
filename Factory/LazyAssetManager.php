@@ -18,8 +18,6 @@ namespace Terrific\ExporterBundle\Factory {
     class LazyAssetManager extends \Terrific\CoreBundle\Factory\LazyAssetManager
     {
 
-        public $service;
-
         /**
          * Filters the asset list against the given configuration options.
          *
