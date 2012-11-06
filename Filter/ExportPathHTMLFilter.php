@@ -44,17 +44,12 @@ namespace Terrific\ExporterBundle\Filter {
                 $item = strtoupper($item);
             });
 
-            $linksDone = array();
             $ret = $in;
             $matches = array();
 
             if (preg_match_all($pattern, $in, $matches) !== false) {
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    if (in_array($matches[1][$i], $linksDone)) {
-                        continue;
-                    }
 
-                    $linksDone[] = $matches[1][$i];
+                for ($i = 0; $i < count($matches[0]); $i++) {
                     $link = $this->clearLink($matches[1][$i]);
 
                     if ($this->validateExtension($link, $extensions)) {
@@ -77,6 +72,7 @@ namespace Terrific\ExporterBundle\Filter {
                                 $nLink = $this->rebuildImageLink($link);
                                 break;
                         }
+
 
                         $ncStr = str_replace($matches[1][$i], $nLink, $cStr);
                         $ret = str_replace($cStr, $ncStr, $ret);
