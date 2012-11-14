@@ -7,6 +7,9 @@
     <parameters>
         <parameter key="assetic.asset_manager.class">Terrific\ExporterBundle\Factory\LazyAssetManager</parameter>
         <parameter key="terrifc.exporter.build_options.class">Terrific\ExporterBundle\Service\BuildOptions</parameter>
+        <parameter key="terrific.exporter.pathresolver.class">Terrific\ExporterBundle\Service\PathResolver</parameter>
+        <parameter key="terrific.exporter.logger.class">Terrific\ExporterBundle\Service\ExportLogger</parameter>
+
     </parameters>
 
 
@@ -15,13 +18,28 @@
             <argument type="service" id="assetic.asset_factory"/>
             <argument type="collection"></argument>
 
-            <property type="service" id="kernel" name="service" />
+            <property type="service" id="kernel" name="service"/>
         </service>
 
         <service id="terrific.exporter.build_options" class="%terrifc.exporter.build_options.class%"/>
 
         <service id="terrific.exporter.filter.html" class="Terrific\ExporterBundle\Filter\ExportPathHTMLFilter">
             <argument>%kernel.root_dir%/../</argument>
+        </service>
+
+        <service id="terrific.exporter.pathresolver" class="%terrific.exporter.pathresolver.class%">
+            <call method="setContainer">
+                <argument type="service" id="kernel"/>
+            </call>
+            <call method="setLogger">
+                <argument type="service" id="logger" on-invalid="ignore"/>
+            </call>
+        </service>
+
+        <service id="terrific.exporter.logger" class="%terrific.exporter.logger.class%">
+            <call method="setLogger">
+                <argument type="service" id="logger"/>
+            </call>
         </service>
     </services>
 </container>
