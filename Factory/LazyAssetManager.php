@@ -15,7 +15,7 @@ namespace Terrific\ExporterBundle\Factory {
      * Extends default LazyAssetManager to ignore default TerrificAssets.
      *
      */
-    class LazyAssetManager extends \Terrific\CoreBundle\Factory\LazyAssetManager
+    class LazyAssetManager extends \Assetic\Factory\LazyAssetManager
     {
 
         /**
