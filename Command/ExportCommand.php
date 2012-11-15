@@ -411,7 +411,7 @@ class ExportCommand extends AbstractCommand
 
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start Asset export"));
             #$returnCode = $command->run($cmdInput, $output);
-            //            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
+            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
 
 
             $tempPath = $this->buildTempPath(true);
