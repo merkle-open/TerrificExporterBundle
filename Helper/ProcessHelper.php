@@ -16,14 +16,44 @@ namespace Terrific\ExporterBundle\Helper {
     {
 
         /**
-         * @param $command
-         * @param $args
+         * Returns if the command is available.
+         *
+         * @param $command string
+         * @return bool
          */
-        public static function checkCommand($args)
+        public static function checkCommand($command)
         {
+            $builder = new ProcessBuilder(array($command));
+
+            try {
+                return ($builder->getProcess()->run() === 0);
+            } catch (\RuntimeException $ex) {
+                return false;
+            }
+        }
+
+        /**
+         * Starts the command with the given arguments.
+         *
+         * @param $command string
+         * @param $args array
+         * @return \Symfony\Component\Process\Process
+         */
+        public static function startCommand($command, $args = array())
+        {
+            $args = array_merge(array($command), $args);
             $builder = new ProcessBuilder($args);
 
-            var_dump($builder->getProcess());
+            $process = $builder->getProcess();
+
+            try {
+                $process->setTimeout(3600);
+                $process->run();
+                return $process;
+            } catch (\RuntimeException $ex) {
+            }
+
+            return null;
         }
     }
 }

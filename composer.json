@@ -14,15 +14,16 @@
         }
     ],
     "require": {
-        "symfony/framework-bundle": "2.*",
-        "symfony/form": "2.*",
-        "symfony/validator": "2.*",
-		"symfony/finder": "2.*",
-        "symfony/console": "2.*"
+        "symfony/framework-bundle": "2.1.*",
+        "symfony/form": "2.1.*",
+        "symfony/validator": "2.1.*",
+		"symfony/finder": "2.1.*",
+        "symfony/console": "2.1.*",
+		"symfony/process": "2.1.*"
     },
     "require-dev": {
-        "symfony/yaml": "2.*",
-        "symfony/filesystem": "2.*"
+        "symfony/yaml": "2.1.*",
+        "symfony/filesystem": "2.1.*"
     },
     "autoload": {
         "psr-0": { "Terrific\\ExporterBundle": "" }
