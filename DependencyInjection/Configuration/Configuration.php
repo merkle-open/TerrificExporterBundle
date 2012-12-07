@@ -61,6 +61,11 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->prototype('array')
                 ->children()
                 ->scalarNode('url')->end()
+
+                ->arrayNode('locations')
+                ->prototype('scalar')
+                ->end()->end()
+
                 ->end()->end()->end()
 
                 ->arrayNode("assetic_export_list")

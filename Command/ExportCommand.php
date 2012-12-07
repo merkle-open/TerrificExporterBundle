@@ -307,6 +307,32 @@ class ExportCommand extends AbstractCommand
         }
     }
 
+    private function findLocationsToUrl($url)
+    {
+        $eList = $this->getContainer()->getParameter('terrific_exporter.layout_export_list');
+
+        foreach ($eList as $k => $v) {
+            if ($v["url"] == $url) {
+                return $v["locations"];
+            }
+        }
+    }
+
+    private function backupLocales()
+    {
+        return array(
+            $this->getContainer()->get("session")->getLocale(),
+            $this->getContainer()->get("translator")->getLocale()
+        );
+    }
+
+    private function restoreLocales($locales)
+    {
+        $this->getContainer()->get("session")->setLocale($locales[0]);
+        $this->getContainer()->get("translator")->setLocale($locales[1]);
+    }
+
+
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
@@ -322,20 +348,46 @@ class ExportCommand extends AbstractCommand
         $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building layouts"));
         $tempPath = $this->buildTempPath(false, "layouts");
 
+        $localeBackup = $this->backupLocales();
+
         foreach ($pageManager->getPages() as $page) {
             if ($exportList == null || in_array($page->getUrl(), $exportList)) {
-                $request = Request::create($page->getUrl());
-                $resp = $http->handle($request);
-                $ret = $resp->getContent();
+                $locales = $this->findLocationsToUrl($page->getUrl());
 
-                if ($this->getContainer()->getParameter('terrific_exporter.build_local_paths')) {
-                    $ret = $exportFilter->filter($ret);
+                if (count($locales) == 0) {
+                    $urlList = array($page->getUrl());
+                } else {
+                    $urlList = array();
+                    foreach ($locales as $loc) {
+                        $urlList[$loc] = $page->getUrl() . "/" . $loc;
+                    }
                 }
 
-                file_put_contents($tempPath . "/" . $page->getName() . ".html", $ret);
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Built layout " . $page->getName()));
+
+                foreach ($urlList as $loc => $url) {
+                    $tplName = $page->getName();
+                    if (is_string($loc)) {
+                        $tplName .= "_" . $loc;
+                        $this->restoreLocales(array($loc, $loc));
+                    }
+
+                    $request = Request::create($url);
+                    $resp = $http->handle($request);
+                    $ret = $resp->getContent();
+
+                    if ($this->getContainer()->getParameter('terrific_exporter.build_local_paths')) {
+                        $ret = $exportFilter->filter($ret);
+                    }
+
+                    file_put_contents($tempPath . "/" . $tplName . ".html", $ret);
+                    $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Built layout " . $tplName));
+                }
+
+
             }
         }
+
+        $this->restoreLocales($localeBackup);
     }
 
     /**
