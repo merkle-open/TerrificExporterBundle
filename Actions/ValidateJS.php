@@ -10,12 +10,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
     use Terrific\ExporterBundle\Object\ActionResult;
     use Symfony\Component\Process\ProcessBuilder;
-
-    /**
-     *
-    $builder = new ProcessBuilder(array('ls', '-lsa'));
-    $builder->getProcess()->run();
-     *     */
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
 
     /**
      *
@@ -29,8 +24,9 @@ namespace Terrific\ExporterBundle\Actions {
          */
         public function run(OutputInterface $output, $params = array())
         {
-            \Terrific\ExporterBundle\Helper\ProcessHelper::checkCommand(array('ls', '-la'));
-
+            if (!ProcessHelper::checkCommand('jshint')) {
+                return new ActionResult(ActionResult::STOP);
+            }
 
             return new ActionResult(ActionResult::OK);
         }
