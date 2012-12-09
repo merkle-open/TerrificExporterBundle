@@ -16,12 +16,12 @@ namespace Terrific\ExporterBundle\Command {
     use Symfony\Component\HttpKernel\Log\LoggerInterface;
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Actions\IAction;
+    use Terrific\ExporterBundle\Actions\AbstractAction;
 
     /**
      *
      */
-    class ExportCommand extends ContainerAwareCommand
-    {
+    class ExportCommand extends ContainerAwareCommand {
         /**
          * @var LoggerInterface
          */
@@ -30,22 +30,14 @@ namespace Terrific\ExporterBundle\Command {
         /**
          *
          */
-        protected function configure()
-        {
-            $this
-                ->setName('build:export')
-                ->setDescription('Builds a release')
-                ->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")
-                ->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")
-                ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')
-                ->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
+        protected function configure() {
+            $this->setName('build:export')->setDescription('Builds a release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
         }
 
         /**
          *
          */
-        protected function retrieveActionStack()
-        {
+        protected function retrieveActionStack() {
             $ret = array();
 
             if ($this->getContainer()->hasParameter("terrific_exporter.action_stack")) {
@@ -70,9 +62,13 @@ namespace Terrific\ExporterBundle\Command {
          * @param \ReflectionClass $refClass
          * @return ActionResult
          */
-        protected function runAction(\ReflectionClass $refClass, OutputInterface $output, $params)
-        {
+        protected function runAction(\ReflectionClass $refClass, OutputInterface $output, $params) {
             $action = $refClass->newInstance();
+
+            if ($action instanceof AbstractAction) {
+                $action->setLogger($this->logger);
+            }
+
 
             if ($action instanceof IAction) {
                 $action->setContainer($this->getContainer());
@@ -80,6 +76,7 @@ namespace Terrific\ExporterBundle\Command {
 
                 return $ret;
             }
+
 
             return null;
         }
@@ -89,8 +86,7 @@ namespace Terrific\ExporterBundle\Command {
          * @param OutputInterface $output
          * @return int|void
          */
-        protected function execute(InputInterface $input, OutputInterface $output)
-        {
+        protected function execute(InputInterface $input, OutputInterface $output) {
             $this->logger = $this->getContainer()->get('logger');
 
             $actionStack = $this->retrieveActionStack();

@@ -11,20 +11,108 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\ActionResult;
     use Symfony\Component\Process\ProcessBuilder;
     use Terrific\ExporterBundle\Helper\ProcessHelper;
+    use Assetic\Factory\LazyAssetManager;
+    use Terrific\ExporterBundle\Object\ValidationResult;
+    use Terrific\ExporterBundle\Object\ValidationResultItem;
 
     /**
      *
      */
-    class ValidateJS extends AbstractAction implements IAction
-    {
+    class ValidateJS extends AbstractAction implements IAction {
+
+        /**
+         *
+         * @param $file String
+         * @return Boolean
+         */
+        private function isJavascript($file) {
+            return (strtolower(substr($file, -2)) == "js");
+        }
+
+        /**
+         * Returns all issues detected by JSHint.
+         *
+         * @param $data String
+         * @return ValidationResult
+         */
+        private function parseXML($data) {
+            $ret = new ValidationResult();
+
+            try {
+                $xml = new \DOMDocument();
+                $xml->loadXML($data);
+
+
+                $xpath = new \DOMXPath($xml);
+                foreach ($xpath->query('/jslint/file/issue') as $issue) {
+                    $item = new ValidationResultItem($issue->getAttribute("reason"));
+                    $item->setChar($issue->getAttribute("char"));
+                    $item->setLine($issue->getAttribute("line"));
+
+                    $ret->addResult($item);
+                }
+            } catch (\Exception $ex) {
+                return $ex;
+            }
+
+            return $ret;
+        }
+
         /**
          *
          * @param $params
          * @return ActionResult
          */
-        public function run(OutputInterface $output, $params = array())
-        {
+        public function run(OutputInterface $output, $params = array()) {
             if (!ProcessHelper::checkCommand('jshint')) {
+                $this->log(AbstractAction::LOG_LEVEL_ERROR, "Cannot find JSHint.");
+                return new ActionResult(ActionResult::STOP);
+            }
+
+            $error = false;
+
+            $this->log(AbstractAction::LOG_LEVEL_DEBUG, "Found JSHint starting validation.");
+
+            /** @var $assetManager LazyAssetManager */
+            $assetManager = $this->container->get("assetic.asset_manager");
+
+
+            foreach ($assetManager->getNames() as $name) {
+                $asset = $assetManager->get($name);
+
+                if ($this->isJavascript($asset->getTargetPath())) {
+                    $this->log(AbstractAction::LOG_LEVEL_INFO, "Starting Validation of parts for " . basename($asset->getTargetPath()));
+
+                    foreach ($assetManager->get($name) as $leaf) {
+                        $this->log(AbstractAction::LOG_LEVEL_DEBUG, "- Validating " . basename($leaf->getSourcePath()));
+                        $leafPath = realpath($leaf->getSourceRoot() . "/" . $leaf->getSourcePath());
+
+                        if ($leafPath != "" && is_file($leafPath)) {
+                            $ret = ProcessHelper::startCommand("jshint", array("--jslint-reporter", $leafPath));
+
+                            $parseRet = $this->parseXML($ret->getOutput());
+
+                            if ($parseRet instanceof \Exception) {
+                                $this->log(AbstractAction::LOG_LEVEL_ERROR, "Cannot parse JSHint output.");
+                                $this->log(AbstractAction::LOG_LEVEL_ERROR, $parseRet->getMessage());
+                                $this->log(AbstractAction::LOG_LEVEL_ERROR, $ret->getCommandLine());
+                                $this->log(AbstractAction::LOG_LEVEL_ERROR, $ret->getErrorOutput());
+                                $error = true;
+                            } else {
+                                // OUT
+                                $error = $parseRet->hasErrors();
+
+                                $results = $parseRet->toOutputString('[%1$s : %2$s] %3$s');
+                                foreach ($results as $item) {
+                                    $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($error) {
                 return new ActionResult(ActionResult::STOP);
             }
 
