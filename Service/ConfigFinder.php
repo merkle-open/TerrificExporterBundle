@@ -41,6 +41,7 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * Find a specific configuration file.
          *
+         * @throws InvalidArgumentException
          * @param String $filename
          * @return String
          */

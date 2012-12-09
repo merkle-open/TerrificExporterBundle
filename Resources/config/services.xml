@@ -32,5 +32,6 @@
                 <argument>%kernel.root_dir%/../</argument>
             </call>
         </service>
+
     </services>
 </container>

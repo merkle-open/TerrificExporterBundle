@@ -10,7 +10,8 @@
         "waits",
         "waitsFor",
         "runs",
-        "Tc"
+        "Tc",
+        "Modernizr"
     ],
 
     "node"   :true,

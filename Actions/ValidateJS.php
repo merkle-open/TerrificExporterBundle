@@ -8,12 +8,13 @@
  */
 namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
-    use Terrific\ExporterBundle\Object\ActionResult;
-    use Symfony\Component\Process\ProcessBuilder;
-    use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Assetic\Factory\LazyAssetManager;
+    use Symfony\Component\Process\ProcessBuilder;
+    use Terrific\ExporterBundle\Object\ActionResult;
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Terrific\ExporterBundle\Object\ValidationResult;
     use Terrific\ExporterBundle\Object\ValidationResultItem;
+    use Terrific\ExporterBundle\Service\ConfigFinder;
 
     /**
      *
@@ -76,6 +77,10 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $assetManager LazyAssetManager */
             $assetManager = $this->container->get("assetic.asset_manager");
 
+            /** @var $configFinder ConfigFinder */
+            $configFinder = $this->container->get("terrific.exporter.configfinder");
+            $config = $configFinder->find("jshint.json");
+
             foreach ($assetManager->getNames() as $name) {
                 $asset = $assetManager->get($name);
 
@@ -87,7 +92,7 @@ namespace Terrific\ExporterBundle\Actions {
                         $leafPath = realpath($leaf->getSourceRoot() . "/" . $leaf->getSourcePath());
 
                         if ($leafPath != "" && is_file($leafPath)) {
-                            $ret = ProcessHelper::startCommand("jshint", array("--jslint-reporter", $leafPath));
+                            $ret = ProcessHelper::startCommand("jshint", array("--jslint-reporter", "--config", $config, $leafPath));
 
                             $parseRet = $this->parseXML($ret->getOutput());
 
@@ -105,6 +110,7 @@ namespace Terrific\ExporterBundle\Actions {
                                 foreach ($results as $item) {
                                     $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
                                 }
+                                $output->writeln(sprintf("Validated %s Found %d Issues.", basename($leafPath), count($results)));
                             }
                         }
                     }
