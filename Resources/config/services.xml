@@ -7,6 +7,7 @@
     <parameters>
         <parameter key="terrifc.exporter.build_options.class">Terrific\ExporterBundle\Service\BuildOptions</parameter>
         <parameter key="terrific.exporter.pathresolver.class">Terrific\ExporterBundle\Service\PathResolver</parameter>
+        <parameter key="terrific.exporter.configfinder.class">Terrific\ExporterBundle\Service\ConfigFinder</parameter>
     </parameters>
 
 
@@ -23,6 +24,12 @@
             </call>
             <call method="setLogger">
                 <argument type="service" id="logger" on-invalid="ignore"/>
+            </call>
+        </service>
+
+        <service id="terrific.exporter.configfinder" class="%terrific.exporter.configfinder.class%">
+            <call method="setWorkingPath">
+                <argument>%kernel.root_dir%/../</argument>
             </call>
         </service>
     </services>

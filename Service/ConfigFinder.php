@@ -39,16 +39,17 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
-         * @param $filename
+         * Find a specific configuration file.
+         *
+         * @param String $filename
+         * @return String
          */
         public function find($filename) {
             $this->initialize();
 
-            try {
-                $file = $this->fileLocator->locate($filename);
-            } catch (\Exception $ex) {
-                var_dump($ex->getMessage());
-            }
+            $file = $this->fileLocator->locate($filename);
+            return realpath($file);
+
         }
 
 
@@ -61,8 +62,9 @@ namespace Terrific\ExporterBundle\Service {
             }
 
             $paths = array();
-            $paths[] = __DIR__ . "/../Resources/config/";
             $paths[] = $this->getWorkingPath() . "/app/config";
+            $paths[] = __DIR__ . "/../Resources/config/";
+
 
             $this->fileLocator = new FileLocator($paths);
         }

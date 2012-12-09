@@ -76,7 +76,6 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $assetManager LazyAssetManager */
             $assetManager = $this->container->get("assetic.asset_manager");
 
-
             foreach ($assetManager->getNames() as $name) {
                 $asset = $assetManager->get($name);
 
