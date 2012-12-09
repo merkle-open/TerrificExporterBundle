@@ -17,10 +17,10 @@ namespace Terrific\ExporterBundle\Actions {
      *
      */
     abstract class AbstractAction implements IAction {
-        const LOG_LEVEL_INFO = 1;
-        const LOG_LEVEL_WARN = 2;
-        const LOG_LEVEL_ERROR = 3;
-        const LOG_LEVEL_DEBUG = 4;
+        const LOG_LEVEL_INFO = 0x01;
+        const LOG_LEVEL_WARN = 0x02;
+        const LOG_LEVEL_ERROR = 0x04;
+        const LOG_LEVEL_DEBUG = 0x08;
 
 
         /**
@@ -47,6 +47,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @var LoggerInterface
          */
         protected $logger;
+
 
         /**
          * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
@@ -75,6 +76,7 @@ namespace Terrific\ExporterBundle\Actions {
 
             $this->workingDir = $directory;
         }
+
 
         /**
          * Logs a Message.
@@ -106,6 +108,7 @@ namespace Terrific\ExporterBundle\Actions {
                     break;
             }
         }
+
 
         /**
          * Constructor

@@ -110,6 +110,7 @@ namespace Terrific\ExporterBundle\Actions {
                                 foreach ($results as $item) {
                                     $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
                                 }
+
                                 $output->writeln(sprintf("Validated %s Found %d Issues.", basename($leafPath), count($results)));
                             }
                         }
