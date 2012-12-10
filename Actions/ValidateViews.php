@@ -9,18 +9,70 @@
 namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
     use Terrific\ExporterBundle\Object\ActionResult;
+    use Terrific\ExporterBundle\Service\TempFileManager;
+    use Terrific\ExporterBundle\Service\PageManager;
+    use Terrific\ExporterBundle\Object\Route;
+    use Symfony\Bundle\FrameworkBundle\HttpKernel;
+    use Symfony\Component\HttpFoundation\Request;
+    use Symfony\Component\HttpFoundation\Response;
+    use Terrific\ExporterBundle\Service\W3CValidator;
 
     /**
      *
      */
-    class ValidateViews extends AbstractAction implements IAction
-    {
+    class ValidateViews extends AbstractAction implements IAction {
+
+        /**
+         * Returns the response object.
+         *
+         * @param \Terrific\ExporterBundle\Object\Route $route
+         * @return \Symfony\Component\HttpFoundation\Response
+         */
+        public function dumpView(Route $route) {
+            /** @var $http HttpKernel */
+            $http = $this->container->get("http_kernel");
+            $req = Request::create($route->getUrl());
+
+            // check on Parameters
+
+            /** @var $resp Response */
+            $resp = $http->handle($req);
+
+            return $resp;
+        }
+
+
         /**
          * @param $params
          * @return ActionResult
          */
-        public function run(OutputInterface $output, $params = array())
-        {
+        public function run(OutputInterface $output, $params = array()) {
+            /** @var $tmpFileMgr TempFileManager */
+            $tmpFileMgr = $this->container->get("terrific.exporter.tempfilemanager");
+
+            /** @var $pageManager PageManager */
+            $pageManager = $this->container->get("terrific.exporter.pagemanager");
+
+            /** @var $w3Validator W3CValidator */
+            $w3Validator = $this->container->get("terrific.exporter.w3validator");
+
+            $error = false;
+
+            /** @var $route Route */
+            foreach ($pageManager->findRoutes(true) as $route) {
+                $resp = $this->dumpView($route);
+                $file = $tmpFileMgr->putContent($resp->getContent());
+
+                $results = $w3Validator->validateFile($file);
+
+                if ($results->hasErrors()) {
+                    $error = true;
+                }
+            }
+
+            if ($error) {
+                return new ActionResult(ActionResult::STOP);
+            }
 
             return new ActionResult(ActionResult::OK);
         }

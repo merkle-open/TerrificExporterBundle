@@ -43,8 +43,8 @@ namespace Terrific\ExporterBundle\Command {
             if ($this->getContainer()->hasParameter("terrific_exporter.action_stack")) {
 
             } else {
-                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
-                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
                 $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';

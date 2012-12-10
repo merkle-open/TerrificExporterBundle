@@ -90,16 +90,20 @@ namespace Terrific\ExporterBundle\Service {
             }
         }
 
-        /**
-         *
-         */
-        public function validate($file) {
+        public function validateFile($file) {
+            $content = file_get_contents($file);
 
             if ($this->logger) {
                 $this->logger->debug("Sending file to W3C Validator: " . basename($file));
             }
 
-            $content = file_get_contents($file);
+            return $this->validate($content);
+        }
+
+        /**
+         *
+         */
+        public function validate($content) {
             $postFields = array("fragment" => $content, "output" => "soap12");
 
             curl_setopt_array($this->cURL, array(CURLOPT_URL => $this->url, CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_POSTFIELDS => $postFields));
@@ -138,51 +142,3 @@ namespace Terrific\ExporterBundle\Service {
     }
 }
 
-
-
-
-
-
-/*
- * 		protected function validatePageContent($content, OutputInterface $output) {
-
-			$dom = $this->sendToW3Validator('HTML', $content);
-
-			$xpath = new DOMXpath($dom);
-			$xpath->registerNamespace("m", "http://www.w3.org/2005/10/markup-validator");
-
-			$errorCount = (int)$xpath->query("//m:errorcount")->item(0)->nodeValue;
-			$output->writeln($this->getMessage(($errorCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_ERROR), sprintf("Found %d Errors", $errorCount)));
-			$errors = $xpath->query("//m:error");
-			$this->outputW3Messages($errors, $output);
-
-
-			$warnCount = (int)$xpath->query("//m:warningcount")->item(0)->nodeValue;
-			$warnCount -= 1;
-			$output->writeln($this->getMessage(($warnCount == 0 ? AbstractCommand::MSG_LEVEL_INFO : AbstractCommand::MSG_LEVEL_WARN), sprintf("Found %d Warnings", $warnCount)));
-			$warnings = $xpath->query("//m:warning");
-			$this->outputW3Messages($warnings, $output);
-		}
-
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-		{
-            parent::execute($input, $output);
-            $this->cURL = curl_init();
-
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validating HTML"));
-
-            $pageManager = $this->getContainer()->get("terrific.composer.page.manager");
-            $http = $this->getContainer()->get("http_kernel");
-
-            foreach ($pageManager->getPages() as $page) {
-                $request = Request::create($page->getUrl());
-                $resp = $http->handle($request);
-                $ret = $resp->getContent();
-
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Validate " . $page->getUrl()));
-                $this->validatePageContent($ret, $output);
-            }
-
-            curl_close($this->cURL);
- */

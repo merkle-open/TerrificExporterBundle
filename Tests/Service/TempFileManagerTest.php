@@ -25,7 +25,7 @@ namespace Terrific\ExporterBundle\Tests\Service {
          * This method is called after a test is executed.
          */
         protected function tearDown() {
-            $this->object->shutdown();
+            $this->object->cleanup();
         }
 
 

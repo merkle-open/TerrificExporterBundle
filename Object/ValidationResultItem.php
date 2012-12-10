@@ -38,6 +38,21 @@ namespace Terrific\ExporterBundle\Object {
          */
         private $description;
 
+
+        /**
+         * @param bool s$warning
+         */
+        public function setWarning($warning) {
+            $this->isWarning = $warning;
+        }
+
+        /**
+         * @param bool $error
+         */
+        public function setError($error) {
+            $this->isError = $error;
+        }
+
         /**
          * Returns true if this item is a error.
          *
