@@ -15,6 +15,9 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\ValidationResult;
     use Terrific\ExporterBundle\Object\ValidationResultItem;
     use Terrific\ExporterBundle\Service\ConfigFinder;
+    use Terrific\ExporterBundle\Helper\XmlLintHelper;
+    use Terrific\ExporterBundle\Helper\AsseticHelper;
+    use Terrific\ExporterBundle\Helper\FileHelper;
 
     /**
      *
@@ -22,42 +25,9 @@ namespace Terrific\ExporterBundle\Actions {
     class ValidateJS extends AbstractAction implements IAction {
 
         /**
-         *
-         * @param $file String
-         * @return Boolean
+         * @var array
          */
-        private function isJavascript($file) {
-            return (strtolower(substr($file, -2)) == "js");
-        }
-
-        /**
-         * Returns all issues detected by JSHint.
-         *
-         * @param $data String
-         * @return ValidationResult
-         */
-        private function parseXML($data) {
-            $ret = new ValidationResult();
-
-            try {
-                $xml = new \DOMDocument();
-                $xml->loadXML($data);
-
-
-                $xpath = new \DOMXPath($xml);
-                foreach ($xpath->query('/jslint/file/issue') as $issue) {
-                    $item = new ValidationResultItem($issue->getAttribute("reason"));
-                    $item->setChar($issue->getAttribute("char"));
-                    $item->setLine($issue->getAttribute("line"));
-
-                    $ret->addResult($item);
-                }
-            } catch (\Exception $ex) {
-                return $ex;
-            }
-
-            return $ret;
-        }
+        private $validatedScripts = null;
 
         /**
          *
@@ -71,11 +41,13 @@ namespace Terrific\ExporterBundle\Actions {
             }
 
             $error = false;
-
             $this->log(AbstractAction::LOG_LEVEL_DEBUG, "Found JSHint starting validation.");
 
             /** @var $assetManager LazyAssetManager */
             $assetManager = $this->container->get("assetic.asset_manager");
+
+            /** @var $tmpFileMgr TempFileManager */
+            $tmpFileMgr = $this->container->get("terrific.exporter.tempfilemanager");
 
             /** @var $configFinder ConfigFinder */
             $configFinder = $this->container->get("terrific.exporter.configfinder");
@@ -84,17 +56,22 @@ namespace Terrific\ExporterBundle\Actions {
             foreach ($assetManager->getNames() as $name) {
                 $asset = $assetManager->get($name);
 
-                if ($this->isJavascript($asset->getTargetPath())) {
+                if (FileHelper::isJavascript($asset->getTargetPath())) {
                     $this->log(AbstractAction::LOG_LEVEL_INFO, "Starting Validation of parts for " . basename($asset->getTargetPath()));
 
-                    foreach ($assetManager->get($name) as $leaf) {
-                        $this->log(AbstractAction::LOG_LEVEL_DEBUG, "- Validating " . basename($leaf->getSourcePath()));
-                        $leafPath = realpath($leaf->getSourceRoot() . "/" . $leaf->getSourcePath());
+                    foreach ($assetManager->get($name) as $origLeaf) {
+                        $leafPath = realpath($origLeaf->getSourceRoot() . "/" . $origLeaf->getSourcePath());
 
-                        if ($leafPath != "" && is_file($leafPath)) {
-                            $ret = ProcessHelper::startCommand("jshint", array("--jslint-reporter", "--config", $config, $leafPath));
+                        if ($leafPath !== false && !in_array($leafPath, $this->validatedScripts)) {
+                            $leaf = AsseticHelper::removeMinFilters($origLeaf);
 
-                            $parseRet = $this->parseXML($ret->getOutput());
+                            $content = $leaf->dump();
+                            $file = $tmpFileMgr->putContent($content);
+
+                            $ret = ProcessHelper::startCommand("jshint", array("--jslint-reporter", "--config", $config, $file));
+                            $this->validatedScripts[] = $leafPath;
+
+                            $parseRet = XmlLintHelper::parseXML($ret->getOutput());
 
                             if ($parseRet instanceof \Exception) {
                                 $this->log(AbstractAction::LOG_LEVEL_ERROR, "Cannot parse JSHint output.");
@@ -113,6 +90,7 @@ namespace Terrific\ExporterBundle\Actions {
 
                                 $output->writeln(sprintf("Validated %s Found %d Issues.", basename($leafPath), count($results)));
                             }
+
                         }
                     }
                 }
@@ -123,6 +101,16 @@ namespace Terrific\ExporterBundle\Actions {
             }
 
             return new ActionResult(ActionResult::OK);
+        }
+
+
+        /**
+         * Constructor
+         */
+        public function __construct() {
+            parent::__construct();
+
+            $this->validatedScripts = array();
         }
     }
 }

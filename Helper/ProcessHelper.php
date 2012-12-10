@@ -47,7 +47,7 @@ namespace Terrific\ExporterBundle\Helper {
             $process = $builder->getProcess();
 
             try {
-                $process->setTimeout(3600);
+                $process->setTimeout(7200);
                 $process->run();
                 return $process;
             } catch (\RuntimeException $ex) {
