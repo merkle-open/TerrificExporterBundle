@@ -37,6 +37,27 @@ namespace Terrific\ExporterBundle\Service {
          */
         private $logger;
 
+
+        /**
+         * @var bool
+         */
+        private $keepTemp = false;
+
+        /**
+         * @param boolean $keepTemp
+         */
+        public function setKeepTemp($keepTemp) {
+            $this->keepTemp = $keepTemp;
+        }
+
+        /**
+         * @return boolean
+         */
+        public function getKeepTemp() {
+            return $this->keepTemp;
+        }
+
+
         /**
          * @param String $tempDir
          */
@@ -119,7 +140,7 @@ namespace Terrific\ExporterBundle\Service {
          *
          * @return void
          */
-        public function shutdown() {
+        public function cleanup() {
             if ($this->fs->exists($this->savedTempFiles)) {
                 if ($this->logger != null) {
                     $this->logger->debug("Removing Files: ");
@@ -141,7 +162,9 @@ namespace Terrific\ExporterBundle\Service {
          *
          */
         public function __destruct() {
-            $this->shutdown();
+            if (!$this->keepTemp) {
+                $this->cleanup();
+            }
         }
 
         /**
