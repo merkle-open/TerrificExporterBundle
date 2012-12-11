@@ -16,6 +16,10 @@ namespace Terrific\ExporterBundle\Annotation {
      */
     class Export {
 
+        /** @var array */
+        private $environments = array();
+
+
         /**
          *
          */

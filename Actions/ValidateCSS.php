@@ -19,6 +19,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\ConfigFinder;
     use Terrific\ExporterBundle\Helper\XmlLintHelper;
     use Terrific\ExporterBundle\Service\TempFileManager;
+    use Terrific\ExporterBundle\Service\PageManager;
     use Assetic\Asset\FileAsset;
 
 
@@ -77,11 +78,17 @@ namespace Terrific\ExporterBundle\Actions {
 
             $configData = $this->prepareConfigurationData($config);
 
+            /** @var $pageManager PageManager */
+            $pageManager = $this->container->get("terrific.exporter.pagemanager");
+
+            // retrieve only assets matching the current export
+            $assetList = $pageManager->retrieveAllAssets(true);
+
             foreach ($assetManager->getNames() as $name) {
                 /** @var $asset FileAsset */
                 $asset = $assetManager->get($name);
 
-                if (FileHelper::isStylesheet($asset->getTargetPath())) {
+                if (FileHelper::isStylesheet($asset->getTargetPath()) && in_array($asset->getTargetPath(), $assetList)) {
                     $this->log(AbstractAction::LOG_LEVEL_INFO, "Starting Validation of parts for " . basename($asset->getTargetPath()));
 
                     foreach ($asset as $origLeaf) {

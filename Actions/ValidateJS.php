@@ -18,6 +18,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\XmlLintHelper;
     use Terrific\ExporterBundle\Helper\AsseticHelper;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Service\PageManager;
 
     /**
      *
@@ -53,10 +54,17 @@ namespace Terrific\ExporterBundle\Actions {
             $configFinder = $this->container->get("terrific.exporter.configfinder");
             $config = $configFinder->find("jshint.json");
 
+            /** @var $pageManager PageManager */
+            $pageManager = $this->container->get("terrific.exporter.pagemanager");
+
+            // retrieve only assets matching the current export
+            $assetList = $pageManager->retrieveAllAssets(true);
+
+
             foreach ($assetManager->getNames() as $name) {
                 $asset = $assetManager->get($name);
 
-                if (FileHelper::isJavascript($asset->getTargetPath())) {
+                if (FileHelper::isJavascript($asset->getTargetPath()) && in_array($asset->getTargetPath(), $assetList)) {
                     $this->log(AbstractAction::LOG_LEVEL_INFO, "Starting Validation of parts for " . basename($asset->getTargetPath()));
 
                     foreach ($assetManager->get($name) as $origLeaf) {

@@ -91,22 +91,42 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         public function validateFile($file) {
-            $content = file_get_contents($file);
 
             if ($this->logger) {
                 $this->logger->debug("Sending file to W3C Validator: " . basename($file));
             }
 
-            return $this->validate($content);
+            $file = realpath($file);
+            $postFields = array("uploaded_file" => "@/" . $file . ";type=text/html");
+
+            return $this->sendValidationRequest($postFields);
         }
 
         /**
          *
          */
         public function validate($content) {
-            $postFields = array("fragment" => $content, "output" => "soap12");
+            $postFields = array("fragment" => $content);
+
+            return $this->sendValidationRequest($postFields);
+        }
+
+        /**
+         * @param $postFields
+         */
+        protected function sendValidationRequest($postFields = array()) {
+            // if its default w3c validator wait a seconds for each request
+            if ($this->url == "http://validator.w3.org/check") {
+                sleep(1);
+            }
+
+            $postFields["output"] = "soap12";
 
             curl_setopt_array($this->cURL, array(CURLOPT_URL => $this->url, CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_POSTFIELDS => $postFields));
+
+            if (isset($postFields["uploaded_file"])) {
+                curl_setopt_array($this->cURL, array(CURLOPT_HTTPHEADER => array("Content-type: multipart/form-data")));
+            }
 
             $ret = curl_exec($this->cURL);
 

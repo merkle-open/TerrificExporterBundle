@@ -46,12 +46,24 @@
         </service>
 
         <service id="terrific.exporter.pagemanager" class="%terrific.exporter.pagemanager.class%">
+            <call method="setLogger">
+                <argument type="service" id="logger" on-invalid="ignore"/>
+            </call>
+
             <call method="setReader">
                 <argument type="service" id="annotation_reader"/>
             </call>
 
             <call method="setRouter">
                 <argument type="service" id="router"/>
+            </call>
+
+            <call method="setKernel">
+                <argument type="service" id="kernel"/>
+            </call>
+
+            <call method="setTwig">
+                <argument type="service" id="twig"/>
             </call>
         </service>
 

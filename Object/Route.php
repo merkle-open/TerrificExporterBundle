@@ -25,7 +25,32 @@ namespace Terrific\ExporterBundle\Object {
         private $exportable = false;
 
         /**
-         * @return ReflectionMethod
+         * @var array
+         */
+        private $assets = array();
+
+        /**
+         * @var string
+         */
+        private $template = "";
+
+        /**
+         * @param string $template
+         */
+        public function setTemplate($template) {
+            $this->template = $template;
+        }
+
+        /**
+         * @return string
+         */
+        public function getTemplate() {
+            return $this->template;
+        }
+
+
+        /**
+         * @return \ReflectionMethod
          */
         public function getMethod() {
             return $this->method;
@@ -52,6 +77,19 @@ namespace Terrific\ExporterBundle\Object {
             return $this->exportable;
         }
 
+        /**
+         * @return array
+         */
+        public function getAssets() {
+            return $this->assets;
+        }
+
+        /**
+         * @param $asset
+         */
+        public function addAssets(array $assets) {
+            $this->assets = array_merge($this->assets, $assets);
+        }
 
         /**
          * @param $method
@@ -62,7 +100,6 @@ namespace Terrific\ExporterBundle\Object {
 
             return new ReflectionMethod($class, $method);
         }
-
 
         /**
          * Constructor
