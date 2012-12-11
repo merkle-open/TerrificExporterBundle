@@ -17,6 +17,7 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Actions\IAction;
     use Terrific\ExporterBundle\Actions\AbstractAction;
+    use Terrific\ExporterBundle\Helper\TimerService;
 
     /**
      *
@@ -45,8 +46,8 @@ namespace Terrific\ExporterBundle\Command {
             } else {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
-                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
-                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
@@ -89,6 +90,14 @@ namespace Terrific\ExporterBundle\Command {
         protected function execute(InputInterface $input, OutputInterface $output) {
             $this->logger = $this->getContainer()->get('logger');
 
+            /** @var $timer TimerService */
+            $timer = $this->getContainer()->get("terrific.exporter.timerservice");
+
+            // startup timer
+            $timer->start();
+
+            $exportPath = "/tmp/ExportPath-tmp";
+
             $actionStack = $this->retrieveActionStack();
 
             $reRunTimer = array();
@@ -100,7 +109,8 @@ namespace Terrific\ExporterBundle\Command {
                 }
                 $refClass = new \ReflectionClass($queueItem);
 
-                $ret = $this->runAction($refClass, $output, array("runnedTimer" => $reRunTimer[$queueItem]));
+                $timer->lap("START-" . $refClass->getShortName());
+                $ret = $this->runAction($refClass, $output, array("runnedTimer" => $reRunTimer[$queueItem], "exportPath" => $exportPath));
 
                 if ($ret instanceof ActionResult) {
                     switch ($ret->getResultCode()) {
@@ -127,7 +137,22 @@ namespace Terrific\ExporterBundle\Command {
                             break;
                     }
                 }
+
+                $timer->lap("STOP-" . $refClass->getShortName());
             }
+
+
+            for ($i = 0; $i < count($actionStack); $i++) {
+                $queueItem = $actionStack[$i];
+                $refClass = new \ReflectionClass($queueItem);
+
+                if ($this->logger) {
+                    $this->logger->info(sprintf("Action [%s] completed after %s seconds.", $refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
+                }
+            }
+
+            // stop timer
+            $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
         }
 
 

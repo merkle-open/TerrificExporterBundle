@@ -60,6 +60,9 @@ namespace Terrific\ExporterBundle\Actions {
             // retrieve only assets matching the current export
             $assetList = $pageManager->retrieveAllAssets(true);
 
+            /** @var $timer TimerService */
+            $timer = $this->container->get("terrific.exporter.timerservice");
+
 
             foreach ($assetManager->getNames() as $name) {
                 $asset = $assetManager->get($name);

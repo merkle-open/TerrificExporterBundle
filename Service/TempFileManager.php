@@ -63,7 +63,7 @@ namespace Terrific\ExporterBundle\Service {
          */
         public function setTempDir($tempDir) {
             if ($this->logger != null) {
-                $this->logger->debug("Set tempd dir to " . $tempDir);
+                $this->logger->debug("Set temp dir to " . $tempDir);
             }
             $this->tempDir = $tempDir;
         }

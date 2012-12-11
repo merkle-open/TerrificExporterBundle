@@ -16,8 +16,7 @@ namespace Terrific\ExporterBundle\Service {
     /**
      *
      */
-    class PathResolver implements ContainerAwareInterface
-    {
+    class PathResolver implements ContainerAwareInterface {
         const TYPE_IMAGE = 0x00;
         const TYPE_FONT = 0x01;
         const TYPE_VIEW = 0x02;
@@ -58,8 +57,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
          * @return void
          */
-        public function setLogger($logger)
-        {
+        public function setLogger($logger) {
             $this->logger = $logger;
         }
 
@@ -69,8 +67,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param \Terrific\ComposerBundle\Service\ModuleManager $moduleManager
          * @return void
          */
-        public function setModuleManager(ModuleManager $moduleManager)
-        {
+        public function setModuleManager(ModuleManager $moduleManager) {
             $this->moduleManager = $moduleManager;
 
             if ($this->moduleManager != null) {
@@ -84,8 +81,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param Array $modules
          * @return void
          */
-        public function setModules($modules)
-        {
+        public function setModules($modules) {
             $this->modules = $modules;
             if ($this->logger !== null) {
                 $this->logger->debug("Set modulelist : " . implode(",", $this->modules));
@@ -97,8 +93,7 @@ namespace Terrific\ExporterBundle\Service {
          *
          * @return Array
          */
-        public function getModules()
-        {
+        public function getModules() {
             return $this->modules;
         }
 
@@ -108,8 +103,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param Array $pathTemplate
          * @return void
          */
-        public function setPathTemplate($pathTemplate)
-        {
+        public function setPathTemplate($pathTemplate) {
             $this->pathTemplate = $pathTemplate;
             if ($this->logger !== null) {
                 $this->logger->debug("Set path templates : " . implode(",", $this->modules));
@@ -121,8 +115,7 @@ namespace Terrific\ExporterBundle\Service {
          *
          * @return Array
          */
-        public function getPathTemplate()
-        {
+        public function getPathTemplate() {
             return $this->pathTemplate;
         }
 
@@ -132,8 +125,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $moduleName String
          * @return boolean
          */
-        public function isValidModule($moduleName, $matchOnLower = false)
-        {
+        public function isValidModule($moduleName, $matchOnLower = false) {
             $ret = false;
 
             if ($moduleName != "") {
@@ -166,24 +158,13 @@ namespace Terrific\ExporterBundle\Service {
          *
          * @api
          */
-        public function setContainer(ContainerInterface $container = null)
-        {
+        public function setContainer(ContainerInterface $container = null) {
             $this->container = $container;
 
             if ($container != null) {
-                $a = array(
-                    (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.image',
-                    (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.font',
-                    (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.css',
-                    (self::TYPE_JS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.js',
-                    (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.view',
+                $a = array((self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.view',
 
-                    (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_image',
-                    (self::TYPE_FONT | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_font',
-                    (self::TYPE_CSS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_css',
-                    (self::TYPE_JS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_js',
-                    (self::TYPE_VIEW | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_view'
-                );
+                    (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_view');
 
                 foreach ($a as $key => $val) {
                     if ($this->container->hasParameter($val)) {
@@ -199,8 +180,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $sourcePath String
          * @return String
          */
-        public function cleanPath($sourcePath)
-        {
+        public function cleanPath($sourcePath) {
             $ret = $sourcePath;
 
             $pos = strpos($sourcePath, "?");
@@ -217,8 +197,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $sourcePath String
          * @return String
          */
-        public function getModuleName($sourcePath)
-        {
+        public function getModuleName($sourcePath) {
             $dir = dirname($sourcePath);
             $ret = null;
 
@@ -259,8 +238,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $sourcePath String
          * @return int
          */
-        public function getScope($sourcePath)
-        {
+        public function getScope($sourcePath) {
             $modName = $this->getModuleName($sourcePath);
 
             if ($modName != null) {
@@ -283,8 +261,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $sourcePath String
          * @return int
          */
-        public function getType($sourcePath)
-        {
+        public function getType($sourcePath) {
             $file = basename($sourcePath);
 
             $ext = strtoupper(pathinfo($file, PATHINFO_EXTENSION));
@@ -317,13 +294,27 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
+         * @param $value
+         */
+        private function getConstantName($value) {
+            $ref = new \ReflectionClass($this);
+
+            foreach ($ref->getConstants() as $name => $val) {
+                if ($val == $value) {
+                    return $name;
+                }
+            }
+
+            return "N/A";
+        }
+
+        /**
          * Builds a new path for the given path. The Path is generated against configuration settings.
          *
          * @param $sourcePath string
          * @return string
          */
-        public function resolve($sourcePath)
-        {
+        public function resolve($sourcePath) {
             $ret = "";
             $sourcePath = $this->cleanPath($sourcePath);
             $type = $this->getType($sourcePath);
@@ -342,7 +333,9 @@ namespace Terrific\ExporterBundle\Service {
             $ret .= "/" . basename($sourcePath);
 
             if ($this->logger !== null) {
-                $this->logger->debug("Resolve path ['${sourcePath}'] => ['${ret}']");
+                $type = $this->getConstantName($type);
+                $scope = $this->getConstantName($scope);
+                $this->logger->debug("Resolve path ['${sourcePath}'] => ['${ret}'] type=${type}, scope=${scope}");
             }
 
             return $ret;
@@ -351,21 +344,10 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * Constructor
          */
-        public function __construct()
-        {
-            $this->pathTemplate = array(
-                (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => '/img/common',
-                (self::TYPE_FONT | self::SCOPE_GLOBAL) => '/fonts',
-                (self::TYPE_CSS | self::SCOPE_GLOBAL) => '/css',
-                (self::TYPE_JS | self::SCOPE_GLOBAL) => '/js',
-                (self::TYPE_VIEW | self::SCOPE_GLOBAL) => '/views',
+        public function __construct() {
+            $this->pathTemplate = array((self::TYPE_IMAGE | self::SCOPE_GLOBAL) => '/img/common', (self::TYPE_FONT | self::SCOPE_GLOBAL) => '/fonts', (self::TYPE_CSS | self::SCOPE_GLOBAL) => '/css', (self::TYPE_JS | self::SCOPE_GLOBAL) => '/js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => '/views',
 
-                (self::TYPE_IMAGE | self::SCOPE_MODULE) => '/img/%module%',
-                (self::TYPE_FONT | self::SCOPE_MODULE) => '/fonts/%module%',
-                (self::TYPE_CSS | self::SCOPE_MODULE) => '/css/%module%',
-                (self::TYPE_JS | self::SCOPE_MODULE) => '/js/%module%',
-                (self::TYPE_VIEW | self::SCOPE_MODULE) => '/views/%module%'
-            );
+                (self::TYPE_IMAGE | self::SCOPE_MODULE) => '/img/%module%', (self::TYPE_FONT | self::SCOPE_MODULE) => '/fonts/%module%', (self::TYPE_CSS | self::SCOPE_MODULE) => '/css/%module%', (self::TYPE_JS | self::SCOPE_MODULE) => '/js/%module%', (self::TYPE_VIEW | self::SCOPE_MODULE) => '/views/%module%');
 
             $this->modules = array();
             $this->moduleManager = null;

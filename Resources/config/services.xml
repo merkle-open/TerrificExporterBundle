@@ -11,6 +11,7 @@
         <parameter key="terrific.exporter.tempfilemanager.class">Terrific\ExporterBundle\Service\TempFileManager</parameter>
         <parameter key="terrific.exporter.pagemanager.class">Terrific\ExporterBundle\Service\PageManager</parameter>
         <parameter key="terrific.exporter.w3validator.class">Terrific\ExporterBundle\Service\W3CValidator</parameter>
+        <parameter key="terrific.exporter.timerservice.class">Terrific\ExporterBundle\Service\TimerService</parameter>
     </parameters>
 
 
@@ -23,7 +24,7 @@
 
         <service id="terrific.exporter.pathresolver" class="%terrific.exporter.pathresolver.class%">
             <call method="setContainer">
-                <argument type="service" id="kernel"/>
+                <argument type="service" id="service_container"/>
             </call>
             <call method="setLogger">
                 <argument type="service" id="logger" on-invalid="ignore"/>
@@ -72,5 +73,8 @@
                 <argument type="service" id="logger" on-invalid="ignore"/>
             </call>
         </service>
+
+        <service id="terrific.exporter.timerservice" class="%terrific.exporter.timerservice.class%"/>
+
     </services>
 </container>
