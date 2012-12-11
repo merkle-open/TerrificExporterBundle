@@ -14,7 +14,7 @@ namespace Terrific\ExporterBundle\Annotation {
      *
      * @Annotation
      */
-    class Export {
+    class LocaleExport {
 
         /** @var array */
         private $environment = array();
@@ -22,14 +22,21 @@ namespace Terrific\ExporterBundle\Annotation {
         /** @var string */
         private $name = "";
 
-        /** @var array */
-        private $locales = array();
+        /** @var string */
+        private $locale = "";
 
         /**
-         * @return array
+         * @param string $locale
          */
-        public function getLocales() {
-            return $this->locales;
+        public function setLocale($locale) {
+            $this->locale = $locale;
+        }
+
+        /**
+         * @return string
+         */
+        public function getLocale() {
+            return $this->locale;
         }
 
         /**
@@ -57,18 +64,7 @@ namespace Terrific\ExporterBundle\Annotation {
          * @param String $name
          */
         public function setName($name) {
-            if (is_string($name)) {
-                $this->name = $name;
-            } else {
-                $this->locales = $name;
-            }
-        }
-
-        /**
-         * @param bool $env
-         */
-        public function matchEnvironment($env) {
-            return ((count($this->environment) == 0) || in_array($env, $this->environment));
+            $this->name = $name;
         }
 
         /**

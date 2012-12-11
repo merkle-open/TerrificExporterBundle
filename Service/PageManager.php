@@ -19,6 +19,7 @@ namespace Terrific\ExporterBundle\Service {
     use Symfony\Component\HttpFoundation\Request;
     use Symfony\Component\HttpFoundation\Response;
     use Terrific\ExporterBundle\Annotation\Export;
+    use Terrific\ExporterBundle\Helper\StringHelper;
 
     /**
      *
@@ -281,17 +282,43 @@ namespace Terrific\ExporterBundle\Service {
 
         /**
          * @param \Terrific\ExporterBundle\Object\Route $route
-         * @param \Terrific\ExporterBundle\Annotation\Export $exportAnnotation
          * @return string
          */
-        protected function findNameByRoute(Route $route, Export $exportAnnotation) {
+        protected function findNameByRoute(Route $route) {
             $ret = "";
 
-            if ($exportAnnotation->getName() != "") {
+            /** @var $exportAnnotation Export */
+            $exportAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ExporterBundle\Annotation\Export');
+
+            if ($exportAnnotation != null) {
                 $ret = $exportAnnotation->getName();
             }
 
+            if ($ret == "") {
+                /** @var $composerAnnotation  \Terrific\ComposerBundle\Annotation\Composer */
+                $composerAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ComposerBundle\Annotation\Composer');
 
+                if ($composerAnnotation != null) {
+                    $tmpName = $composerAnnotation->getName();
+                } else {
+                    /** @var $routeAnnotation \Symfony\Component\Routing\Annotation\Route */
+                    $routeAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), '');
+
+                    if ($routeAnnotation != null) {
+                        $tmpName = $routeAnnotation->getName();
+                    }
+                }
+                $ret = StringHelper::escapeFileLabel($tmpName);
+            }
+
+            if (strpos(strtolower($ret), ".html") === false) {
+                $ret .= ".html";
+            }
+
+
+            if ($ret == "") {
+                $ret = sprintf("view%s.html", ucfirst($route->getMethod()->getShortName()));
+            }
 
             return $ret;
         }
@@ -317,10 +344,14 @@ namespace Terrific\ExporterBundle\Service {
                 $exportAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ExporterBundle\Annotation\Export');
 
                 if ($exportAnnotation) {
+                    if (!$exportAnnotation->matchEnvironment($this->kernel->getEnvironment())) {
+                        continue;
+                    }
+
                     $route->setExportable(true);
-                    $route->setExportName($this->findNameByRoute($route, $exportAnnotation));
                 }
 
+                $route->setExportName($this->findNameByRoute($route));
                 $this->findAssets($sRoute, $route);
                 $this->routeList[] = $route;
             }
