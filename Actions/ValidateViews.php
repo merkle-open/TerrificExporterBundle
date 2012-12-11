@@ -23,26 +23,6 @@ namespace Terrific\ExporterBundle\Actions {
     class ValidateViews extends AbstractAction implements IAction {
 
         /**
-         * Returns the response object.
-         *
-         * @param \Terrific\ExporterBundle\Object\Route $route
-         * @return \Symfony\Component\HttpFoundation\Response
-         */
-        public function dumpView(Route $route) {
-            /** @var $http HttpKernel */
-            $http = $this->container->get("http_kernel");
-            $req = Request::create($route->getUrl());
-
-            // check on Parameters
-
-            /** @var $resp Response */
-            $resp = $http->handle($req);
-
-            return $resp;
-        }
-
-
-        /**
          * @param $params
          * @return ActionResult
          */
@@ -60,7 +40,7 @@ namespace Terrific\ExporterBundle\Actions {
 
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
-                $resp = $this->dumpView($route);
+                $resp = $pageManager->dumpRoute($route);
                 $file = $tmpFileMgr->putContent($resp->getContent());
 
                 $results = $w3Validator->validateFile($file);
@@ -71,7 +51,7 @@ namespace Terrific\ExporterBundle\Actions {
             }
 
             if ($error) {
-                return new ActionResult(ActionResult::STOP);
+                //return new ActionResult(ActionResult::STOP);
             }
 
             return new ActionResult(ActionResult::OK);

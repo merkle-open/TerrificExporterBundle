@@ -24,15 +24,14 @@ namespace Terrific\ExporterBundle\Object {
         /** @var Boolean */
         private $exportable = false;
 
-        /**
-         * @var array
-         */
+        /** @var array */
         private $assets = array();
 
-        /**
-         * @var string
-         */
+        /** @var string */
         private $template = "";
+
+        /** @var string */
+        private $exportName = "";
 
         /**
          * @param string $template
@@ -75,6 +74,20 @@ namespace Terrific\ExporterBundle\Object {
          */
         public function isExportable() {
             return $this->exportable;
+        }
+
+        /**
+         * @param string $exportName
+         */
+        public function setExportName($exportName) {
+            $this->exportName = $exportName;
+        }
+
+        /**
+         * @return string
+         */
+        public function getExportName() {
+            return $this->exportName;
         }
 
         /**

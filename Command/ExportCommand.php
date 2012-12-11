@@ -49,7 +49,7 @@ namespace Terrific\ExporterBundle\Command {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
-                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 

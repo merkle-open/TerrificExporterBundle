@@ -12,15 +12,15 @@ namespace Terrific\ExporterBundle\Actions {
     /**
      *
      */
-    class ExportModules extends AbstractAction implements IAction
-    {
+    class ExportModules extends AbstractAction implements IAction {
+
+
 
         /**
          * @param $params
          * @return ActionResult
          */
-        public function run(OutputInterface $output, $params = array())
-        {
+        public function run(OutputInterface $output, $params = array()) {
 
         }
     }

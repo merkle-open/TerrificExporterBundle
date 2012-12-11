@@ -19,6 +19,22 @@ namespace Terrific\ExporterBundle\Annotation {
         /** @var array */
         private $environments = array();
 
+        /** @var string */
+        private $name = "";
+
+        /**
+         * @return array
+         */
+        public function getEnvironments() {
+            return $this->environments;
+        }
+
+        /**
+         * @return string
+         */
+        public function getName() {
+            return $this->name;
+        }
 
         /**
          *

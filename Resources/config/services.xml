@@ -66,6 +66,10 @@
             <call method="setTwig">
                 <argument type="service" id="twig"/>
             </call>
+
+            <call method="setHttpKernel">
+                <argument type="service" id="http_kernel"/>
+            </call>
         </service>
 
         <service id="terrific.exporter.w3validator" class="%terrific.exporter.w3validator.class%">

@@ -15,6 +15,10 @@ namespace Terrific\ExporterBundle\Service {
     use Symfony\Component\HttpKernel\Kernel;
     use InvalidArgumentException;
     use Terrific\ExporterBundle\Object\Route;
+    use Symfony\Component\HttpKernel\HttpKernel;
+    use Symfony\Component\HttpFoundation\Request;
+    use Symfony\Component\HttpFoundation\Response;
+    use Terrific\ExporterBundle\Annotation\Export;
 
     /**
      *
@@ -41,6 +45,9 @@ namespace Terrific\ExporterBundle\Service {
 
         /** @var bool */
         private $initialized = false;
+
+        /** @var HttpKernel */
+        private $http_kernel = null;
 
         /**
          * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
@@ -112,6 +119,20 @@ namespace Terrific\ExporterBundle\Service {
          */
         public function getTwig() {
             return $this->twig;
+        }
+
+        /**
+         * @param \Symfony\Component\HttpKernel\HttpKernel $http_kernel
+         */
+        public function setHttpKernel($http_kernel) {
+            $this->http_kernel = $http_kernel;
+        }
+
+        /**
+         * @return \Symfony\Component\HttpKernel\HttpKernel
+         */
+        public function getHttpKernel() {
+            return $this->http_kernel;
         }
 
 
@@ -238,6 +259,44 @@ namespace Terrific\ExporterBundle\Service {
 
 
         /**
+         * Returns the response object.
+         *
+         * @param \Terrific\ExporterBundle\Object\Route $route
+         * @return \Symfony\Component\HttpFoundation\Response
+         */
+        public function dumpRoute(Route $route) {
+            $this->initialize();
+
+            /** @var $http HttpKernel */
+            $req = Request::create($route->getUrl());
+
+            // check on Parameters
+
+
+            /** @var $resp Response */
+            $resp = $this->http_kernel->handle($req);
+
+            return $resp;
+        }
+
+        /**
+         * @param \Terrific\ExporterBundle\Object\Route $route
+         * @param \Terrific\ExporterBundle\Annotation\Export $exportAnnotation
+         * @return string
+         */
+        protected function findNameByRoute(Route $route, Export $exportAnnotation) {
+            $ret = "";
+
+            if ($exportAnnotation->getName() != "") {
+                $ret = $exportAnnotation->getName();
+            }
+
+
+
+            return $ret;
+        }
+
+        /**
          *
          */
         protected function initialize() {
@@ -254,8 +313,13 @@ namespace Terrific\ExporterBundle\Service {
             foreach ($this->router->getRouteCollection()->all() as $sRoute) {
                 $route = new Route($sRoute);
 
+                /** @var $exportAnnotation Export */
                 $exportAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ExporterBundle\Annotation\Export');
-                $route->setExportable(($exportAnnotation != null));
+
+                if ($exportAnnotation) {
+                    $route->setExportable(true);
+                    $route->setExportName($this->findNameByRoute($route, $exportAnnotation));
+                }
 
                 $this->findAssets($sRoute, $route);
                 $this->routeList[] = $route;
