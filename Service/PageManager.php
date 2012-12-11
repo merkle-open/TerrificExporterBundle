@@ -242,6 +242,35 @@ namespace Terrific\ExporterBundle\Service {
 
 
         /**
+         * @param String $controller
+         * @param String $method
+         */
+        public function findRoute($controllerName, $methodName) {
+            $this->initialize();
+
+            if (strpos($methodName, "Action") === false) {
+                $methodName .= "Action";
+            }
+
+            if (strpos($controllerName, "Controller") === false) {
+                $controllerName .= "Controller";
+            }
+
+            /** @var $route Route */
+            foreach ($this->routeList as $route) {
+                $method = $route->getMethod();
+                $class = $method->getDeclaringClass();
+
+                if ($method->getName() == $methodName && $class->getShortName() == $controllerName) {
+                    return $route;
+                }
+            }
+
+            return null;
+        }
+
+
+        /**
          * @param bool $exportablesOnly
          */
         public function retrieveAllAssets($exportablesOnly = false) {
@@ -257,7 +286,6 @@ namespace Terrific\ExporterBundle\Service {
 
             return array_unique($ret);
         }
-
 
         /**
          * Returns the response object.
@@ -311,7 +339,7 @@ namespace Terrific\ExporterBundle\Service {
                 $ret = StringHelper::escapeFileLabel($tmpName);
             }
 
-            if (strpos(strtolower($ret), ".html") === false) {
+            if ($ret != "" && strpos(strtolower($ret), ".html") === false) {
                 $ret .= ".html";
             }
 
