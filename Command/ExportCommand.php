@@ -46,6 +46,7 @@ namespace Terrific\ExporterBundle\Command {
             } else {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
@@ -70,14 +71,12 @@ namespace Terrific\ExporterBundle\Command {
                 $action->setLogger($this->logger);
             }
 
-
             if ($action instanceof IAction) {
                 $action->setContainer($this->getContainer());
                 $ret = $action->run($output, $params);
 
                 return $ret;
             }
-
 
             return null;
         }

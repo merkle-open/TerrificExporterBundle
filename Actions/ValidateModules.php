@@ -3,51 +3,26 @@
  * Created by JetBrains PhpStorm.
  * User: blorenz
  * Date: 12.11.12
- * Time: 14:08
+ * Time: 14:16
  * To change this template use File | Settings | File Templates.
  */
 namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
+    use Terrific\ExporterBundle\Object\ActionResult;
+    use Terrific\ExporterBundle\Service\TempFileManager;
+    use Terrific\ExporterBundle\Service\PageManager;
+    use Terrific\ExporterBundle\Object\Route;
+    use Symfony\Bundle\FrameworkBundle\HttpKernel;
+    use Symfony\Component\HttpFoundation\Request;
+    use Symfony\Component\HttpFoundation\Response;
+    use Terrific\ExporterBundle\Service\W3CValidator;
     use Terrific\ComposerBundle\Service\ModuleManager;
     use Terrific\ComposerBundle\Entity\Module;
-    use Terrific\ExporterBundle\Service\PageManager;
-    use Terrific\ExporterBundle\Object\ActionResult;
-    use Terrific\ExporterBundle\Object\Route;
-    use Symfony\Component\HttpFoundation\Response;
-    use Symfony\Component\HttpFoundation\Request;
-    use Terrific\ExporterBundle\Service\TempFileManager;
-    use Terrific\ExporterBundle\Service\PathResolver;
-    use Terrific\ExporterBundle\Helper\FileHelper;
-
 
     /**
      *
      */
-    class ExportModules extends AbstractAction implements IAction {
-
-        /**
-         * @param $tmpFile String
-         * @param $targetFile String
-         */
-        protected function saveToPath($tmpFile, $targetFile) {
-            /** @var $fs Filesystem */
-            $fs = $this->container->get("filesystem");
-
-            $targetPath = dirname($targetFile);
-
-            try {
-                FileHelper::createPathRecursive(dirname($targetFile));
-                $fs->copy($tmpFile, $targetFile);
-
-                return true;
-            } catch (IOException $ex) {
-                $this->logger->err($ex->getMessage());
-                $this->logger->err($ex->getTraceAsString());
-            }
-
-            return false;
-        }
-
+    class ValidateModules extends AbstractAction implements IAction {
 
         /**
          * @param \Terrific\ExporterBundle\Object\Route $route
@@ -67,12 +42,12 @@ namespace Terrific\ExporterBundle\Actions {
             return $resp->getContent();
         }
 
+
         /**
          * @param $params
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-
             /** @var $moduleManager ModuleManager */
             $moduleManager = $this->container->get("terrific.composer.module.manager");
 
@@ -83,8 +58,8 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $pageManager PageManager */
                 $pageManager = $this->container->get("terrific.exporter.pagemanager");
 
-                /** @var $pathResolver PathResolver */
-                $pathResolver = $this->container->get("terrific.exporter.pathresolver");
+                /** @var $w3Validator W3CValidator */
+                $w3Validator = $this->container->get("terrific.exporter.w3validator");
 
                 $route = $pageManager->findRoute("Module", "detailsAction");
 
@@ -97,8 +72,7 @@ namespace Terrific\ExporterBundle\Actions {
                         $content = $this->doDump($route, $module, $tpl->getName());
                         $file = $tmpFileMgr->putContent($content);
 
-                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s.html", $module->getName(), $tpl->getName()));
-                        $this->saveToPath($file, $params["exportPath"] . "/" . $path);
+                        $results = $w3Validator->validateFile($file);
                     }
                 }
 
@@ -106,9 +80,6 @@ namespace Terrific\ExporterBundle\Actions {
             } else if ($this->logger) {
                 $this->logger->debug("Cannot find Terrific Modulemanager in DIC.");
             }
-
-
-            return new ActionResult(ActionResult::STOP);
         }
     }
 }

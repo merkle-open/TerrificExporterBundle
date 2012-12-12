@@ -71,7 +71,11 @@ namespace Terrific\ExporterBundle\Service {
             $this->moduleManager = $moduleManager;
 
             if ($this->moduleManager != null) {
-                $this->setModules($this->moduleManager->getModules());
+                $moduleList = array();
+                foreach($this->moduleManager->getModules() as $module) {
+                    $moduleList[] = $module->getName();
+                }
+                $this->setModules(array_unique($moduleList));
             }
         }
 

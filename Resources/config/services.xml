@@ -29,6 +29,9 @@
             <call method="setLogger">
                 <argument type="service" id="logger" on-invalid="ignore"/>
             </call>
+            <call method="setModuleManager">
+                <argument type="service" id="terrific.composer.module.manager" on-invalid="ignore" />
+            </call>
         </service>
 
         <service id="terrific.exporter.configfinder" class="%terrific.exporter.configfinder.class%">

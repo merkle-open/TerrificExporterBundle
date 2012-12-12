@@ -57,12 +57,18 @@ namespace Terrific\ExporterBundle\Actions {
             $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
             $f = new Finder();
-
             $jsPath = $this->container->getParameter("kernel.root_dir") . "/../web/js/dependencies";
+            if (file_exists($jsPath)) {
+                $f->in($jsPath);
+            }
+
             $cssPath = $this->container->getParameter("kernel.root_dir") . "/../web/css/dependencies";
+            if (file_exists($cssPath)) {
+                $f->in($cssPath);
+            }
 
             /** @var $file SplFileInfo */
-            foreach ($f->in($cssPath)->in($jsPath)->name("*.js")->name("*.css") as $file) {
+            foreach ($f->name("*.js")->name("*.css") as $file) {
                 $resolve = $pathResolver->resolve($file->getRelativePathname());
                 $targetPath = dirname($resolve) . "/dependencies/" . $file->getRelativePathname();
                 $this->saveToPath($file->getPathname(), $param["exportPath"] . "/" . $targetPath);

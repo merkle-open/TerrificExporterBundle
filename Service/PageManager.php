@@ -352,6 +352,22 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
+         * @param \Terrific\ExporterBundle\Object\Route $route
+         */
+        protected function buildUrlParameters(Route $route) {
+            $url = $route->getUrl();
+
+            $matches = array();
+            $count = preg_match_all('/{([^}]+)}/', $url, $matches);
+
+            if($count !== false) {
+                foreach($matches[1] as $param) {
+                    $route->addUrlParameter($param);
+                }
+            }
+        }
+
+        /**
          *
          */
         protected function initialize() {
@@ -365,6 +381,7 @@ namespace Terrific\ExporterBundle\Service {
                 $this->logger->info("PageManager init");
             }
 
+            /** @var $sRoute \Symfony\Component\Routing\Route */
             foreach ($this->router->getRouteCollection()->all() as $sRoute) {
                 $route = new Route($sRoute);
 
@@ -380,6 +397,7 @@ namespace Terrific\ExporterBundle\Service {
                 }
 
                 $route->setExportName($this->findNameByRoute($route));
+                $this->buildUrlParameters($route);
                 $this->findAssets($sRoute, $route);
                 $this->routeList[] = $route;
             }

@@ -33,6 +33,17 @@ namespace Terrific\ExporterBundle\Object {
         /** @var string */
         private $exportName = "";
 
+        /** @var array */
+        private $urlParameters = array();
+
+
+        /**
+         * @return array
+         */
+        public function getUrlParameters() {
+            return $this->urlParameters;
+        }
+
         /**
          * @param string $template
          */
@@ -47,7 +58,6 @@ namespace Terrific\ExporterBundle\Object {
             return $this->template;
         }
 
-
         /**
          * @return \ReflectionMethod
          */
@@ -58,8 +68,8 @@ namespace Terrific\ExporterBundle\Object {
         /**
          * @return String
          */
-        public function getUrl() {
-            return $this->url;
+        public function getUrl(array $params = array()) {
+            return $this->buildUrl($params);
         }
 
         /**
@@ -98,10 +108,45 @@ namespace Terrific\ExporterBundle\Object {
         }
 
         /**
+         * @return bool
+         */
+        public function hasUrlParameters() {
+            return (count($this->urlParameters) > 0);
+        }
+
+        /**
+         *
+         * @param array $values
+         * @return string
+         * @throws \InvalidArgumentException
+         */
+        protected function buildUrl(array $values) {
+            $url = $this->url;
+
+            foreach ($this->urlParameters as $param) {
+                if (!isset($values[$param])) {
+                    throw new \InvalidArgumentException("Option '${$param}' not found in the given parameter values.");
+                }
+
+                $url = str_replace('{' . $param . '}', $values[$param], $url);
+            }
+
+            return rtrim($url, "/");
+        }
+
+
+        /**
          * @param $asset
          */
         public function addAssets(array $assets) {
             $this->assets = array_merge($this->assets, $assets);
+        }
+
+        /**
+         * @param $param
+         */
+        public function addUrlParameter($param) {
+            $this->urlParameters[] = $param;
         }
 
         /**
