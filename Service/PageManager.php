@@ -157,7 +157,6 @@ namespace Terrific\ExporterBundle\Service {
 
                 if ($token->getValue() === "extends") {
                     $newTpl = $stream->getCurrent()->getValue();
-                    $this->logger->debug("Found Parent Template :" . $newTpl);
                     list($bundle, $controller, $view) = explode(":", $newTpl);
 
                     $pTpl = $this->kernel->locateResource(sprintf("@%s/Resources/views/%s/%s", $bundle, $controller, $view));
@@ -179,6 +178,11 @@ namespace Terrific\ExporterBundle\Service {
                     }
                 }
             }
+
+            if ($this->logger) {
+                $this->logger->debug(sprintf("Found assets [ %s ] for template '%s':", implode(", ", $in), basename($filePath)));
+            }
+
 
             return $in;
         }
@@ -360,8 +364,8 @@ namespace Terrific\ExporterBundle\Service {
             $matches = array();
             $count = preg_match_all('/{([^}]+)}/', $url, $matches);
 
-            if($count !== false) {
-                foreach($matches[1] as $param) {
+            if ($count !== false) {
+                foreach ($matches[1] as $param) {
                     $route->addUrlParameter($param);
                 }
             }

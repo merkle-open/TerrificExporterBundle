@@ -100,6 +100,10 @@ namespace Terrific\ExporterBundle\Actions {
             // retrieve only assets matching the current export
             $assetList = $pageManager->retrieveAllAssets(true);
 
+            if ($this->logger) {
+                $this->logger->info("Using asset list: " . implode(", ", $assetList));
+            }
+
             $results = true;
             foreach ($assetManager->getNames() as $name) {
                 /** @var $asset FileAsset */
