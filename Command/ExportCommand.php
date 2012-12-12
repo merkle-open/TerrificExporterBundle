@@ -47,11 +47,11 @@ namespace Terrific\ExporterBundle\Command {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
-                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+ #               $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+ #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+ #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+ #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
