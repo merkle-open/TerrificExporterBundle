@@ -47,11 +47,11 @@ namespace Terrific\ExporterBundle\Command {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
- #               $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+                #               $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
                 $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
- #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
- #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
- #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
@@ -82,6 +82,18 @@ namespace Terrific\ExporterBundle\Command {
         }
 
         /**
+         *
+         */
+        protected function compileConfiguration(array $extend = array()) {
+            $ret = array();
+
+            var_dump($this->getContainer()->getParameter("terrific_exporter"));
+            //"exportPath" => $exportPath
+
+            return $ret;
+        }
+
+        /**
          * @param InputInterface $input
          * @param OutputInterface $output
          * @return int|void
@@ -94,6 +106,9 @@ namespace Terrific\ExporterBundle\Command {
 
             // startup timer
             $timer->start();
+
+            var_dump($this->compileConfiguration());
+            die();
 
             $exportPath = "/tmp/ExportPath-tmp";
 
@@ -109,7 +124,7 @@ namespace Terrific\ExporterBundle\Command {
                 $refClass = new \ReflectionClass($queueItem);
 
                 $timer->lap("START-" . $refClass->getShortName());
-                $ret = $this->runAction($refClass, $output, array("runnedTimer" => $reRunTimer[$queueItem], "exportPath" => $exportPath));
+                $ret = $this->runAction($refClass, $output, $this->compileConfiguration(array("runnedTimer" => $reRunTimer[$queueItem])));
 
                 if ($ret instanceof ActionResult) {
                     switch ($ret->getResultCode()) {
