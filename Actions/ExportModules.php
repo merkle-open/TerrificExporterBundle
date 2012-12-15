@@ -42,8 +42,8 @@ namespace Terrific\ExporterBundle\Actions {
          * @param \Terrific\ComposerBundle\Entity\Module $module
          * @return string
          */
-        public function doDump(Route $route, RouteModule $module) {
-            $url = $route->getUrl(array("module" => $module->getName(), "template" => $module->getTemplate(), "skins" => implode(" ", $module->getSkins())));
+        public function doDump(RouteModule $module) {
+            $url = $module->getUrl(array("module" => $module->getModule(), "template" => $module->getTemplate(), "skins" => implode(" ", $module->getSkins())));
 
             /** @var $http HttpKernel */
             $req = Request::create($url);
@@ -81,32 +81,14 @@ namespace Terrific\ExporterBundle\Actions {
 
                     /** @var $module RouteModule */
                     foreach ($route->getModules() as $module) {
-
-                        $content = $this->doDump($route, $module);
+                        $content = $this->doDump($module);
                         $file = $tmpFileMgr->putContent($content);
 
-                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s.html", $module->getName(), $module->getTemplate(true)));
+                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s", $module->getModule(), $module->getExportingPath()));
                         $this->saveToPath($file, $params["exportPath"] . "/" . $path);
 
                     }
                 }
-
-
-                /*
-                /** @var $module Module *
-                foreach ($moduleManager->getModules() as $module) {
-                    $module = $moduleManager->getModuleByName($module->getName());
-
-                    /** @var $tpl \Terrific\ComposerBundle\Entity\Template *
-                    foreach ($module->getTemplates() as $tpl) {
-                        $content = $this->doDump($route, $module, $tpl->getName());
-                        $file = $tmpFileMgr->putContent($content);
-
-                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s.html", $module->getName(), $tpl->getName()));
-                        $this->saveToPath($file, $params["exportPath"] . "/" . $path);
-                    }
-                }
-                */
 
                 return new ActionResult(ActionResult::OK);
             } else if ($this->logger) {

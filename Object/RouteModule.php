@@ -25,6 +25,24 @@ namespace Terrific\ExporterBundle\Object {
         /** @var array */
         private $assets;
 
+
+        /**
+         *
+         */
+        public function getExportingPath() {
+            $ret = $this->getTemplate(true);
+            $ret .= (count($this->skins) > 0 ? "_" . implode("-", $this->skins) : "");
+            $ret .= ".html";
+            return $ret;
+        }
+
+        /**
+         *
+         */
+        public function getUrl() {
+            return sprintf("/terrific/composer/module/details/%s/%s/%s", $this->module, $this->getTemplate(true), implode(",", $this->skins));
+        }
+
         /**
          * @param array $assets
          */
@@ -78,7 +96,6 @@ namespace Terrific\ExporterBundle\Object {
          * @return string
          */
         public function getTemplate($withoutExtension = false) {
-
             if (!$withoutExtension) {
                 return $this->template;
             } else {
