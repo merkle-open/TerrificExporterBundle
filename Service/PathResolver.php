@@ -12,6 +12,8 @@ namespace Terrific\ExporterBundle\Service {
     use Terrific\ComposerBundle\Service\ModuleManager;
     use Terrific\ExporterBundle\Exception\PathResolveException;
     use Symfony\Component\HttpKernel\Log\LoggerInterface;
+    use Symfony\Component\Config\FileLocator;
+    use Symfony\Component\Filesystem\Filesystem;
 
     /**
      *
@@ -26,30 +28,23 @@ namespace Terrific\ExporterBundle\Service {
         const SCOPE_GLOBAL = 0x20;
         const SCOPE_MODULE = 0x10;
 
-        /**
-         * @var ContainerInterface
-         */
+        /** @var ContainerInterface */
         protected $container;
 
-        /**
-         * @var ModuleManager
-         */
+        /** @var ModuleManager */
         protected $moduleManager;
 
-        /**
-         * @var Array
-         */
+        /** @var Array */
         protected $pathTemplate;
 
-        /**
-         * @var Array
-         */
-        protected $modules;
+        /** @var Array */
+        protected $modules = array();
 
-        /**
-         * @var LoggerInterface
-         */
+        /** var LoggerInterface */
         protected $logger;
+
+        /** @var FileLocator */
+        protected $fileLocator;
 
         /**
          * Setter for logger.
@@ -72,7 +67,7 @@ namespace Terrific\ExporterBundle\Service {
 
             if ($this->moduleManager != null) {
                 $moduleList = array();
-                foreach($this->moduleManager->getModules() as $module) {
+                foreach ($this->moduleManager->getModules() as $module) {
                     $moduleList[] = $module->getName();
                 }
                 $this->setModules(array_unique($moduleList));
@@ -166,9 +161,11 @@ namespace Terrific\ExporterBundle\Service {
             $this->container = $container;
 
             if ($container != null) {
-                $a = array((self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.view',
+                $a = array(
+                    (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.view',
 
-                    (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_view');
+                    (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_view'
+                );
 
                 foreach ($a as $key => $val) {
                     if ($this->container->hasParameter($val)) {
@@ -312,6 +309,36 @@ namespace Terrific\ExporterBundle\Service {
             return "N/A";
         }
 
+
+        /**
+         * @param $file
+         */
+        public function locate($file, $assertedPath = "") {
+            $this->initialize();
+
+            $locatedFiles = $this->fileLocator->locate($file, null, false);
+
+            $ret = array();
+            foreach ($locatedFiles as $file) {
+                $file = realpath($file);
+                $found = (strpos($file, $assertedPath) !== false);
+
+                if ($this->logger) {
+                    $this->logger->debug(sprintf("Search for '%s' in '%s' => %s", $assertedPath, $file, ($found ? 'true' : 'false')));
+                }
+
+                if ($found) {
+                    $ret[] = $file;
+                }
+            }
+
+            if (count($ret) == 1) {
+                return $ret[0];
+            }
+
+            throw new \Exception("Cannot identify single path for asset");
+        }
+
         /**
          * Builds a new path for the given path. The Path is generated against configuration settings.
          *
@@ -346,12 +373,41 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
+         *
+         */
+        protected function initialize() {
+            if ($this->fileLocator == null) {
+                if ($this->container && count($this->modules)) {
+                    /** @var $fs Filesystem */
+                    $fs = $this->container->get("filesystem");
+
+                    $root_dir = $this->container->getParameter("kernel.root_dir");
+                    $locations = array($root_dir . "/../web/img");
+
+                    $root_dir .= "/../src/Terrific/Module";
+                    foreach ($this->modules as $module) {
+                        $locations[] = $root_dir . "/${module}/Resources/public/img";
+                    }
+
+                    $locations = array_filter($locations, function ($itm) use ($fs) {
+                        return $fs->exists($itm);
+                    });
+
+                    if ($this->logger) {
+                        $this->logger->debug(sprintf("Use pathlist for location [ %s ].", implode(", ", $locations)));
+                    }
+                    $this->fileLocator = new FileLocator($locations);
+                }
+            }
+        }
+
+        /**
          * Constructor
          */
         public function __construct() {
-            $this->pathTemplate = array((self::TYPE_IMAGE | self::SCOPE_GLOBAL) => '/img/common', (self::TYPE_FONT | self::SCOPE_GLOBAL) => '/fonts', (self::TYPE_CSS | self::SCOPE_GLOBAL) => '/css', (self::TYPE_JS | self::SCOPE_GLOBAL) => '/js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => '/views',
-
-                (self::TYPE_IMAGE | self::SCOPE_MODULE) => '/img/%module%', (self::TYPE_FONT | self::SCOPE_MODULE) => '/fonts/%module%', (self::TYPE_CSS | self::SCOPE_MODULE) => '/css/%module%', (self::TYPE_JS | self::SCOPE_MODULE) => '/js/%module%', (self::TYPE_VIEW | self::SCOPE_MODULE) => '/views/%module%');
+            $this->pathTemplate = array(
+                (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => '/img/common', (self::TYPE_FONT | self::SCOPE_GLOBAL) => '/fonts', (self::TYPE_CSS | self::SCOPE_GLOBAL) => '/css', (self::TYPE_JS | self::SCOPE_GLOBAL) => '/js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => '/views', (self::TYPE_IMAGE | self::SCOPE_MODULE) => '/img/%module%', (self::TYPE_FONT | self::SCOPE_MODULE) => '/fonts/%module%', (self::TYPE_CSS | self::SCOPE_MODULE) => '/css/%module%', (self::TYPE_JS | self::SCOPE_MODULE) => '/js/%module%', (self::TYPE_VIEW | self::SCOPE_MODULE) => '/views/%module%'
+            );
 
             $this->modules = array();
             $this->moduleManager = null;

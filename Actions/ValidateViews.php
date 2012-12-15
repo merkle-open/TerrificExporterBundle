@@ -23,6 +23,16 @@ namespace Terrific\ExporterBundle\Actions {
     class ValidateViews extends AbstractAction implements IAction {
 
         /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params) {
+            return (isset($params["validate_html"]) && $params["export_views"]);
+        }
+
+        /**
          * @param $params
          * @return ActionResult
          */

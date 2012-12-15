@@ -40,7 +40,24 @@ namespace Terrific\ExporterBundle\Tests\Filter {
             $this->assertTrue(FileHelper::isStylesheet('asdfasdf.CSS'), "asdfasdf.CSS should be marked as stylesheet.");
 
             $this->assertFalse(FileHelper::isStylesheet('asdf'), "asdf is not a stylesheet.");
-            $this->assertFalse(FileHelper::isStylesheet('test-file-css'), "test-file-css is not a stylessheet.");
+            $this->assertFalse(FileHelper::isStylesheet('test-file-css'), "test-file-css is not a stylesheet.");
+        }
+
+        /**
+         * @covers \Terrific\ExporterBundle\Helper\FileHelper::isImage
+         */
+        public function testIsImage() {
+            $this->assertTrue(FileHelper::isImage('test.gif'), "test.css should be marked as image.");
+            $this->assertTrue(FileHelper::isImage('asdfasdf.GIF'), "asdfasdf.CSS should be marked as image.");
+
+            $this->assertTrue(FileHelper::isImage('test.jpg'), "test.css should be marked as image.");
+            $this->assertTrue(FileHelper::isImage('asdfasdf.JPG'), "asdfasdf.CSS should be marked as image.");
+
+            $this->assertTrue(FileHelper::isImage('test.png'), "test.css should be marked as image.");
+            $this->assertTrue(FileHelper::isImage('asdfasdf.PNG'), "asdfasdf.CSS should be marked as image.");
+
+            $this->assertFalse(FileHelper::isImage('asdf'), "asdf is not a image.");
+            $this->assertFalse(FileHelper::isImage('test-file-css'), "test-file-css is not a image.");
         }
 
     }

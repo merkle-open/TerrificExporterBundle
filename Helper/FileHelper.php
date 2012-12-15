@@ -36,6 +36,18 @@ namespace Terrific\ExporterBundle\Helper {
         }
 
         /**
+         * Returns true if the given path is a image.
+         *
+         * @param String $file
+         * @return bool
+         */
+        public static function isImage($file) {
+            $ext = strtolower(substr($file, -4));
+
+            return ($ext == ".jpg" || $ext == ".gif" || $ext == ".png");
+        }
+
+        /**
          * Creates a path recursive.
          *
          * @throws IOException

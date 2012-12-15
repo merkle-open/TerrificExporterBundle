@@ -27,6 +27,16 @@ namespace Terrific\ExporterBundle\Actions {
     class ExportAssets extends AbstractAction implements IAction {
 
         /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params) {
+            return (isset($params["export_assets"]) && $params["export_assets"]);
+        }
+
+        /**
          * @param $tmpFile String
          * @param $targetFile String
          */

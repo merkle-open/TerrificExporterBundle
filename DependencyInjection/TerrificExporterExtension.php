@@ -20,20 +20,17 @@ namespace Terrific\ExporterBundle\DependencyInjection {
     /**
      *
      */
-    class TerrificExporterExtension extends Extension
-    {
-        public function load(array $configs, ContainerBuilder $container)
-        {
+    class TerrificExporterExtension extends Extension {
+
+        /**
+         * @param array $configs
+         * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+         */
+        public function load(array $configs, ContainerBuilder $container) {
             $configuration = new Configuration();
             $config = $this->processConfiguration($configuration, $configs);
 
-            $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-            $loader->load('services.xml');
-
-            // flat version !
-            foreach ($config as $key => $val) {
-                $container->setParameter(sprintf("terrific_exporter.%s", $key), $val);
-            }
+            $container->setParameter("terrific_exporter", $config);
         }
     }
 }

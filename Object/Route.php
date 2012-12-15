@@ -9,6 +9,7 @@
 
 namespace Terrific\ExporterBundle\Object {
     use ReflectionMethod;
+    use Terrific\ExporterBundle\Helper\FileHelper;
 
     /**
      *
@@ -103,8 +104,27 @@ namespace Terrific\ExporterBundle\Object {
         /**
          * @return array
          */
-        public function getAssets() {
-            return $this->assets;
+        public function getAssets(array $types = array()) {
+            if (count($types) == 0) {
+                return $this->assets;
+            } else {
+                array_walk($types, function ($itm) {
+                    $itm = strtoupper($itm);
+                    return $itm;
+                });
+
+                $searchJS = in_array("JS", $types);
+                $searchCSS = in_array("CSS", $types);
+                $searchIMG = in_array("IMG", $types);
+
+                $ret = array();
+                foreach ($this->assets as $asset) {
+                    if (($searchJS && FileHelper::isJavascript($asset)) || ($searchCSS && FileHelper::isStylesheet($asset) || $searchIMG && FileHelper::isImage($asset))) {
+                        $ret[] = $asset;
+                    }
+                }
+                return $ret;
+            }
         }
 
         /**
@@ -140,6 +160,7 @@ namespace Terrific\ExporterBundle\Object {
          */
         public function addAssets(array $assets) {
             $this->assets = array_merge($this->assets, $assets);
+            $this->assets = array_unique($this->assets);
         }
 
         /**

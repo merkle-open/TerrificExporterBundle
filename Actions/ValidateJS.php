@@ -31,6 +31,19 @@ namespace Terrific\ExporterBundle\Actions {
         private $validatedScripts = null;
 
         /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params) {
+            $ret = true;
+            $ret &= $params["validate_js"];
+            $ret &= $params["export_assets"];
+            return $ret;
+        }
+
+        /**
          *
          * @param $params
          * @return ActionResult

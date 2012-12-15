@@ -13,8 +13,7 @@ namespace Terrific\ExporterBundle\Actions {
     /**
      *
      */
-    interface IAction extends ContainerAwareInterface
-    {
+    interface IAction extends ContainerAwareInterface {
         /**
          * @param $directory
          * @return void
@@ -27,5 +26,13 @@ namespace Terrific\ExporterBundle\Actions {
          */
         public function run(OutputInterface $output, $params = array());
 
+
+        /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params);
     }
 }

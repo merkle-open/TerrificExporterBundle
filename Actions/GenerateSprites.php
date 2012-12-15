@@ -19,6 +19,16 @@ namespace Terrific\ExporterBundle\Actions {
     class GenerateSprites extends AbstractAction implements IAction {
 
         /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params) {
+            return (isset($params["build_sprites"]) && $params["build_sprites"]);
+        }
+
+        /**
          * @param String $directory
          * @param String $targetName
          * @param array $params
@@ -63,7 +73,6 @@ namespace Terrific\ExporterBundle\Actions {
 
             $process = ProcessHelper::startCommand("montage", $processParams);
 
-
             return $process;
         }
 
@@ -77,10 +86,9 @@ namespace Terrific\ExporterBundle\Actions {
                 return;
             }
 
-            $params["spriteList"] = array(array("directory" => "/data/vhosts.d/exporter-bundle/htdocs/PROD/internet_sprite_icons", "name" => "/tmp/testSprite.png", "width" => 100, "height" => 50));
-            foreach ($params["spriteList"] as $sprite) {
-                if (isset($sprite["directory"]) && isset($sprite["name"])) {
-                    $process = $this->buildSpriteFromDirectory($sprite["directory"], $sprite["name"], $sprite["width"], $sprite["height"]);
+            foreach ($params["sprites"] as $sprite) {
+                if (isset($sprite["directory"]) && isset($sprite["target"]) && isset($sprite["item"])) {
+                    $process = $this->buildSpriteFromDirectory($sprite["directory"], $sprite["target"], $sprite["item"]["width"], $sprite["item"]["height"]);
 
                     if (!$process->isSuccessful()) {
                         $this->logger->err("Couldn't create Sprite [${sprite["name"]}]");
@@ -93,5 +101,7 @@ namespace Terrific\ExporterBundle\Actions {
 
             return new ActionResult(ActionResult::OK);
         }
+
+
     }
 }

@@ -32,9 +32,11 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->children()
                 ->booleanNode('build_local_paths')->defaultTrue()->end()
                 ->booleanNode('build_js_doc')->defaultTrue()->end()
+
                 ->booleanNode('validate_js')->defaultTrue()->end()
                 ->booleanNode('validate_html')->defaultTrue()->end()
                 ->booleanNode('validate_css')->defaultTrue()->end()
+
                 ->booleanNode('optimize_images')->defaultTrue()->end()
                 ->booleanNode('export_rewrite_routes')->defaultFalse()->end()
                 ->booleanNode('export_layouts')->defaultTrue()->end()

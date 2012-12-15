@@ -2,23 +2,33 @@
 /**
  * Created by JetBrains PhpStorm.
  * User: blorenz
- * Date: 12.11.12
- * Time: 14:13
+ * Date: 10.11.12
+ * Time: 23:47
  * To change this template use File | Settings | File Templates.
  */
 namespace Terrific\ExporterBundle\Actions {
+    use Assetic\Asset\FileAsset;
+    use Assetic\Factory\LazyAssetManager;
+    use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Console\Output\OutputInterface;
-    use Terrific\ExporterBundle\Service\PageManager;
+    use Symfony\Component\Filesystem\Exception\IOException;
+    use Symfony\Component\Finder\Finder;
+    use Symfony\Component\Finder\SplFileInfo;
     use Terrific\ExporterBundle\Service\TempFileManager;
-    use Terrific\ExporterBundle\Object\ActionResult;
+    use Terrific\ExporterBundle\Service\PageManager;
     use Terrific\ExporterBundle\Service\PathResolver;
-    use Terrific\ExporterBundle\Object\Route;
+    use Terrific\ExporterBundle\Helper\TimerService;
+    use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Object\Route;
+    use Symfony\Component\Config\FileLocator;
+
 
     /**
      *
      */
-    class ExportViews extends AbstractAction implements IAction {
+    class ExportImages extends AbstractAction implements IAction {
+
         /**
          * Return true if the action should be runned false if not.
          *
@@ -26,9 +36,8 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            return (isset($params["export_views"]) && $params["export_views"]);
+            return true;
         }
-
 
         /**
          * @param $tmpFile String
@@ -53,33 +62,40 @@ namespace Terrific\ExporterBundle\Actions {
             return false;
         }
 
+
         /**
-         * @param $params
-         * @return ActionResult
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @return ActionResult|void
          */
         public function run(OutputInterface $output, $params = array()) {
-            /** @var $tmpFileMgr TempFileManager */
-            $tmpFileMgr = $this->container->get("terrific.exporter.tempfilemanager");
-
             /** @var $pageManager PageManager */
             $pageManager = $this->container->get("terrific.exporter.pagemanager");
 
             /** @var $pathResolver PathResolver */
             $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
+            /** @var $timer TimerService */
+            $timer = $this->container->get("terrific.exporter.timerservice");
 
             /** @var $route Route */
-            foreach ($pageManager->findRoutes(true) as $route) {
-                $resp = $pageManager->dumpRoute($route);
-                $file = $tmpFileMgr->putContent($resp->getContent());
+            foreach ($pageManager->findRoutes() as $route) {
+                foreach ($route->getAssets(array('IMG')) as $img) {
+                    $targetPath = $pathResolver->resolve($img);
+                    $sourcePath = $pathResolver->locate(basename($img), $img);
 
-                $targetPath = $params["exportPath"] . "/" . $pathResolver->resolve($route->getExportName());
-                $this->saveToPath($file, $targetPath);
+                    $targetPath = $params["exportPath"] . "/" . $targetPath;
+                    var_dump($sourcePath, $targetPath);
+                }
             }
 
-            return new ActionResult(ActionResult::OK);
 
+            return new ActionResult(ActionResult::OK);
         }
     }
 }
+
+
+
+
 

@@ -29,6 +29,19 @@ namespace Terrific\ExporterBundle\Actions {
     class ValidateCSS extends AbstractAction implements IAction {
 
         /**
+         * Return true if the action should be runned false if not.
+         *
+         * @param array $params
+         * @return bool
+         */
+        public function isRunnable(array $params) {
+            $ret = true;
+            $ret &= $params["validate_css"];
+            $ret &= $params["export_assets"];
+            return $ret;
+        }
+
+        /**
          * @param $file
          */
         private function prepareConfigurationData($file) {

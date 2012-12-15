@@ -18,6 +18,8 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Actions\IAction;
     use Terrific\ExporterBundle\Actions\AbstractAction;
     use Terrific\ExporterBundle\Helper\TimerService;
+    use Symfony\Component\Filesystem\Filesystem;
+    use Terrific\ExporterBundle\Service\BuildOptions;
 
     /**
      *
@@ -47,11 +49,12 @@ namespace Terrific\ExporterBundle\Command {
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
 #                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
-                #               $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
-                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
-                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
-                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
-                #               $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
@@ -72,23 +75,48 @@ namespace Terrific\ExporterBundle\Command {
             }
 
             if ($action instanceof IAction) {
-                $action->setContainer($this->getContainer());
-                $ret = $action->run($output, $params);
+                if ($action->isRunnable($params)) {
+                    $action->setContainer($this->getContainer());
 
-                return $ret;
+                    $this->logger->debug("Starting command with params: " . print_r($params, true));
+                    $ret = $action->run($output, $params);
+                    return $ret;
+                } else {
+                    $this->logger->info("Skipped tasks '" . $refClass->getName() . "' during config settings.");
+                }
             }
 
             return null;
         }
 
         /**
-         *
+         * @param array $extend
+         * @return array
          */
         protected function compileConfiguration(array $extend = array()) {
-            $ret = array();
+            $ret = array_merge($this->getContainer()->getParameter("terrific_exporter"), $extend);
 
-            var_dump($this->getContainer()->getParameter("terrific_exporter"));
-            //"exportPath" => $exportPath
+            /** @var $fs Filesystem */
+            $fs = $this->getContainer()->get("filesystem");
+
+            if (!empty($ret["build_path"]) && $fs->isAbsolutePath($ret["build_path"])) {
+                $ret["exportPath"] = $ret["build_path"];
+            } else if (!empty($ret["build_path"])) {
+                $ret["exportPath"] = realpath($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_path"]);
+            }
+
+
+            // append build options
+            if (!empty($ret["build_settings"])) {
+                /** @var $buildOptions BuildOptions */
+                $buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
+
+                $buildOptions->setFile($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"]);
+
+                $version = $buildOptions["version"];
+
+                $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
+            }
 
             return $ret;
         }
@@ -107,12 +135,9 @@ namespace Terrific\ExporterBundle\Command {
             // startup timer
             $timer->start();
 
-            var_dump($this->compileConfiguration());
-            die();
-
-            $exportPath = "/tmp/ExportPath-tmp";
-
             $actionStack = $this->retrieveActionStack();
+
+            $config = $this->compileConfiguration();
 
             $reRunTimer = array();
             for ($i = 0; $i < count($actionStack); $i++) {
@@ -124,7 +149,9 @@ namespace Terrific\ExporterBundle\Command {
                 $refClass = new \ReflectionClass($queueItem);
 
                 $timer->lap("START-" . $refClass->getShortName());
-                $ret = $this->runAction($refClass, $output, $this->compileConfiguration(array("runnedTimer" => $reRunTimer[$queueItem])));
+
+                $config["runnedTimer"] = $reRunTimer[$queueItem];
+                $ret = $this->runAction($refClass, $output, $config);
 
                 if ($ret instanceof ActionResult) {
                     switch ($ret->getResultCode()) {

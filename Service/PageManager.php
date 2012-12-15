@@ -20,6 +20,7 @@ namespace Terrific\ExporterBundle\Service {
     use Symfony\Component\HttpFoundation\Response;
     use Terrific\ExporterBundle\Annotation\Export;
     use Terrific\ExporterBundle\Helper\StringHelper;
+    use Terrific\ExporterBundle\Helper\FileHelper;
 
     /**
      *
@@ -49,6 +50,9 @@ namespace Terrific\ExporterBundle\Service {
 
         /** @var HttpKernel */
         private $http_kernel = null;
+
+        /** @var array */
+        private $assetCache = array();
 
         /**
          * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
@@ -142,7 +146,12 @@ namespace Terrific\ExporterBundle\Service {
          */
         protected function findAssetsByFile($filePath, array $in = array()) {
             $this->initialize();
-            $ret = $in;
+
+            $md5 = md5($filePath);
+
+            if (isset($this->assetCache[$md5]) && is_array($this->assetCache[$md5])) {
+                return $this->assetCache[$md5];
+            }
 
             $content = file_get_contents($filePath);
 
@@ -172,6 +181,14 @@ namespace Terrific\ExporterBundle\Service {
                     $inBlock = false;
                 }
 
+                if ($token->getValue() === "asset") {
+                    $url = $stream->look()->getValue();
+
+                    if (FileHelper::isImage($url)) {
+                        $in[] = $url;
+                    }
+                }
+
                 if ($inBlock) {
                     if ($token->getValue() === "output") {
                         $in[] = $stream->look()->getValue();
@@ -184,6 +201,7 @@ namespace Terrific\ExporterBundle\Service {
             }
 
 
+            $this->assetCache[$md5] = $in;
             return $in;
         }
 
