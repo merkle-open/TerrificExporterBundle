@@ -74,8 +74,6 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $pathResolver PathResolver */
                 $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
-                $route = $pageManager->findRoute("Module", "detailsAction");
-
                 /** @var $route Route */
                 foreach ($pageManager->findRoutes(true) as $route) {
 

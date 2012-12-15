@@ -18,6 +18,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\W3CValidator;
     use Terrific\ComposerBundle\Service\ModuleManager;
     use Terrific\ComposerBundle\Entity\Module;
+    use Terrific\ExporterBundle\Object\RouteModule;
 
     /**
      *
@@ -39,8 +40,8 @@ namespace Terrific\ExporterBundle\Actions {
          * @param \Terrific\ComposerBundle\Entity\Module $module
          * @return string
          */
-        public function doDump(Route $route, Module $module, $template) {
-            $url = $route->getUrl(array("module" => $module->getName(), "template" => $template, "skins" => ""));
+        public function doDump(RouteModule $module) {
+            $url = $module->getUrl(array("module" => $module->getModule(), "template" => $module->getTemplate(), "skins" => implode(" ", $module->getSkins())));
 
             /** @var $http HttpKernel */
             $req = Request::create($url);
@@ -71,15 +72,12 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $w3Validator W3CValidator */
                 $w3Validator = $this->container->get("terrific.exporter.w3validator");
 
-                $route = $pageManager->findRoute("Module", "detailsAction");
+                /** @var $route Route */
+                foreach ($pageManager->findRoutes(true) as $route) {
 
-                /** @var $module Module */
-                foreach ($moduleManager->getModules() as $module) {
-                    $module = $moduleManager->getModuleByName($module->getName());
-
-                    /** @var $tpl \Terrific\ComposerBundle\Entity\Template */
-                    foreach ($module->getTemplates() as $tpl) {
-                        $content = $this->doDump($route, $module, $tpl->getName());
+                    /** @var $module RouteModule */
+                    foreach ($route->getModules() as $module) {
+                        $content = $this->doDump($module);
                         $file = $tmpFileMgr->putContent($content);
 
                         $results = $w3Validator->validateFile($file);

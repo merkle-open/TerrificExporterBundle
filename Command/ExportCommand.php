@@ -46,15 +46,15 @@ namespace Terrific\ExporterBundle\Command {
             if ($this->getContainer()->hasParameter("terrific_exporter.action_stack")) {
 
             } else {
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
@@ -75,7 +75,7 @@ namespace Terrific\ExporterBundle\Command {
             }
 
             if ($action instanceof IAction) {
-                if ($action->isRunnable($params)) {
+                if ($action->isRunnable($params) || true) {
                     $action->setContainer($this->getContainer());
 
                     $this->logger->debug("Starting command with params: " . print_r($params, true));
