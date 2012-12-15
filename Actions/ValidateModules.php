@@ -72,15 +72,21 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $w3Validator W3CValidator */
                 $w3Validator = $this->container->get("terrific.exporter.w3validator");
 
+                $done = array();
+
                 /** @var $route Route */
                 foreach ($pageManager->findRoutes(true) as $route) {
 
                     /** @var $module RouteModule */
                     foreach ($route->getModules() as $module) {
-                        $content = $this->doDump($module);
-                        $file = $tmpFileMgr->putContent($content);
+                        if (!in_array($module->getId(), $done)) {
+                            $content = $this->doDump($module);
+                            $file = $tmpFileMgr->putContent($content);
 
-                        $results = $w3Validator->validateFile($file);
+                            $results = $w3Validator->validateFile($file);
+
+                            $done = $module->getId();
+                        }
                     }
                 }
 
