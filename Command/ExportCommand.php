@@ -89,12 +89,13 @@ namespace Terrific\ExporterBundle\Command {
             return null;
         }
 
+
         /**
          * @param array $extend
          * @return array
          */
-        protected function compileConfiguration(array $extend = array()) {
-            $ret = array_merge($this->getContainer()->getParameter("terrific_exporter"), $extend);
+        protected function compileConfiguration() {
+            $ret = $this->getContainer()->getParameter("terrific_exporter");
 
             /** @var $fs Filesystem */
             $fs = $this->getContainer()->get("filesystem");
@@ -120,6 +121,7 @@ namespace Terrific\ExporterBundle\Command {
 
             return $ret;
         }
+
 
         /**
          * @param InputInterface $input

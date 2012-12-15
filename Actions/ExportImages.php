@@ -22,12 +22,13 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Object\Route;
     use Symfony\Component\Config\FileLocator;
+    use Terrific\ExporterBundle\Object\RouteModule;
 
 
     /**
      *
      */
-    class ExportImages extends AbstractAction implements IAction {
+    class ExportImages extends AbstractExportAction implements IAction {
 
         /**
          * Return true if the action should be runned false if not.
@@ -39,27 +40,44 @@ namespace Terrific\ExporterBundle\Actions {
             return true;
         }
 
+
         /**
-         * @param $tmpFile String
-         * @param $targetFile String
+         * @param $pathResolver
+         * @param $params
          */
-        protected function saveToPath($tmpFile, $targetFile) {
-            /** @var $fs Filesystem */
-            $fs = $this->container->get("filesystem");
+        protected function exportViewImages(PageManager $pageManager, PathResolver $pathResolver, $params) {
+            /** @var $route Route */
+            foreach ($pageManager->findRoutes(true) as $route) {
+                foreach ($route->getAssets(array('IMG')) as $img) {
+                    $targetPath = $pathResolver->resolve($img);
+                    $sourcePath = $pathResolver->locate(basename($img), $img);
 
-            $targetPath = dirname($targetFile);
-
-            try {
-                FileHelper::createPathRecursive(dirname($targetFile));
-                $fs->copy($tmpFile, $targetFile);
-
-                return true;
-            } catch (IOException $ex) {
-                $this->logger->err($ex->getMessage());
-                $this->logger->err($ex->getTraceAsString());
+                    $targetPath = $params["exportPath"] . "/" . $targetPath;
+                    $this->saveToPath($sourcePath, $targetPath);
+                }
             }
+        }
 
-            return false;
+        /**
+         * @param \Terrific\ExporterBundle\Service\PathResolver $pathResolver
+         * @param $params
+         */
+        protected function exportModuleImage(PageManager $pageManager, PathResolver $pathResolver, $params) {
+            /** @var $route Route */
+            foreach ($pageManager->findRoutes(true) as $route) {
+
+                /** @var $module RouteModule */
+                foreach ($route->getModules() as $module) {
+
+                    foreach($module->getAssets(array('IMG')) as $img) {
+                        $targetPath = $pathResolver->resolve($img);
+                        $sourcePath = $pathResolver->locate(basename($img), $img);
+
+                        $targetPath = $params["exportPath"] . "/" . $targetPath;
+                        $this->saveToPath($sourcePath, $targetPath);
+                    }
+                }
+            }
         }
 
 
@@ -78,15 +96,20 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $timer TimerService */
             $timer = $this->container->get("terrific.exporter.timerservice");
 
-            /** @var $route Route */
-            foreach ($pageManager->findRoutes() as $route) {
-                foreach ($route->getAssets(array('IMG')) as $img) {
-                    $targetPath = $pathResolver->resolve($img);
-                    $sourcePath = $pathResolver->locate(basename($img), $img);
+            $timer->lap("START-ViewImageExport");
+            $this->exportViewImages($pageManager, $pathResolver, $params);
+            $timer->lap("STOP-ViewImageExport");
 
-                    $targetPath = $params["exportPath"] . "/" . $targetPath;
-                    var_dump($sourcePath, $targetPath);
-                }
+            if ($this->logger) {
+                $this->logger->debug(sprintf("ViewImageExport took %s seconds", $timer->getTime("START-ViewImageExport", "STOP-ViewImageExport")));
+            }
+
+            $timer->lap("START-ModuleImageExport");
+            $this->exportModuleImage($pageManager, $pathResolver, $params);
+            $timer->lap("STOP-ModuleImageExport");
+
+            if ($this->logger) {
+                $this->logger->debug(sprintf("ModuleImageExport took %s seconds", $timer->getTime("START-ModuleImageExport", "STOP-ModuleImageExport")));
             }
 
 

@@ -316,6 +316,20 @@ namespace Terrific\ExporterBundle\Service {
         public function locate($file, $assertedPath = "") {
             $this->initialize();
 
+
+            if (strpos($assertedPath, "/terrificmodule") !== false) {
+                $modName = $this->getModuleName($assertedPath);
+
+                $modPath = "/terrificmodule" . strtolower($modName) . "/";
+                $pos = strpos($assertedPath, $modPath) + strlen($modPath);
+                $path = substr($assertedPath, $pos);
+
+                $nPath = "src/Terrific/Module/" . $modName . "/Resources/public/" . $path;
+
+                $assertedPath = $nPath;
+            }
+
+
             $locatedFiles = $this->fileLocator->locate($file, null, false);
 
             $ret = array();

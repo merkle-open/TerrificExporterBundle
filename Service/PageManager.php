@@ -21,6 +21,7 @@ namespace Terrific\ExporterBundle\Service {
     use Terrific\ExporterBundle\Annotation\Export;
     use Terrific\ExporterBundle\Helper\StringHelper;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Object\RouteModule;
 
     /**
      *
@@ -82,7 +83,6 @@ namespace Terrific\ExporterBundle\Service {
         public function getKernel() {
             return $this->kernel;
         }
-
 
         /**
          * @param \Doctrine\Common\Annotations\Reader $reader
@@ -188,6 +188,53 @@ namespace Terrific\ExporterBundle\Service {
                         $in[] = $url;
                     }
                 }
+
+                if ($token->getValue() == "tc" && $stream->getCurrent()->getValue() == "." && $stream->look()->getValue() == "module") {
+                    while ($token->getValue() != "(") {
+                        $token = $stream->next();
+                    }
+                    $token = $stream->next();
+
+                    $module = $token->getValue();
+                    $skins = array();
+
+                    if ($stream->getCurrent()->getValue() != ")") {
+                        $token = $stream->next();
+                        $token = $stream->next();
+
+                        $view = $token->getValue();
+
+                        if ($view == "") {
+                            $view = strtolower($module);
+                        } else {
+                            $view = $token->getValue();
+                        }
+                        $view .= ".html.twig";
+
+
+                        $token = $stream->next();
+                        $token = $stream->next();
+
+                        if ($token->getValue() == "[") {
+                            $token = $stream->next();
+                            while ($token->getValue() != "]") {
+                                $skins[] = $token->getValue();
+                                $token = $stream->next();
+                            }
+                        }
+                    } else {
+                        $view = strtolower($module) . ".html.twig";
+                    }
+
+
+                    $routeModule = new RouteModule($module, $view, $skins);
+                    $in[] = $routeModule;
+
+                    $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
+                    $moduleIn = $this->findAssetsByFile($tpl);
+                    $routeModule->setAssets($moduleIn);
+                }
+
 
                 if ($inBlock) {
                     if ($token->getValue() === "output") {

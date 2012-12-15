@@ -24,7 +24,7 @@ namespace Terrific\ExporterBundle\Actions {
     /**
      *
      */
-    class ExportAssets extends AbstractAction implements IAction {
+    class ExportAssets extends AbstractExportAction implements IAction {
 
         /**
          * Return true if the action should be runned false if not.
@@ -34,29 +34,6 @@ namespace Terrific\ExporterBundle\Actions {
          */
         public function isRunnable(array $params) {
             return (isset($params["export_assets"]) && $params["export_assets"]);
-        }
-
-        /**
-         * @param $tmpFile String
-         * @param $targetFile String
-         */
-        protected function saveToPath($tmpFile, $targetFile) {
-            /** @var $fs Filesystem */
-            $fs = $this->container->get("filesystem");
-
-            $targetPath = dirname($targetFile);
-
-            try {
-                FileHelper::createPathRecursive(dirname($targetFile));
-                $fs->copy($tmpFile, $targetFile);
-
-                return true;
-            } catch (IOException $ex) {
-                $this->logger->err($ex->getMessage());
-                $this->logger->err($ex->getTraceAsString());
-            }
-
-            return false;
         }
 
         /**

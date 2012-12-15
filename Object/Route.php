@@ -10,6 +10,7 @@
 namespace Terrific\ExporterBundle\Object {
     use ReflectionMethod;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Object\RouteModule;
 
     /**
      *
@@ -36,6 +37,9 @@ namespace Terrific\ExporterBundle\Object {
 
         /** @var array */
         private $urlParameters = array();
+
+        /** @var array */
+        private $modules = array();
 
 
         /**
@@ -128,6 +132,13 @@ namespace Terrific\ExporterBundle\Object {
         }
 
         /**
+         * @return array
+         */
+        public function getModules() {
+            return $this->modules;
+        }
+
+        /**
          * @return bool
          */
         public function hasUrlParameters() {
@@ -159,8 +170,24 @@ namespace Terrific\ExporterBundle\Object {
          * @param $asset
          */
         public function addAssets(array $assets) {
-            $this->assets = array_merge($this->assets, $assets);
+            $ret = array();
+
+            foreach ($assets as $a) {
+                if ($a instanceof RouteModule) {
+                    $this->addModule($a);
+                } else {
+                    $this->assets[] = $a;
+                }
+            }
+
             $this->assets = array_unique($this->assets);
+        }
+
+        /**
+         * @param $module
+         */
+        public function addModule(RouteModule $module) {
+            $this->modules[$module->getId()] = $module;
         }
 
         /**
