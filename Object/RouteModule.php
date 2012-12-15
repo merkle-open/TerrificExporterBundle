@@ -77,8 +77,13 @@ namespace Terrific\ExporterBundle\Object {
         /**
          * @return string
          */
-        public function getTemplate() {
-            return $this->template;
+        public function getTemplate($withoutExtension = false) {
+
+            if (!$withoutExtension) {
+                return $this->template;
+            } else {
+                return substr($this->template, 0, strpos($this->template, ".html.twig"));
+            }
         }
 
         /**

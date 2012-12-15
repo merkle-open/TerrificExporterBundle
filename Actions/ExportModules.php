@@ -18,6 +18,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\TempFileManager;
     use Terrific\ExporterBundle\Service\PathResolver;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Object\RouteModule;
 
 
     /**
@@ -41,8 +42,8 @@ namespace Terrific\ExporterBundle\Actions {
          * @param \Terrific\ComposerBundle\Entity\Module $module
          * @return string
          */
-        public function doDump(Route $route, Module $module, $template) {
-            $url = $route->getUrl(array("module" => $module->getName(), "template" => $template, "skins" => ""));
+        public function doDump(Route $route, RouteModule $module) {
+            $url = $route->getUrl(array("module" => $module->getName(), "template" => $module->getTemplate(), "skins" => implode(" ", $module->getSkins())));
 
             /** @var $http HttpKernel */
             $req = Request::create($url);
@@ -75,11 +76,28 @@ namespace Terrific\ExporterBundle\Actions {
 
                 $route = $pageManager->findRoute("Module", "detailsAction");
 
-                /** @var $module Module */
+                /** @var $route Route */
+                foreach ($pageManager->findRoutes(true) as $route) {
+
+                    /** @var $module RouteModule */
+                    foreach ($route->getModules() as $module) {
+
+                        $content = $this->doDump($route, $module);
+                        $file = $tmpFileMgr->putContent($content);
+
+                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s.html", $module->getName(), $module->getTemplate(true)));
+                        $this->saveToPath($file, $params["exportPath"] . "/" . $path);
+
+                    }
+                }
+
+
+                /*
+                /** @var $module Module *
                 foreach ($moduleManager->getModules() as $module) {
                     $module = $moduleManager->getModuleByName($module->getName());
 
-                    /** @var $tpl \Terrific\ComposerBundle\Entity\Template */
+                    /** @var $tpl \Terrific\ComposerBundle\Entity\Template *
                     foreach ($module->getTemplates() as $tpl) {
                         $content = $this->doDump($route, $module, $tpl->getName());
                         $file = $tmpFileMgr->putContent($content);
@@ -88,6 +106,7 @@ namespace Terrific\ExporterBundle\Actions {
                         $this->saveToPath($file, $params["exportPath"] . "/" . $path);
                     }
                 }
+                */
 
                 return new ActionResult(ActionResult::OK);
             } else if ($this->logger) {
