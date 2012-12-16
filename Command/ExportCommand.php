@@ -120,7 +120,12 @@ namespace Terrific\ExporterBundle\Command {
 
                 $version = $buildOptions["version"];
 
-                $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
+                if ($ret["export_with_version"]) {
+                    $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
+                } else {
+                    $ret["exportPath"] .= "/" . $version["name"];
+
+                }
             }
 
             return $ret;

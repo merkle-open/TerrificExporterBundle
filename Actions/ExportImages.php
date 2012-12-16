@@ -138,7 +138,6 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $timer TimerService */
             $timer = $this->container->get("terrific.exporter.timerservice");
 
-            /*
             $timer->lap("START-ViewImageExport");
             $this->exportViewImages($pageManager, $pathResolver, $params);
             $timer->lap("STOP-ViewImageExport");
@@ -154,7 +153,6 @@ namespace Terrific\ExporterBundle\Actions {
             if ($this->logger) {
                 $this->logger->debug(sprintf("ModuleImageExport took %s seconds", $timer->getTime("START-ModuleImageExport", "STOP-ModuleImageExport")));
             }
-*/
 
             $timer->lap("START-CSSImageExport");
             $this->exportCSSImages($pageManager, $pathResolver, $params);
