@@ -23,7 +23,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\Route;
     use Symfony\Component\Config\FileLocator;
     use Terrific\ExporterBundle\Object\RouteModule;
-
+    use Terrific\ExporterBundle\Helper\AsseticHelper;
 
     /**
      *
@@ -41,6 +41,22 @@ namespace Terrific\ExporterBundle\Actions {
         }
 
 
+        protected function saveImage($image, PathResolver $pathResolver, array $params) {
+
+            if (!is_array($image)) {
+                $image = array($image);
+            }
+
+            foreach ($image as $img) {
+                $targetPath = $pathResolver->resolve($img);
+                $sourcePath = $pathResolver->locate(basename($img), $img);
+
+                $targetPath = $params["exportPath"] . "/" . $targetPath;
+                $this->saveToPath($sourcePath, $targetPath);
+            }
+        }
+
+
         /**
          * @param $pathResolver
          * @param $params
@@ -49,11 +65,7 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
                 foreach ($route->getAssets(array('IMG')) as $img) {
-                    $targetPath = $pathResolver->resolve($img);
-                    $sourcePath = $pathResolver->locate(basename($img), $img);
-
-                    $targetPath = $params["exportPath"] . "/" . $targetPath;
-                    $this->saveToPath($sourcePath, $targetPath);
+                    $this->saveImage($img, $pathResolver, $params);
                 }
             }
         }
@@ -70,11 +82,41 @@ namespace Terrific\ExporterBundle\Actions {
                 foreach ($route->getModules() as $module) {
 
                     foreach ($module->getAssets(array('IMG')) as $img) {
-                        $targetPath = $pathResolver->resolve($img);
-                        $sourcePath = $pathResolver->locate(basename($img), $img);
+                        $this->saveImage($img, $pathResolver, $params);
+                    }
+                }
+            }
+        }
 
-                        $targetPath = $params["exportPath"] . "/" . $targetPath;
-                        $this->saveToPath($sourcePath, $targetPath);
+        /**
+         * @param \Terrific\ExporterBundle\Service\PageManager $pageManager
+         * @param \Terrific\ExporterBundle\Service\PathResolver $pathResolver
+         * @param $params
+         */
+        protected function exportCSSImages(PageManager $pageManager, PathResolver $pathResolver, $params) {
+            /** @var $assetManager LazyAssetManager */
+            $assetManager = $this->container->get("assetic.asset_manager");
+
+            $styles = array();
+
+            /** @var $route Route */
+            foreach ($pageManager->findRoutes(true) as $route) {
+                $styles = array_merge($styles, $route->getAssets(array('CSS')));
+            }
+            $styles = array_unique($styles);
+
+
+            foreach ($assetManager->getNames() as $name) {
+                /** @var $asset FileAsset */
+                $asset = $assetManager->get($name);
+
+                if (in_array($asset->getTargetPath(), $styles)) {
+                    foreach ($asset as $leaf) {
+                        $leaf = AsseticHelper::removeMinFilters($leaf);
+
+                        $content = $leaf->dump();
+                        $imageList = AsseticHelper::retrieveImages($content);
+                        $this->saveImage($imageList, $pathResolver, $params);
                     }
                 }
             }
@@ -96,6 +138,7 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $timer TimerService */
             $timer = $this->container->get("terrific.exporter.timerservice");
 
+            /*
             $timer->lap("START-ViewImageExport");
             $this->exportViewImages($pageManager, $pathResolver, $params);
             $timer->lap("STOP-ViewImageExport");
@@ -110,6 +153,15 @@ namespace Terrific\ExporterBundle\Actions {
 
             if ($this->logger) {
                 $this->logger->debug(sprintf("ModuleImageExport took %s seconds", $timer->getTime("START-ModuleImageExport", "STOP-ModuleImageExport")));
+            }
+*/
+
+            $timer->lap("START-CSSImageExport");
+            $this->exportCSSImages($pageManager, $pathResolver, $params);
+            $timer->lap("STOP-CSSImageExport");
+
+            if ($this->logger) {
+                $this->logger->debug(sprintf("CSSImageExport took %s seconds", $timer->getTime("START-CSSImageExport", "STOP-CSSImageExport")));
             }
 
 

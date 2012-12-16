@@ -40,7 +40,7 @@ namespace Terrific\ExporterBundle\Object {
          *
          */
         public function getUrl() {
-            return sprintf("/terrific/composer/module/details/%s/%s/%s", $this->module, $this->getTemplate(true), implode(",", $this->skins));
+            return rtrim(sprintf("/terrific/composer/module/details/%s/%s/%s", $this->module, $this->getTemplate(true), implode(",", $this->skins)), "/");
         }
 
         /**

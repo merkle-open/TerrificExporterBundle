@@ -14,6 +14,9 @@ namespace Terrific\ExporterBundle\Service {
     use Symfony\Component\HttpKernel\Log\LoggerInterface;
     use Symfony\Component\Config\FileLocator;
     use Symfony\Component\Filesystem\Filesystem;
+    use Symfony\Component\Finder\Finder;
+    use Symfony\Component\Finder\SplFileInfo;
+    use Terrific\ExporterBundle\Helper\FileHelper;
 
     /**
      *
@@ -377,7 +380,12 @@ namespace Terrific\ExporterBundle\Service {
                 $ret = $tpl;
             }
 
-            $ret .= "/" . basename($sourcePath);
+            if (FileHelper::isImage($sourcePath)) {
+                $ret .= "/" . substr($sourcePath, strpos($sourcePath, "img/") + 4);
+            } else {
+                $ret .= "/" . basename($sourcePath);
+
+            }
 
             if ($this->logger !== null) {
                 $type = $this->getConstantName($type);
@@ -394,11 +402,14 @@ namespace Terrific\ExporterBundle\Service {
         protected function initialize() {
             if ($this->fileLocator == null) {
                 if ($this->container && count($this->modules)) {
+                    $finder = new Finder();
+
                     /** @var $fs Filesystem */
                     $fs = $this->container->get("filesystem");
 
                     $root_dir = $this->container->getParameter("kernel.root_dir");
                     $locations = array($root_dir . "/../web/img");
+
 
                     $root_dir .= "/../src/Terrific/Module";
                     foreach ($this->modules as $module) {
@@ -408,6 +419,13 @@ namespace Terrific\ExporterBundle\Service {
                     $locations = array_filter($locations, function ($itm) use ($fs) {
                         return $fs->exists($itm);
                     });
+
+                    $finder->in($locations);
+
+                    /** @var $dir SplFileInfo */
+                    foreach ($finder->directories() as $dir) {
+                        $locations[] = $dir->getPathname();
+                    }
 
                     if ($this->logger) {
                         $this->logger->debug(sprintf("Use pathlist for location [ %s ].", implode(", ", $locations)));

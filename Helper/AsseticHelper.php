@@ -46,5 +46,37 @@ namespace Terrific\ExporterBundle\Helper {
 
             return $asset;
         }
+
+        /**
+         *
+         *
+         * @param String $content
+         * @return array
+         */
+        public static function retrieveImages($content) {
+            $css = new \CssMin();
+            $tokenList = $css->parse($content);
+
+            $images = array();
+
+            foreach ($tokenList as $token) {
+                if (isset($token->Property)) {
+                    switch ($token->Property) {
+                        case "background-image":
+                            $matches = array();
+
+                            if (preg_match('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
+                                $images[] = $matches[1];
+                            }
+
+                            break;
+                    }
+                }
+            }
+
+            return array_unique($images);
+        }
+
+
     }
 }
