@@ -46,6 +46,7 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->booleanNode('append_changelogs')->defaultTrue()->end()
                 ->booleanNode('build_sprites')->defaultTrue()->end()
                 ->booleanNode('export_with_version')->defaultTrue()->end()
+                ->booleanNode('autoincrement_build')->defaultTrue()->end()
 
                 ->scalarNode('build_settings')->defaultValue('build/build.ini')->end()
                 ->scalarNode('build_path')->defaultValue('build')->end()

@@ -58,6 +58,7 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
+            $ret = array();
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
             return $ret;
@@ -98,7 +99,7 @@ namespace Terrific\ExporterBundle\Command {
          * @param array $extend
          * @return array
          */
-        protected function compileConfiguration() {
+        protected function compileConfiguration(BuildOptions $buildOptions) {
             $ret = $this->getContainer()->getParameter("terrific_exporter");
 
             /** @var $fs Filesystem */
@@ -113,9 +114,6 @@ namespace Terrific\ExporterBundle\Command {
 
             // append build options
             if (!empty($ret["build_settings"])) {
-                /** @var $buildOptions BuildOptions */
-                $buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
-
                 $buildOptions->setFile($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"]);
 
                 $version = $buildOptions["version"];
@@ -143,12 +141,15 @@ namespace Terrific\ExporterBundle\Command {
             /** @var $timer TimerService */
             $timer = $this->getContainer()->get("terrific.exporter.timerservice");
 
+            /** @var $buildOptions BuildOptions */
+            $buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
+
+
             // startup timer
             $timer->start();
 
             $actionStack = $this->retrieveActionStack();
-
-            $config = $this->compileConfiguration();
+            $config = $this->compileConfiguration($buildOptions);
 
             $reRunTimer = array();
             for ($i = 0; $i < count($actionStack); $i++) {
@@ -205,6 +206,11 @@ namespace Terrific\ExporterBundle\Command {
 
             // stop timer
             $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
+
+            if ($config["autoincrement_build"]) {
+                $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
+                $buildOptions->save();
+            }
         }
 
 
