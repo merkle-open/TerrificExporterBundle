@@ -37,10 +37,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            $ret = true;
-            $ret &= $params["validate_js"];
-            $ret &= $params["export_assets"];
-            return $ret;
+            return isset($params["validate_js"]) && $params["validate_js"];
         }
 
         /**

@@ -391,6 +391,7 @@ namespace Terrific\ExporterBundle\Service {
                 $ret = $exportAnnotation->getName();
             }
 
+            $tmpName = "";
             if ($ret == "") {
                 /** @var $composerAnnotation  \Terrific\ComposerBundle\Annotation\Composer */
                 $composerAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ComposerBundle\Annotation\Composer');

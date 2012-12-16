@@ -114,7 +114,7 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * @param $postFields
          */
-        protected function sendValidationRequest($postFields = array()) {
+        protected function sendValidationRequest($postFields = array(), $retry = false) {
             // if its default w3c validator wait a seconds for each request
             if ($this->url == "http://validator.w3.org/check") {
                 sleep(1);
@@ -130,19 +130,30 @@ namespace Terrific\ExporterBundle\Service {
 
             $ret = curl_exec($this->cURL);
 
-            $dom = new DOMDocument();
-            $dom->loadXML($ret);
+            try {
+                $dom = new DOMDocument();
+                $dom->loadXML($ret);
 
-            $xpath = new DOMXpath($dom);
-            $xpath->registerNamespace("m", "http://www.w3.org/2005/10/markup-validator");
+                $xpath = new DOMXpath($dom);
+                $xpath->registerNamespace("m", "http://www.w3.org/2005/10/markup-validator");
 
-            $ret = new ValidationResult();
-            $errors = $xpath->query("//m:error");
-            $this->buildResultList($errors, $ret, "error");
+                $ret = new ValidationResult();
+                $errors = $xpath->query("//m:error");
+                $this->buildResultList($errors, $ret, "error");
 
-            $warnings = $xpath->query("//m:warning");
-            $this->buildResultList($warnings, $ret, "warning");
+                $warnings = $xpath->query("//m:warning");
+                $this->buildResultList($warnings, $ret, "warning");
+            } catch (\Exception $ex) {
+                // try one more
+                if (!$retry) {
+                    return $this->sendValidationRequest($postFields, true);
+                }
 
+                if ($this->logger) {
+                    $this->logger->err($ex->getMessage());
+                    $this->logger->err($ex->getTraceAsString());
+                }
+            }
             return $ret;
         }
 

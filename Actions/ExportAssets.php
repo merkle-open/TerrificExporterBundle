@@ -33,7 +33,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            return (isset($params["export_assets"]) && $params["export_assets"]);
+            return true;
         }
 
         /**

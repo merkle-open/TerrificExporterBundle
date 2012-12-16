@@ -39,7 +39,7 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
 
                 ->booleanNode('optimize_images')->defaultTrue()->end()
                 ->booleanNode('export_rewrite_routes')->defaultFalse()->end()
-                ->booleanNode('export_layouts')->defaultTrue()->end()
+                ->booleanNode('export_views')->defaultTrue()->end()
                 ->booleanNode('export_modules')->defaultTrue()->end()
                 ->booleanNode('export_fonts')->defaultTrue()->end()
                 ->booleanNode('base_files_workaround')->defaultTrue()->end()
@@ -49,49 +49,24 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->scalarNode('build_settings')->defaultValue('build/build.ini')->end()
                 ->scalarNode('build_path')->defaultValue('build')->end()
 
-                ->arrayNode('module_export_list')
-                ->requiresAtLeastOneElement()
-                ->prototype('array')
-                ->children()
-                ->scalarNode('name')->end()
-                ->end()
-                ->end()
-                ->end()
-
-                ->arrayNode('layout_export_list')
-                ->requiresAtLeastOneElement()
-                ->prototype('array')
-                ->children()
-                ->scalarNode('url')->end()
-                ->end()->end()->end()
-
-                ->arrayNode("assetic_export_list")
-                ->requiresAtLeastOneElement()
-                ->prototype('scalar')
-                ->end()->end()
-
             /* Sprite Settings */
                 ->arrayNode('sprites')
                 ->requiresAtLeastOneElement()
                 ->prototype('array')
-                ->children()
-                ->scalarNode('directory')->end()
-
-                #->arrayNode('files')
-                #->prototype('array')->children()
-                #->scalarNode('name')->end()
-                #->end()->end()->end()
-
-                ->scalarNode('target')->end()
-                ->scalarNode('type')->defaultValue('vertical')->validate()->IfNotInArray(array('vertical', 'horizontal', 'clustered'))->thenInvalid("Invalid value given. Valid values are 'vertical', 'horizontal' and 'clustered")->end()->end()
-                ->arrayNode('item')
-                ->addDefaultsIfNotSet()
-                ->children()
-                ->scalarNode('height')->defaultValue(50)->end()
-                ->scalarNode('width')->defaultValue(50)->end()
-                ->end()->end()
-
-                ->end()->end()->end()
+                    ->children()
+                        ->scalarNode('directory')->end()
+                        ->scalarNode('target')->end()
+                        ->scalarNode('type')->defaultValue('vertical')->validate()->IfNotInArray(array('vertical', 'horizontal', 'clustered'))->thenInvalid("Invalid value given. Valid values are 'vertical', 'horizontal' and 'clustered")->end()->end()
+                        ->arrayNode('item')
+                            ->addDefaultsIfNotSet()
+                                ->children()
+                                    ->scalarNode('height')->defaultValue(50)->end()
+                                    ->scalarNode('width')->defaultValue(50)->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
 
 
             /* Export type */

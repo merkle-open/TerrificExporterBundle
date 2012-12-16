@@ -69,7 +69,7 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $module RouteModule */
                 foreach ($route->getModules() as $module) {
 
-                    foreach($module->getAssets(array('IMG')) as $img) {
+                    foreach ($module->getAssets(array('IMG')) as $img) {
                         $targetPath = $pathResolver->resolve($img);
                         $sourcePath = $pathResolver->locate(basename($img), $img);
 

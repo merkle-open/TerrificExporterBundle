@@ -75,7 +75,7 @@ namespace Terrific\ExporterBundle\Command {
             }
 
             if ($action instanceof IAction) {
-                if ($action->isRunnable($params) || true) {
+                if ($action->isRunnable($params)) {
                     $action->setContainer($this->getContainer());
 
                     $this->logger->debug("Starting command with params: " . print_r($params, true));

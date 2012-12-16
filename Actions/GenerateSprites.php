@@ -25,7 +25,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            return (isset($params["build_sprites"]) && $params["build_sprites"]);
+            return (isset($params["sprites"]) && is_array($params["sprites"]) && count($params["sprites"]) > 0);
         }
 
         /**

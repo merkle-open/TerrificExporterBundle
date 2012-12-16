@@ -85,7 +85,7 @@ namespace Terrific\ExporterBundle\Actions {
 
                             $results = $w3Validator->validateFile($file);
 
-                            $done = $module->getId();
+                            $done[] = $module->getId();
                         }
                     }
                 }

@@ -143,7 +143,7 @@ namespace Terrific\ExporterBundle\Service {
             }
 
             if ($this->logger != null) {
-                $this->logger->debug("Validating Module ['${$moduleName}'] => " . ($ret ? "true" : "false"));
+                $this->logger->debug("Validating Module ['${moduleName}'] => " . ($ret ? "true" : "false"));
             }
 
             return $ret;
@@ -203,6 +203,8 @@ namespace Terrific\ExporterBundle\Service {
             $ret = null;
 
             $matches = array();
+            $modName = "";
+            
             if (preg_match('#/terrificmodule([^/]+)#', $dir, $matches)) {
                 $modName = trim($matches[1]);
 
