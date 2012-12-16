@@ -29,7 +29,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            return (isset($params["validate_html"]) && $params["export_views"]);
+            return (isset($params["validate_html"]) && $params["validate_html"] && isset($params["export_views"]) && $params["export_views"]);
         }
 
         /**

@@ -204,7 +204,7 @@ namespace Terrific\ExporterBundle\Service {
 
             $matches = array();
             $modName = "";
-            
+
             if (preg_match('#/terrificmodule([^/]+)#', $dir, $matches)) {
                 $modName = trim($matches[1]);
 
