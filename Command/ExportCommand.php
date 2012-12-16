@@ -53,6 +53,7 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+                $ret[] = 'Terrific\ExporterBundle\Actions\OptimizeImages';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
@@ -79,6 +80,8 @@ namespace Terrific\ExporterBundle\Command {
                     $action->setContainer($this->getContainer());
 
                     $this->logger->debug("Starting command with params: " . print_r($params, true));
+                    $output->writeln("Start [" . $refClass->getShortName() . "] Action");
+
                     $ret = $action->run($output, $params);
                     return $ret;
                 } else {

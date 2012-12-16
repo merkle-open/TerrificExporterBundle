@@ -13,18 +13,17 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
     use Symfony\Component\Filesystem\Exception\IOException;
     use Symfony\Component\Finder\Finder;
-    use Symfony\Component\Finder\SplFileInfo;
-    use Terrific\ExporterBundle\Service\TempFileManager;
-    use Terrific\ExporterBundle\Service\PageManager;
-    use Terrific\ExporterBundle\Service\PathResolver;
-    use Terrific\ExporterBundle\Helper\TimerService;
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Terrific\ExporterBundle\Object\ActionResult;
-    use Terrific\ExporterBundle\Helper\FileHelper;
+    use Symfony\Component\Finder\SplFileInfo;
+    use Symfony\Component\Process\Process;
 
     /**
      *
      */
-    class OptimizeAssets extends AbstractAction implements IAction {
+    class OptimizeImages extends AbstractAction implements IAction {
+        const OPTIM_TRIMAGE = 0;
+
 
         /**
          * Return true if the action should be runned false if not.
@@ -38,11 +37,52 @@ namespace Terrific\ExporterBundle\Actions {
 
 
         /**
+         * @return bool|int
+         */
+        public function retrieveOptimizer() {
+            if (ProcessHelper::checkCommand("trimage --version")) {
+                return self::OPTIM_TRIMAGE;
+            }
+
+            return false;
+        }
+
+
+        /**
+         * @param array $params
+         * @return iterator
+         */
+        public function retrieveFileList(array $params) {
+            $f = new Finder();
+
+            $f->in($params["exportPath"]);
+            $f->name("*.jpg")->name("*.png")->name("*.gif");
+
+            return $f->getIterator();
+        }
+
+
+        /**
          * @param \Symfony\Component\Console\Output\OutputInterface $output
          * @param array $params
          * @return ActionResult|\Terrific\ExporterBundle\Object\ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
+            $optim = $this->retrieveOptimizer();
+
+            $fileList = $this->retrieveFileList($params);
+
+            switch ($optim) {
+                case self::OPTIM_TRIMAGE:
+                    /** @var $file SplFileInfo */
+                    foreach ($fileList as $file) {
+                        /** @var $process Process */
+                        $process = ProcessHelper::startCommand("trimage", array("--file", $file->getPathname()));
+
+                        $this->logger->debug(str_replace($params["exportPath"], "", trim($process->getOutput())));
+                    }
+                    break;
+            }
 
 
             return new ActionResult(ActionResult::OK);
