@@ -29,7 +29,6 @@ namespace Terrific\ExporterBundle\Actions {
             $ret = array();
 
             $ret[] = new ActionRequirement("yuidoc", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\BuildJSDoc');
-            $ret[] = new ActionRequirement("build_js_doc", ActionRequirement::TYPE_SETTING, 'Terrific\ExporterBundle\Actions\BuildJSDoc');
 
             return $ret;
         }
@@ -49,6 +48,20 @@ namespace Terrific\ExporterBundle\Actions {
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
+            /** @var $configFinder ConfigFinder */
+            $configFinder = $this->container->get("terrific.exporter.config_finder");
+
+            $kernelRootDir = realpath($this->container->getParameter("kernel.root_dir") . "/../");
+
+            $configFile = $configFinder->find("yuidoc.json");
+
+            $process = ProcessHelper::startCommand("yuidoc", array("-c", $configFile), $kernelRootDir);
+
+            var_dump($process->getOutput());
+            var_dump($process->getErrorOutput());
+
+
+
 
 
             return new ActionResult(ActionResult::OK);

@@ -51,6 +51,7 @@ namespace Terrific\ExporterBundle\Command {
 
             } else {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ClearAction';
+                $ret[] = 'Terrific\ExporterBundle\Actions\BuildJSDoc';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';

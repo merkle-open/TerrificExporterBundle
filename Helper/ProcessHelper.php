@@ -48,11 +48,16 @@ namespace Terrific\ExporterBundle\Helper {
          * @param $args array
          * @return \Symfony\Component\Process\Process
          */
-        public static function startCommand($command, $args = array()) {
+        public static function startCommand($command, $args = array(), $cwd = null) {
             $args = array_merge(array($command), $args);
             $builder = new ProcessBuilder($args);
 
             $process = $builder->getProcess();
+
+            if ($cwd != null) {
+
+                $process->setWorkingDirectory($cwd);
+            }
 
             try {
                 $process->setTimeout(7200);

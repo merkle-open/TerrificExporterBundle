@@ -30,7 +30,6 @@ namespace Terrific\ExporterBundle\Actions {
             $ret = array();
 
             $ret[] = new ActionRequirement("montage", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\GenerateSprites');
-            $ret[] = new ActionRequirement("sprites", ActionRequirement::TYPE_SETTING, 'Terrific\ExporterBundle\Actions\GenerateSprites');
 
             return $ret;
         }
