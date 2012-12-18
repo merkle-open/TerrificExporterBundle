@@ -21,6 +21,7 @@ namespace Terrific\ExporterBundle\Helper {
          * @return bool
          */
         public static function checkCommand($command) {
+            $retVal = 0;
             switch ($command) {
                 case "trimage":
                     $buildOp = array($command, "--version");
@@ -28,6 +29,7 @@ namespace Terrific\ExporterBundle\Helper {
 
                 case "yuidoc":
                     $buildOp = array($command, "-v");
+                    $retVal = 1;
                     break;
 
                 default:
@@ -39,7 +41,7 @@ namespace Terrific\ExporterBundle\Helper {
             $builder = new ProcessBuilder($buildOp);
 
             try {
-                return ($builder->getProcess()->run() === 0);
+                return ($builder->getProcess()->run() === $retVal);
             } catch (\RuntimeException $ex) {
                 return false;
             }
