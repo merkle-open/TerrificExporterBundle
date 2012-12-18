@@ -19,11 +19,28 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ComposerBundle\Service\ModuleManager;
     use Terrific\ComposerBundle\Entity\Module;
     use Terrific\ExporterBundle\Object\RouteModule;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
      */
     class ValidateModules extends AbstractAction implements IAction {
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            $ret = array();
+
+            $ret[] = new ActionRequirement("curl", ActionRequirement::TYPE_PHPEXT, 'Terrific\ExporterBundle\Actions\ValidateModules');
+
+            return $ret;
+        }
+
 
         /**
          * Return true if the action should be runned false if not.

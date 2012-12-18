@@ -20,6 +20,10 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Helper\TimerService;
     use Symfony\Component\Filesystem\Filesystem;
     use Terrific\ExporterBundle\Service\BuildOptions;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
+    use Terrific\ExporterBundle\Object\ActionRequirementStack;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -34,13 +38,13 @@ namespace Terrific\ExporterBundle\Command {
          *
          */
         protected function configure() {
-            $this->setName('build:export')->setDescription('Builds a release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
+            $this->setName('build:export')->setDescription('Builds m release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
         }
 
         /**
          *
          */
-        protected function retrieveActionStack() {
+        protected function retrieveActionStack(array $config) {
             $ret = array();
 
             if ($this->getContainer()->hasParameter("terrific_exporter.action_stack")) {
@@ -58,10 +62,82 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
-            $ret = array();
+
+
+            $requirementStack = new ActionRequirementStack();
+
+            $stack = array();
+            foreach ($ret as $action) {
+                $refAction = new \ReflectionClass($action);
+
+                if ($refAction->implementsInterface('Terrific\ExporterBundle\Actions\IAction')) {
+                    /** @var $method \ReflectionMethod */
+                    $method = $refAction->getMethod("getRequirements");
+
+                    $requirementStack->addStacks($method->invoke(null));
+                }
+                $stack[] = $refAction;
+            }
+
+
+            $this->logger->debug("Checking Requirements");
+            Log::info("Checking Requirements");
+            Log::blkstart();
+
+            $failedOverall = false;
+
+            /** @var $req ActionRequirement */
+            foreach ($requirementStack->getStack(true) as $req) {
+                $failed = false;
+
+                switch ($req->getType()) {
+                    case ActionRequirement::TYPE_PHPEXT:
+                        $failed = !extension_loaded($req->getName());
+                        $str = "Check for PHP Extension [%s] => %s";
+                        break;
+
+                    case ActionRequirement::TYPE_PROCESS:
+                        $failed = !ProcessHelper::checkCommand($req->getName());
+                        $str = "Check for Command [%s] => %s";
+                        break;
+
+                    case ActionRequirement::TYPE_SETTING:
+                        $failed = !(isset($config[$req->getName()]) && !empty($config[$req->getName()]));
+                        $str = "Check for Setting [%s] => %s";
+                        break;
+                }
+
+
+                $ret = (!$failed ? 'passed' : 'failed');
+                $this->logger->debug(sprintf("- " . $str, $req->getName(), $ret));
+
+                if ($failed) {
+                    $failedOverall = true;
+                    Log::err($str, array($req->getName(), $ret));
+
+                    Log::blkstart();
+                    Log::err("Used by the following Actions:");
+
+                    /** @var $refAction \ReflectionClass */
+                    foreach ($requirementStack->findAffectedActions($req) as $refAction) {
+                        Log::err($refAction->getName(), array());
+                    }
+
+                    Log::blkend();
+                } else {
+                    Log::info($str, array($req->getName(), $ret));
+                }
+            }
+
+            Log::blkend();
+
+            if ($failedOverall) {
+                Log::err("Cannot proceed with requirement errors");
+                die();
+            }
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
-            return $ret;
+            return $stack;
         }
 
         /**
@@ -82,7 +158,7 @@ namespace Terrific\ExporterBundle\Command {
                     $action->setContainer($this->getContainer());
 
                     $this->logger->debug("Starting command with params: " . print_r($params, true));
-                    $output->writeln("Start [" . $refClass->getShortName() . "] Action");
+                    Log::info("Start [" . $refClass->getShortName() . "]");
 
                     $ret = $action->run($output, $params);
                     return $ret;
@@ -136,6 +212,9 @@ namespace Terrific\ExporterBundle\Command {
          * @return int|void
          */
         protected function execute(InputInterface $input, OutputInterface $output) {
+            // Init console logger !
+            Log::init($output);
+
             $this->logger = $this->getContainer()->get('logger');
 
             /** @var $timer TimerService */
@@ -148,18 +227,18 @@ namespace Terrific\ExporterBundle\Command {
             // startup timer
             $timer->start();
 
-            $actionStack = $this->retrieveActionStack();
             $config = $this->compileConfiguration($buildOptions);
+            $actionStack = $this->retrieveActionStack($config);
 
             $reRunTimer = array();
             for ($i = 0; $i < count($actionStack); $i++) {
-                $queueItem = $actionStack[$i];
+                /** @var $refClass \ReflectionClass */
+                $refClass = $actionStack[$i];
+                $queueItem = $refClass->getName();
 
                 if (!isset($reRunTimer[$queueItem])) {
                     $reRunTimer[$queueItem] = 0;
                 }
-                $refClass = new \ReflectionClass($queueItem);
-
                 $timer->lap("START-" . $refClass->getShortName());
 
                 $config["runnedTimer"] = $reRunTimer[$queueItem];
@@ -168,11 +247,10 @@ namespace Terrific\ExporterBundle\Command {
                 if ($ret instanceof ActionResult) {
                     switch ($ret->getResultCode()) {
                         case ActionResult::OK:
-                            $output->writeln("Successfully ran [" . $refClass->getShortName() . "] Action");
                             break;
 
                         case ActionResult::STOP:
-                            $output->writeln("Stopping export after [" . $refClass->getShortName() . "] Action");
+                            Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
                             break 2;
 
                         case ActionResult::TRY_AGAIN:
@@ -181,12 +259,12 @@ namespace Terrific\ExporterBundle\Command {
                                 --$i;
                             } else {
                                 $reRunTimer[$queueItem] = 0;
-                                $output->writeln("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
+                                Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
                             }
                             break;
 
                         default:
-                            $output->writeln("Retrieved from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
+                            Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
                             break;
                     }
                 }
@@ -196,12 +274,14 @@ namespace Terrific\ExporterBundle\Command {
 
 
             for ($i = 0; $i < count($actionStack); $i++) {
-                $queueItem = $actionStack[$i];
-                $refClass = new \ReflectionClass($queueItem);
+                $refClass = $actionStack[$i];
 
+                $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
                 if ($this->logger) {
-                    $this->logger->info(sprintf("Action [%s] completed after %s seconds.", $refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
+                    $this->logger->info($msg);
                 }
+
+                Log::info($msg);
             }
 
             // stop timer

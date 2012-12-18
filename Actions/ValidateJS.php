@@ -19,6 +19,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\AsseticHelper;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Service\PageManager;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
@@ -29,6 +30,22 @@ namespace Terrific\ExporterBundle\Actions {
          * @var array
          */
         private $validatedScripts = null;
+
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            $ret = array();
+
+            $ret[] = new ActionRequirement("jshint", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\ValidateJS');
+
+            return $ret;
+        }
 
         /**
          * Return true if the action should be runned false if not.
@@ -46,11 +63,6 @@ namespace Terrific\ExporterBundle\Actions {
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-            if (!ProcessHelper::checkCommand('jshint')) {
-                $this->log(AbstractAction::LOG_LEVEL_ERROR, "Cannot find JSHint.");
-                return new ActionResult(ActionResult::STOP);
-            }
-
             $error = false;
             $this->log(AbstractAction::LOG_LEVEL_DEBUG, "Found JSHint starting validation.");
 

@@ -20,6 +20,18 @@ namespace Terrific\ExporterBundle\Actions {
      */
     class ExportViews extends AbstractExportAction implements IAction {
         /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            return array();
+        }
+
+        /**
          * Return true if the action should be runned false if not.
          *
          * @param array $params

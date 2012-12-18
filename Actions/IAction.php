@@ -26,7 +26,6 @@ namespace Terrific\ExporterBundle\Actions {
          */
         public function run(OutputInterface $output, $params = array());
 
-
         /**
          * Return true if the action should be runned false if not.
          *
@@ -34,5 +33,15 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params);
+
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements();
     }
 }

@@ -12,11 +12,29 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Symfony\Component\Finder\Finder;
     use Symfony\Component\Filesystem\Filesystem;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
      */
     class GenerateSprites extends AbstractAction implements IAction {
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            $ret = array();
+
+            $ret[] = new ActionRequirement("montage", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\GenerateSprites');
+            $ret[] = new ActionRequirement("sprites", ActionRequirement::TYPE_SETTING, 'Terrific\ExporterBundle\Actions\GenerateSprites');
+
+            return $ret;
+        }
+
 
         /**
          * Return true if the action should be runned false if not.
@@ -81,11 +99,6 @@ namespace Terrific\ExporterBundle\Actions {
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-            if (!ProcessHelper::checkCommand("montage")) {
-                $this->logger->info("Need montage (ImageMagick) to build sprites.");
-                return;
-            }
-
             foreach ($params["sprites"] as $sprite) {
                 if (isset($sprite["directory"]) && isset($sprite["target"]) && isset($sprite["item"])) {
                     $process = $this->buildSpriteFromDirectory($sprite["directory"], $sprite["target"], $sprite["item"]["width"], $sprite["item"]["height"]);

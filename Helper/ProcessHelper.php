@@ -12,8 +12,7 @@ namespace Terrific\ExporterBundle\Helper {
     /**
      *
      */
-    abstract class ProcessHelper
-    {
+    abstract class ProcessHelper {
 
         /**
          * Returns if the command is available.
@@ -21,9 +20,19 @@ namespace Terrific\ExporterBundle\Helper {
          * @param $command string
          * @return bool
          */
-        public static function checkCommand($command)
-        {
-            $builder = new ProcessBuilder(array($command));
+        public static function checkCommand($command) {
+            switch ($command) {
+                case "trimage":
+                    $buildOp = array($command, "--version");
+                    break;
+
+                default:
+                    $buildOp = array($command);
+                    break;
+            }
+
+
+            $builder = new ProcessBuilder($buildOp);
 
             try {
                 return ($builder->getProcess()->run() === 0);
@@ -39,8 +48,7 @@ namespace Terrific\ExporterBundle\Helper {
          * @param $args array
          * @return \Symfony\Component\Process\Process
          */
-        public static function startCommand($command, $args = array())
-        {
+        public static function startCommand($command, $args = array()) {
             $args = array_merge(array($command), $args);
             $builder = new ProcessBuilder($args);
 

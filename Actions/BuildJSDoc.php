@@ -2,20 +2,21 @@
 /**
  * Created by JetBrains PhpStorm.
  * User: blorenz
- * Date: 10.11.12
- * Time: 23:47
+ * Date: 17.12.12
+ * Time: 08:30
  * To change this template use File | Settings | File Templates.
  */
 namespace Terrific\ExporterBundle\Actions {
-    use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Console\Output\OutputInterface;
     use Terrific\ExporterBundle\Object\ActionResult;
-    use Symfony\Component\Filesystem\Exception\IOException;
+    use Terrific\ExporterBundle\Service\ConfigFinder;
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
      */
-    class ClearAction extends AbstractAction implements IAction {
+    class BuildJSDoc extends AbstractAction implements IAction {
         /**
          * Returns requirements for running this Action.
          *
@@ -25,7 +26,12 @@ namespace Terrific\ExporterBundle\Actions {
          * @return array
          */
         public static function getRequirements() {
-            return array();
+            $ret = array();
+
+            $ret[] = new ActionRequirement("yuidoc", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\BuildJSDoc');
+            $ret[] = new ActionRequirement("build_js_doc", ActionRequirement::TYPE_SETTING, 'Terrific\ExporterBundle\Actions\BuildJSDoc');
+
+            return $ret;
         }
 
         /**
@@ -35,29 +41,18 @@ namespace Terrific\ExporterBundle\Actions {
          * @return bool
          */
         public function isRunnable(array $params) {
-            return true;
+            return $params["build_js_doc"];
         }
 
         /**
-         * @param \Symfony\Component\Console\Output\OutputInterface $output
-         * @param array $params
-         * @return ActionResult|void
+         * @param $params
+         * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-            /** @var $fs Filesystem */
-            $fs = $this->container->get("filesystem");
 
-            try {
-                $fs->remove($params["exportPath"]);
-                return new ActionResult(ActionResult::OK);
-            } catch (IOException $ex) {
-                return new ActionResult(ActionResult::STOP);
-            }
+
+            return new ActionResult(ActionResult::OK);
         }
+
     }
 }
-
-
-
-
-

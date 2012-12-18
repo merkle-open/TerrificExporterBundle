@@ -17,12 +17,29 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\ActionResult;
     use Symfony\Component\Finder\SplFileInfo;
     use Symfony\Component\Process\Process;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
      */
     class OptimizeImages extends AbstractAction implements IAction {
         const OPTIM_TRIMAGE = 0;
+
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            $ret = array();
+
+            $ret[] = new ActionRequirement("trimage", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+
+            return $ret;
+        }
 
 
         /**

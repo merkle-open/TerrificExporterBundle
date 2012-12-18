@@ -21,11 +21,21 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\RouteModule;
 
 
-
     /**
      *
      */
     class ExportModules extends AbstractExportAction implements IAction {
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            return array();
+        }
 
         /**
          * Return true if the action should be runned false if not.

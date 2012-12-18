@@ -16,11 +16,27 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\HttpFoundation\Request;
     use Symfony\Component\HttpFoundation\Response;
     use Terrific\ExporterBundle\Service\W3CValidator;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
 
     /**
      *
      */
     class ValidateViews extends AbstractAction implements IAction {
+        /**
+         * Returns requirements for running this Action.
+         *
+         * @param \Symfony\Component\Console\Output\OutputInterface $output
+         * @param array $params
+         * @param array $runnedActions
+         * @return array
+         */
+        public static function getRequirements() {
+            $ret = array();
+
+            $ret[] = new ActionRequirement("curl", ActionRequirement::TYPE_PHPEXT, 'Terrific\ExporterBundle\Actions\ValidateViews');
+
+            return $ret;
+        }
 
         /**
          * Return true if the action should be runned false if not.
