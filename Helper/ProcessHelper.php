@@ -26,6 +26,10 @@ namespace Terrific\ExporterBundle\Helper {
                     $buildOp = array($command, "--version");
                     break;
 
+                case "yuidoc":
+                    $buildOp = array($command, "-v");
+                    break;
+
                 default:
                     $buildOp = array($command);
                     break;
