@@ -62,6 +62,7 @@ namespace Terrific\ExporterBundle\Helper {
             foreach ($tokenList as $token) {
                 if (isset($token->Property)) {
                     switch ($token->Property) {
+                        case "background":
                         case "background-image":
                             $matches = array();
 

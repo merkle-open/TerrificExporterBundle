@@ -12,6 +12,7 @@
         <parameter key="terrific.exporter.pagemanager.class">Terrific\ExporterBundle\Service\PageManager</parameter>
         <parameter key="terrific.exporter.w3validator.class">Terrific\ExporterBundle\Service\W3CValidator</parameter>
         <parameter key="terrific.exporter.timerservice.class">Terrific\ExporterBundle\Service\TimerService</parameter>
+        <parameter key="terrific.exporter.filter.exportpathfilter.class">Terrific\ExporterBundle\Filter\CSSPathRewriteFilter</parameter>
     </parameters>
 
 
@@ -30,7 +31,7 @@
                 <argument type="service" id="logger" on-invalid="ignore"/>
             </call>
             <call method="setModuleManager">
-                <argument type="service" id="terrific.composer.module.manager" on-invalid="ignore" />
+                <argument type="service" id="terrific.composer.module.manager" on-invalid="ignore"/>
             </call>
         </service>
 
@@ -83,5 +84,14 @@
 
         <service id="terrific.exporter.timerservice" class="%terrific.exporter.timerservice.class%"/>
 
+        <service id="terrific.exporter.filter.exportpathfilter" class="%terrific.exporter.filter.exportpathfilter.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <call method="setPathResolver">
+                <argument type="service" id="terrific.exporter.pathresolver"/>
+            </call>
+            <tag name="assetic.filter"/>
+        </service>
     </services>
 </container>

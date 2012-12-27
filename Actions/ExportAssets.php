@@ -20,6 +20,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\TimerService;
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Filter\CSSPathRewriteFilter;
 
     /**
      *
@@ -97,6 +98,9 @@ namespace Terrific\ExporterBundle\Actions {
             // retrieve only assets matching the current export
             $assetList = $pageManager->retrieveAllAssets(true);
 
+            /** @var $cssPathFilter CSSPathRewriteFilter */
+            $cssPathFilter = $this->container->get("terrific.exporter.filter.exportpathfilter");
+
             if ($this->logger) {
                 $this->logger->info("Using asset list: " . implode(", ", $assetList));
             }
@@ -112,7 +116,7 @@ namespace Terrific\ExporterBundle\Actions {
                     $nPath = $params["exportPath"] . "/" . $pathResolver->resolve($asset->getTargetPath());
 
                     $sPoint = $timer->lap();
-                    $content = $asset->dump();
+                    $content = $asset->dump($cssPathFilter);
                     $file = $tmpFileMgr->putContent($content);
                     $results &= $this->saveToPath($file, $nPath);
                     $ePoint = $timer->lap();
