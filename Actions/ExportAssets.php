@@ -67,9 +67,8 @@ namespace Terrific\ExporterBundle\Actions {
 
             /** @var $file SplFileInfo */
             foreach ($f->name("*.js")->name("*.css") as $file) {
-                $resolve = $pathResolver->resolve($file->getRelativePathname());
-                $targetPath = dirname($resolve) . "/dependencies/" . $file->getRelativePathname();
-                $this->saveToPath($file->getPathname(), $param["exportPath"] . "/" . $targetPath);
+                $resolve = $pathResolver->resolve($file->getPathname());
+                $this->saveToPath($file->getPathname(), $param["exportPath"] . "/" . $resolve);
             }
         }
 

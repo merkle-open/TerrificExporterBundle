@@ -383,8 +383,11 @@ namespace Terrific\ExporterBundle\Service {
             if (FileHelper::isImage($sourcePath)) {
                 $ret .= "/" . substr($sourcePath, strpos($sourcePath, "img/") + 4);
             } else {
-                $ret .= "/" . basename($sourcePath);
-
+                if (strpos($sourcePath, "dependencies") !== false) {
+                    $ret .= "/dependencies/" . substr($sourcePath, strpos($sourcePath, "dependencies/") + 13);
+                } else {
+                    $ret .= "/" . basename($sourcePath);
+                }
             }
 
             if ($this->logger !== null) {

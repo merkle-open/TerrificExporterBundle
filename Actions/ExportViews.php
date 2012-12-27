@@ -14,6 +14,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\PathResolver;
     use Terrific\ExporterBundle\Object\Route;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -59,10 +60,29 @@ namespace Terrific\ExporterBundle\Actions {
 
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
+                Log::info("Exporting View: " . $route->getExportName());
+                $targetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($route->getExportName()), "/");
                 $resp = $pageManager->dumpRoute($route);
-                $file = $tmpFileMgr->putContent($resp->getContent());
 
-                $targetPath = $params["exportPath"] . "/" . $pathResolver->resolve($route->getExportName());
+
+                if (!empty($params["build_local_paths"]) && $params["build_local_paths"] === true) {
+                    $content = $resp->getContent();
+                    foreach ($route->getAllAssets() as $asset) {
+                        $nAssetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($asset), "/");
+                        $retPath = $this->fs->makePathRelative(dirname($nAssetPath), dirname($targetPath));
+                        $nAsset = $retPath . basename($nAssetPath);
+
+
+                        // TODO: Find a better solutation than this
+                        foreach (array("../${asset}?1", "/${asset}?1") as $f) {
+                            $content = str_replace($f, $nAsset, $content);
+                        }
+                    }
+                    $resp->setContent($content);
+                }
+
+
+                $file = $tmpFileMgr->putContent($resp->getContent());
                 $this->saveToPath($file, $targetPath);
             }
 

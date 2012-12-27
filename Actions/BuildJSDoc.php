@@ -12,6 +12,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\ConfigFinder;
     use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -57,12 +58,13 @@ namespace Terrific\ExporterBundle\Actions {
 
             $process = ProcessHelper::startCommand("yuidoc", array("-c", $configFile), $kernelRootDir);
 
-            var_dump($process->getOutput());
-            var_dump($process->getErrorOutput());
-
-
-
-
+            if (!$process->isSuccessful()) {
+                Log::err("Cannot build javascript documentation");
+                $this->logger->err($process->getErrorOutput());
+                return new ActionResult(ActionResult::STOP);
+            } else {
+                $this->logger->warn($process->getErrorOutput());
+            }
 
             return new ActionResult(ActionResult::OK);
         }

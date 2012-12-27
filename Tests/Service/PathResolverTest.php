@@ -288,6 +288,21 @@ namespace Terrific\ExporterBundle\Tests\Service {
                 $this->object->resolve($file),
                 "Cannot resolve path ['${file}']"
             );
+
+            $file = "/web/js/dependencies/blubb.js";
+            $this->assertEquals(
+                "/js/dependencies/blubb.js",
+                $this->object->resolve($file),
+                "Cannot resolve path ['${file}']"
+            );
+
+            $file = "/web/css/dependencies/dpblubb.css";
+            $this->assertEquals(
+                "/css/dependencies/dpblubb.css",
+                $this->object->resolve($file),
+                "Cannot resolve path ['${file}']"
+            );
+
         }
     }
 }

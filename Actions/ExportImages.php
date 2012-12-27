@@ -17,7 +17,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\TempFileManager;
     use Terrific\ExporterBundle\Service\PageManager;
     use Terrific\ExporterBundle\Service\PathResolver;
-    use Terrific\ExporterBundle\Helper\TimerService;
+    use Terrific\ExporterBundle\Service\TimerService;
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Object\Route;
@@ -32,9 +32,6 @@ namespace Terrific\ExporterBundle\Actions {
         /**
          * Returns requirements for running this Action.
          *
-         * @param \Symfony\Component\Console\Output\OutputInterface $output
-         * @param array $params
-         * @param array $runnedActions
          * @return array
          */
         public static function getRequirements() {

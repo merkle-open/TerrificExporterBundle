@@ -132,6 +132,20 @@ namespace Terrific\ExporterBundle\Object {
         }
 
         /**
+         * @param array $types
+         */
+        public function getAllAssets(array $types = array()) {
+            $ret = $this->getAssets($types);
+
+            /** @var $module RouteModule */
+            foreach ($this->getModules() as $module) {
+                $ret = array_merge($ret, $module->getAssets($types));
+            }
+
+            return array_unique($ret);
+        }
+
+        /**
          * @return array
          */
         public function getModules() {

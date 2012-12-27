@@ -184,9 +184,7 @@ namespace Terrific\ExporterBundle\Service {
                 if ($token->getValue() === "asset") {
                     $url = $stream->look()->getValue();
 
-                    if (FileHelper::isImage($url)) {
-                        $in[] = $url;
-                    }
+                    $in[] = $url;
                 }
 
                 if ($token->getValue() == "tc" && $stream->getCurrent()->getValue() == "." && $stream->look()->getValue() == "module") {
@@ -365,6 +363,7 @@ namespace Terrific\ExporterBundle\Service {
          * Returns the response object.
          *
          * @param \Terrific\ExporterBundle\Object\Route $route
+         * @param bool $rewritePaths
          * @return \Symfony\Component\HttpFoundation\Response
          */
         public function dumpRoute(Route $route) {
@@ -374,7 +373,6 @@ namespace Terrific\ExporterBundle\Service {
             $req = Request::create($route->getUrl());
 
             // check on Parameters
-
 
             /** @var $resp Response */
             $resp = $this->http_kernel->handle($req);
