@@ -196,6 +196,7 @@ namespace Terrific\ExporterBundle\Service {
                     $token = $stream->next();
 
                     $module = $token->getValue();
+
                     $skins = array();
 
                     if ($stream->getCurrent()->getValue() != ")") {
@@ -230,9 +231,13 @@ namespace Terrific\ExporterBundle\Service {
                     $routeModule = new RouteModule($module, $view, $skins);
                     $in[] = $routeModule;
 
-                    $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
-                    $moduleIn = $this->findAssetsByFile($tpl);
-                    $routeModule->setAssets($moduleIn);
+                    try {
+                        $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
+                        $moduleIn = $this->findAssetsByFile($tpl);
+                        $routeModule->setAssets($moduleIn);
+                    } catch (InvalidArgumentException $ex) {
+
+                    }
                 }
 
 

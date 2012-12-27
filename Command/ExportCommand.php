@@ -160,8 +160,9 @@ namespace Terrific\ExporterBundle\Command {
 
                     $this->logger->debug("Starting command with params: " . print_r($params, true));
                     Log::info("Start [" . $refClass->getShortName() . "]");
-
+                    Log::blkstart();
                     $ret = $action->run($output, $params);
+                    Log::blkend();
                     return $ret;
                 } else {
                     $this->logger->info("Skipped tasks '" . $refClass->getName() . "' during config settings.");

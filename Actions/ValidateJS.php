@@ -20,6 +20,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Service\PageManager;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -121,7 +122,13 @@ namespace Terrific\ExporterBundle\Actions {
                                     $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
                                 }
 
-                                $output->writeln(sprintf("Validated %s Found %d Issues.", basename($leafPath), count($results)));
+
+                                $resultCount = count($results);
+                                if ($resultCount == 0) {
+                                    Log::info("Validated %s Found %d Issues.", array(basename($leafPath), $resultCount));
+                                } else {
+                                    Log::warn("Validated %s Found %d Issues.", array(basename($leafPath), $resultCount));
+                                }
                             }
 
                         }
