@@ -1,33 +1,35 @@
 {
-    "name": "senuphtyz/terrific-exporter-bundle",
-    "description": "Exports your terrific frontend",
-    "keywords": ["frontend", "terrific", "export"],
-    "type": "symfony-bundle",
-    "license": "MIT",
-    "authors": [
+    "name"       :"senuphtyz/terrific-exporter-bundle",
+    "description":"Exports your terrific frontend",
+    "keywords"   :["frontend", "terrific", "export"],
+    "type"       :"symfony-bundle",
+    "license"    :"MIT",
+    "authors"    :[
         {
-            "name": "Bruno Lorenz"
+            "name":"Bruno Lorenz"
         },
         {
-            "name": "Terrific Symfony Community",
-            "homepage": "https://github.com/senuphtyz/TerrificExporterBundle/contributors"
+            "name"    :"Terrific Symfony Community",
+            "homepage":"https://github.com/senuphtyz/TerrificExporterBundle/contributors"
         }
     ],
-    "require": {
-        "symfony/framework-bundle": "2.1.*",
-        "symfony/form": "2.1.*",
-        "symfony/validator": "2.1.*",
-		"symfony/finder": "2.1.*",
-        "symfony/console": "2.1.*",
-		"symfony/process": "2.1.*",
-        "natxet/CssMin" : "dev-master"
+    "require"    :{
+        "symfony/framework-bundle":"2.1.*",
+        "symfony/form"            :"2.1.*",
+        "symfony/validator"       :"2.1.*",
+        "symfony/finder"          :"2.1.*",
+        "symfony/console"         :"2.1.*",
+        "symfony/process"         :"2.1.*",
+        "natxet/CssMin"           :"dev-master"
     },
-    "require-dev": {
-        "symfony/yaml": "2.1.*",
-        "symfony/filesystem": "2.1.*"
+    "require-dev":{
+        "symfony/yaml"      :"2.1.*",
+        "symfony/filesystem":"2.1.*"
     },
-    "autoload": {
-        "psr-0": { "Terrific\\ExporterBundle": "" }
+    "autoload"   :{
+        "psr-0":{
+            "Terrific\\ExporterBundle":""
+        }
     },
-    "target-dir": "Terrific/ExporterBundle"
+    "target-dir" :"Terrific/ExporterBundle"
 }

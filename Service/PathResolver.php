@@ -390,6 +390,8 @@ namespace Terrific\ExporterBundle\Service {
                 }
             }
 
+            $ret = FileHelper::cleanPath($ret);
+
             if ($this->logger !== null) {
                 $type = $this->getConstantName($type);
                 $scope = $this->getConstantName($scope);

@@ -48,6 +48,16 @@ namespace Terrific\ExporterBundle\Helper {
         }
 
         /**
+         * Removes // from the given path.
+         *
+         * @param String $path
+         * @return String
+         */
+        public static function cleanPath($path) {
+            return str_replace("//", "/", $path);
+        }
+
+        /**
          * Creates a path recursive.
          *
          * @throws IOException
