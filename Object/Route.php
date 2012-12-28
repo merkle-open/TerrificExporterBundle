@@ -11,6 +11,7 @@ namespace Terrific\ExporterBundle\Object {
     use ReflectionMethod;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Object\RouteModule;
+    use Terrific\ExporterBundle\Object\RouteLocale;
 
     /**
      *
@@ -41,6 +42,23 @@ namespace Terrific\ExporterBundle\Object {
         /** @var array */
         private $modules = array();
 
+        /** @var array */
+        private $locales = array();
+
+
+        /**
+         * @param array $locales
+         */
+        public function setLocales($locales) {
+            $this->locales = $locales;
+        }
+
+        /**
+         * @return array
+         */
+        public function getLocales() {
+            return $this->locales;
+        }
 
         /**
          * @return array
@@ -104,6 +122,25 @@ namespace Terrific\ExporterBundle\Object {
         public function getExportName() {
             return $this->exportName;
         }
+
+
+        /**
+         * @param $locale
+         * @param $exportName
+         */
+        public function addLocale($locale, $exportName) {
+            $rLocale = new RouteLocale($locale, $exportName);
+
+            $this->locales[] = $rLocale;
+        }
+
+        /**
+         *
+         */
+        public function isLocalized() {
+            return (count($this->locales) > 0);
+        }
+
 
         /**
          * @return array

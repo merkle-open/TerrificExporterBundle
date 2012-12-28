@@ -14,10 +14,7 @@ namespace Terrific\ExporterBundle\Annotation {
      *
      * @Annotation
      */
-    class LocaleExport {
-
-        /** @var array */
-        private $environment = array();
+    class LocaleExport extends AbstractEnvironmentAnnotation {
 
         /** @var string */
         private $name = "";
@@ -40,20 +37,6 @@ namespace Terrific\ExporterBundle\Annotation {
         }
 
         /**
-         * @return array
-         */
-        public function getEnvironment() {
-            return $this->environment;
-        }
-
-        /**
-         * @param String $env
-         */
-        public function setEnvironment($env) {
-            $this->environment = explode(",", $env);
-        }
-
-        /**
          * @return string
          */
         public function getName() {
@@ -66,6 +49,7 @@ namespace Terrific\ExporterBundle\Annotation {
         public function setName($name) {
             $this->name = $name;
         }
+
 
         /**
          *

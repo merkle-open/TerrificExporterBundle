@@ -15,6 +15,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\Route;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Object\RouteLocale;
 
     /**
      *
@@ -44,6 +45,34 @@ namespace Terrific\ExporterBundle\Actions {
 
 
         /**
+         * @param \Terrific\ExporterBundle\Object\Route $route
+         */
+        protected function buildLocalPaths(Route $route, PathResolver $pathResolver, $content, $targetPath, $params) {
+            if (!empty($params["build_local_paths"]) && $params["build_local_paths"] === true) {
+                foreach ($route->getAllAssets() as $asset) {
+                    $nAssetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($asset), "/");
+                    $retPath = $this->fs->makePathRelative(dirname($nAssetPath), dirname($targetPath));
+                    $nAsset = $retPath . basename($nAssetPath);
+
+
+                    // TODO: Find a better solutation than this
+                    foreach (array("../${asset}?1", "/${asset}?1") as $f) {
+                        $content = str_replace($f, $nAsset, $content);
+                    }
+                }
+            }
+            return $content;
+        }
+
+        protected function export($exportName, Route $route, TempFileManager $tmpFileMgr, PathResolver $pathResolver, $content, $params) {
+            $targetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($exportName), "/");
+            $content = $this->buildLocalPaths($route, $pathResolver, $content, $targetPath, $params);
+
+            $file = $tmpFileMgr->putContent($content);
+            $this->saveToPath($file, $targetPath);
+        }
+
+        /**
          * @param $params
          * @return ActionResult
          */
@@ -61,29 +90,24 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
                 Log::info("Exporting View: " . $route->getExportName());
-                $targetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($route->getExportName()), "/");
-                $resp = $pageManager->dumpRoute($route);
 
+                if (!$route->isLocalized()) {
+                    $resp = $pageManager->dumpRoute($route);
+                    $this->export($route->getExportName(), $route, $tmpFileMgr, $pathResolver, $resp->getContent(), $params);
 
-                if (!empty($params["build_local_paths"]) && $params["build_local_paths"] === true) {
-                    $content = $resp->getContent();
-                    foreach ($route->getAllAssets() as $asset) {
-                        $nAssetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($asset), "/");
-                        $retPath = $this->fs->makePathRelative(dirname($nAssetPath), dirname($targetPath));
-                        $nAsset = $retPath . basename($nAssetPath);
+                } else {
+                    Log::blkstart();
+                    /** @var $locale RouteLocale */
+                    foreach ($route->getLocales() as $locale) {
+                        Log::info("Export Locale: " . $locale->getLocale());
+                        $resp = $pageManager->dumpRoute($route, $locale->getLocale());
 
-
-                        // TODO: Find a better solutation than this
-                        foreach (array("../${asset}?1", "/${asset}?1") as $f) {
-                            $content = str_replace($f, $nAsset, $content);
-                        }
+                        $this->export($locale->getExportName(), $route, $tmpFileMgr, $pathResolver, $resp->getContent(), $params);
                     }
-                    $resp->setContent($content);
+                    Log::blkend();
                 }
 
 
-                $file = $tmpFileMgr->putContent($resp->getContent());
-                $this->saveToPath($file, $targetPath);
             }
 
             return new ActionResult(ActionResult::OK);

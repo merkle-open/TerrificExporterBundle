@@ -22,6 +22,9 @@ namespace Terrific\ExporterBundle\Service {
     use Terrific\ExporterBundle\Helper\StringHelper;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Object\RouteModule;
+    use Terrific\ExporterBundle\Annotation\LocaleExport;
+    use Symfony\Component\HttpFoundation\Session\Session;
+    use Symfony\Component\Translation\Translator;
 
     /**
      *
@@ -363,19 +366,30 @@ namespace Terrific\ExporterBundle\Service {
          * Returns the response object.
          *
          * @param \Terrific\ExporterBundle\Object\Route $route
-         * @param bool $rewritePaths
+         * @param String $locale
          * @return \Symfony\Component\HttpFoundation\Response
          */
-        public function dumpRoute(Route $route) {
+        public function dumpRoute(Route $route, $locale = null) {
             $this->initialize();
 
             /** @var $http HttpKernel */
-            $req = Request::create($route->getUrl());
+            $req = Request::create($route->getUrl(array("_locale" => $locale)));
 
-            // check on Parameters
+            // Setup locale
+            if ($locale !== null) {
+                /** @var $translator Translator */
+                $translator = $this->getKernel()->getContainer()->get("translator");
+
+                $backupLocale = $translator->getLocale();
+                $translator->setLocale($locale);
+            }
 
             /** @var $resp Response */
             $resp = $this->http_kernel->handle($req);
+
+            if ($locale != null) {
+                $translator->setLocale($backupLocale);
+            }
 
             return $resp;
         }
@@ -467,6 +481,15 @@ namespace Terrific\ExporterBundle\Service {
                     }
 
                     $route->setExportable(true);
+
+                    if (count($exportAnnotation->getLocales()) > 0) {
+                        /** @var $locale LocaleExport */
+                        foreach ($exportAnnotation->getLocales() as $locale) {
+                            if ($locale->matchEnvironment($this->kernel->getEnvironment())) {
+                                $route->addLocale($locale->getLocale(), $locale->getName());
+                            }
+                        }
+                    }
                 }
 
                 $route->setExportName($this->findNameByRoute($route));
