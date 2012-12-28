@@ -1,5 +1,5 @@
 {
-    "hash": "5956c70f0d02f53cd62b5fe3d0b055c1",
+    "hash": "31731125ea6fd0ed7e3fe97d2ca6e495",
     "packages": [
         {
             "name": "doctrine/common",
@@ -57,7 +57,7 @@
                 {
                     "name": "Johannes Schmitt",
                     "email": "schmittjoh@gmail.com",
-                    "homepage": "http://jmsyst.com",
+                    "homepage": "https://github.com/schmittjoh",
                     "role": "Developer of wrapped JMSSerializerBundle"
                 }
             ],
@@ -180,52 +180,6 @@
                 "css",
                 "minify"
             ]
-        },
-        {
-            "name": "symfony/class-loader",
-            "version": "v2.1.6",
-            "target-dir": "Symfony/Component/ClassLoader",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/ClassLoader",
-                "reference": "v2.1.6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/symfony/ClassLoader/archive/v2.1.6.zip",
-                "reference": "v2.1.6",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "require-dev": {
-                "symfony/finder": "2.1.*"
-            },
-            "time": "2012-12-06 10:00:55",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "psr-0": {
-                    "Symfony\\Component\\ClassLoader": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "http://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony ClassLoader Component",
-            "homepage": "http://symfony.com"
         },
         {
             "name": "symfony/config",
