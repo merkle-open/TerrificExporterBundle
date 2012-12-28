@@ -21,6 +21,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Filter\CSSPathRewriteFilter;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -121,6 +122,7 @@ namespace Terrific\ExporterBundle\Actions {
                     $results &= $this->saveToPath($file, $nPath);
                     $ePoint = $timer->lap();
 
+                    Log::info("Exported asset [%s]", array(basename($asset->getTargetPath())));
                     $this->logger->info(sprintf("Exporting took %s seconds", $timer->getTime($sPoint, $ePoint)));
                 }
             }

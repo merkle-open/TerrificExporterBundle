@@ -18,6 +18,8 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Finder\SplFileInfo;
     use Symfony\Component\Process\Process;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Helper\NumberHelper;
 
     /**
      *
@@ -36,7 +38,9 @@ namespace Terrific\ExporterBundle\Actions {
         public static function getRequirements() {
             $ret = array();
 
-            $ret[] = new ActionRequirement("trimage", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+            $ret[] = new ActionRequirement("jpegoptim", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+            $ret[] = new ActionRequirement("advpng", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+            $ret[] = new ActionRequirement("optipng", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
 
             return $ret;
         }
@@ -52,19 +56,6 @@ namespace Terrific\ExporterBundle\Actions {
             return (isset($params["optimize_images"]) && $params["optimize_images"]);
         }
 
-
-        /**
-         * @return bool|int
-         */
-        public function retrieveOptimizer() {
-            if (ProcessHelper::checkCommand("trimage --version")) {
-                return self::OPTIM_TRIMAGE;
-            }
-
-            return false;
-        }
-
-
         /**
          * @param array $params
          * @return iterator
@@ -78,6 +69,48 @@ namespace Terrific\ExporterBundle\Actions {
             return $f->getIterator();
         }
 
+        /**
+         *
+         * @return int
+         */
+        public function optimizePNG(SplFileInfo $file) {
+            $oldSize = $file->getSize();
+
+
+            /** @var $process Process */
+            $process = ProcessHelper::startCommand("optipng", array("-o7", $file->getPathname()));
+
+            if ($process->isSuccessful()) {
+                /** @var $process Process */
+                $process = ProcessHelper::startCommand("advpng", array("-q", "-4", $file->getPathname()));
+
+                if ($process->getExitCode() == 1) {
+                    clearstatcache(true, $file->getPathname());
+
+                    return ($oldSize - $file->getSize());
+                }
+            }
+
+            return -1;
+        }
+
+        /**
+         * @param \Symfony\Component\Finder\SplFileInfo $file
+         */
+        public function optimizeJPEG(SplFileInfo $file) {
+            $oldSize = $file->getSize();
+
+            /** @var $process Process */
+            $process = ProcessHelper::startCommand("jpegoptim", array("-q", $file->getPathname()));
+
+            if ($process->isSuccessful()) {
+                clearstatcache(true, $file->getPathname());
+
+                return ($oldSize - $file->getSize());
+            }
+
+            return -1;
+        }
 
         /**
          * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -85,22 +118,33 @@ namespace Terrific\ExporterBundle\Actions {
          * @return ActionResult|\Terrific\ExporterBundle\Object\ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-            $optim = $this->retrieveOptimizer();
-
             $fileList = $this->retrieveFileList($params);
 
-            switch ($optim) {
-                case self::OPTIM_TRIMAGE:
-                    /** @var $file SplFileInfo */
-                    foreach ($fileList as $file) {
-                        /** @var $process Process */
-                        $process = ProcessHelper::startCommand("trimage", array("--file", $file->getPathname()));
+            $savedOverall = 0;
 
-                        $this->logger->debug(str_replace($params["exportPath"], "", trim($process->getOutput())));
-                    }
-                    break;
+            /** @var $file SplFileInfo */
+            foreach ($fileList as $file) {
+                $optimized = false;
+
+                switch (strtoupper($file->getExtension())) {
+                    case "PNG":
+                        $optimized = true;
+                        $compressed = $this->optimizePNG($file);
+                        break;
+
+                    case "JPG":
+                        $optimized = true;
+                        $compressed = $this->optimizeJPEG($file);
+                        break;
+                }
+
+                if ($optimized) {
+                    $savedOverall += $compressed;
+                    Log::info("Optimized Image [%s] Saved => %s", array($file->getFilename(), NumberHelper::formatBytes($compressed)));
+                }
             }
 
+            Log::info("Total saving: %s", array(NumberHelper::formatBytes($savedOverall)));
 
             return new ActionResult(ActionResult::OK);
         }

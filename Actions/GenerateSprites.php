@@ -13,6 +13,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Finder\Finder;
     use Symfony\Component\Filesystem\Filesystem;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -107,6 +108,8 @@ namespace Terrific\ExporterBundle\Actions {
                         $this->logger->debug($process->getCommandLine());
                         $this->logger->debug($process->getErrorOutput());
                         return new ActionResult(ActionResult::STOP);
+                    } else {
+                        Log::info("Sprite generated [%s]", array(basename($sprite["target"])));
                     }
                 }
             }

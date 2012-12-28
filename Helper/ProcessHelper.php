@@ -23,6 +23,10 @@ namespace Terrific\ExporterBundle\Helper {
         public static function checkCommand($command) {
             $retVal = 0;
             switch ($command) {
+                case "jpegoptim":
+                    $buildOp = array($command, "--version");
+                    break;
+
                 case "trimage":
                     $buildOp = array($command, "--version");
                     break;

@@ -165,6 +165,7 @@ namespace Terrific\ExporterBundle\Command {
                     Log::blkend();
                     return $ret;
                 } else {
+                    Log::info("Skipped [" . $refClass->getShortName() . "]");
                     $this->logger->info("Skipped tasks '" . $refClass->getName() . "' during config settings.");
                 }
             }

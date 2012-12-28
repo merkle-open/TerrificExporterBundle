@@ -19,6 +19,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\PathResolver;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Object\RouteModule;
+    use Terrific\ExporterBundle\Service\Log;
 
 
     /**
@@ -85,17 +86,24 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $pathResolver PathResolver */
                 $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
+
+                $modsDone = array();
+
                 /** @var $route Route */
                 foreach ($pageManager->findRoutes(true) as $route) {
 
                     /** @var $module RouteModule */
                     foreach ($route->getModules() as $module) {
-                        $content = $this->doDump($module);
-                        $file = $tmpFileMgr->putContent($content);
+                        if (!in_array($module->getId(), $modsDone)) {
+                            $content = $this->doDump($module);
+                            $file = $tmpFileMgr->putContent($content);
 
-                        $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s", $module->getModule(), $module->getExportingPath()));
-                        $this->saveToPath($file, $params["exportPath"] . "/" . $path);
+                            $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s", $module->getModule(), $module->getExportingPath()));
+                            $this->saveToPath($file, $params["exportPath"] . "/" . $path);
 
+                            Log::info("Exported [%s]", array($module->getModule()));
+                            $modsDone[] = $module->getId();
+                        }
                     }
                 }
 

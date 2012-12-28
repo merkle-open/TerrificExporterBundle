@@ -24,6 +24,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Config\FileLocator;
     use Terrific\ExporterBundle\Object\RouteModule;
     use Terrific\ExporterBundle\Helper\AsseticHelper;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -62,6 +63,8 @@ namespace Terrific\ExporterBundle\Actions {
                 $targetPath = $params["exportPath"] . "/" . $targetPath;
                 $this->saveToPath($sourcePath, $targetPath);
             }
+
+            return (count($image));
         }
 
 
@@ -70,12 +73,17 @@ namespace Terrific\ExporterBundle\Actions {
          * @param $params
          */
         protected function exportViewImages(PageManager $pageManager, PathResolver $pathResolver, $params) {
+            $count = 0;
+
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
                 foreach ($route->getAssets(array('IMG')) as $img) {
                     $this->saveImage($img, $pathResolver, $params);
+                    ++$count;
                 }
             }
+
+            return $count;
         }
 
         /**
@@ -83,6 +91,8 @@ namespace Terrific\ExporterBundle\Actions {
          * @param $params
          */
         protected function exportModuleImage(PageManager $pageManager, PathResolver $pathResolver, $params) {
+            $count = 0;
+
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
 
@@ -91,9 +101,12 @@ namespace Terrific\ExporterBundle\Actions {
 
                     foreach ($module->getAssets(array('IMG')) as $img) {
                         $this->saveImage($img, $pathResolver, $params);
+                        ++$count;
                     }
                 }
             }
+
+            return $count;
         }
 
         /**
@@ -147,7 +160,8 @@ namespace Terrific\ExporterBundle\Actions {
             $timer = $this->container->get("terrific.exporter.timerservice");
 
             $timer->lap("START-ViewImageExport");
-            $this->exportViewImages($pageManager, $pathResolver, $params);
+            $count = $this->exportViewImages($pageManager, $pathResolver, $params);
+            Log::info("Exported %d Images from Views", array($count));
             $timer->lap("STOP-ViewImageExport");
 
             if ($this->logger) {
@@ -155,7 +169,8 @@ namespace Terrific\ExporterBundle\Actions {
             }
 
             $timer->lap("START-ModuleImageExport");
-            $this->exportModuleImage($pageManager, $pathResolver, $params);
+            $count = $this->exportModuleImage($pageManager, $pathResolver, $params);
+            Log::info("Exported %d Images from Modules", array($count));
             $timer->lap("STOP-ModuleImageExport");
 
             if ($this->logger) {
@@ -163,7 +178,8 @@ namespace Terrific\ExporterBundle\Actions {
             }
 
             $timer->lap("START-CSSImageExport");
-            $this->exportCSSImages($pageManager, $pathResolver, $params);
+            $count = $this->exportCSSImages($pageManager, $pathResolver, $params);
+            Log::info("Exported %d Images from CSS", array($count));
             $timer->lap("STOP-CSSImageExport");
 
             if ($this->logger) {
