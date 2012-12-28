@@ -47,20 +47,20 @@ namespace Terrific\ExporterBundle\Command {
         protected function retrieveActionStack(array $config) {
             $ret = array();
 
-            if ($this->getContainer()->hasParameter("terrific_exporter.action_stack")) {
-
+            if (!empty($config["build_actions"]) && is_array($config["build_actions"])) {
+                $ret = $config["build_actions"];
             } else {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ClearAction';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\BuildJSDoc';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\OptimizeImages';
-#                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+                $ret[] = 'Terrific\ExporterBundle\Actions\BuildJSDoc';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+                $ret[] = 'Terrific\ExporterBundle\Actions\OptimizeImages';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
             }
 
