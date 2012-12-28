@@ -80,8 +80,6 @@ namespace Terrific\ExporterBundle\Filter {
                     $nPath = $this->pathResolver->resolve($img);
 
                     $tPath = $fs->makePathRelative(dirname($nPath), dirname($exportPath));
-                    var_dump($tPath);
-
                     $content = str_replace($img, $tPath . basename($img), $content);
                 }
 
