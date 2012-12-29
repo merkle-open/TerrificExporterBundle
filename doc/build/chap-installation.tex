@@ -1,0 +1,111 @@
+
+\section{Installation}
+
+% ##############################################################################################
+\subsection{Dependency management}
+Update your composer.json and add a new repository. \\
+
+\begin{verbatim}
+{
+"type" : "vcs",
+"url"  : "http://github.com/senuphtyz/TerrificExporterBundle"
+}
+\end{verbatim}
+
+\noindent After that add a new requirement to your project. \\
+
+\begin{verbatim}
+"senuphtyz/terrific-exporter-bundle" : "dev-refactored"
+\end{verbatim}
+\noindent Now update your project using the composer. \\
+
+\begin{verbatim}
+php composer.phar update
+\end{verbatim}
+\noindent This should now install alle necessary requirements for your project. \\
+
+% ##############################################################################################
+\subsection{Tooling}
+There are a number of tools needed depending on your configuration and tasks.\\
+
+\begin{itemize}
+	\litem{YUIDoc}
+	\litem{csshint}
+	\litem{jslint}
+	\litem{jpegoptim}
+	\litem{optipng}
+	\litem{advpng}
+	\litem{montage}
+\end{itemize} 
+
+\noindent It is necessary to have all tools within path, the exporter won't search for tools on your hardrive. So you have to setup your path variable depending on your os system correctly to have all tools within path's.\\
+\\
+On Windows: http://www.computerhope.com/issues/ch000549.htm\\
+\\
+On *nix/MacOSX: http://www.troubleshooters.com/linux/prepostpath.htm\\
+To do a permanent change it is necessary to change ~/.bashrc or ~/.bash\_profile depending on your os.
+
+% ##############################################################################################
+\subsubsection{YUIDoc, jslint, csshint}
+YUIDoc, jslint and csshint are installed using Node.js. Just go to nodejs.org download the package fits for you operating system and install it. \\
+After the installation is done open up a new commandline and install Node.js.
+
+\begin{verbatim}
+npm -g install yuidocjs jslint csshint
+\end{verbatim}
+
+\noindent For further help and syntax for YUIDoc visit http://yui.github.com/yuidoc/.
+
+
+% ##############################################################################################
+\subsubsection{jpegoptim, optipng, advpng, montage}
+
+% ##############################################################################################
+\paragraph{Windows\\}
+\noindent Jpegoptim is currently not available on Windows systems.\\
+\\
+Optipng can be retrieved from http://optipng.sourceforge.net/. Just download the Windows package unzip it no installation required.\\
+\\
+Advpng or advancecomp can be fetched from http://advancemame.sourceforge.net/comp-download.html. The same just download and unzip.\\
+\\
+Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
+http://www.imagemagick.org/script/binary-releases.php \\
+
+% ##############################################################################################
+\paragraph{Unix/Linux\\}
+On Ubuntu/Debian based Linux it is possible to install jpegoptim directly using your package manager.\\
+
+\begin{verbatim}
+sudo apt-get install jpegoptim advancecomp optipng imagemagick
+\end{verbatim}
+
+\noindent On RHEL/Fedora/Centos Linux you have to install jpegoptim from source, rest of the tools could be installed using yum. Download the current version from http://www.kokkonen.net/tjko/projects.html. \\
+
+
+\begin{verbatim}
+sudo yum install advancecomp optipng ImageMagick
+\end{verbatim}
+
+\noindent \textbf{jpegoptim}
+\begin{verbatim}
+tar zxf jpegoptim-1.2.4.tar.gz
+cd jpegoptim-1.2.4
+./configure && make && make install
+\end{verbatim}
+
+
+% ##############################################################################################
+\paragraph{MacOSX\\}
+\noindent On MacOSX the easiest way to get the whole toolset is to install ImageOptim. This application contains all necessary image optimizing tools needed by the exporter.\\
+\\
+http://imageoptim.com/\\
+\\
+Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
+http://www.imagemagick.org/script/binary-releases.php\\
+
+% ##############################################################################################
+\subsection{Setup an export environment}
+
+It is necessary to setup a new environment for you export. To setup an export environment just copy your app/config.yml to app/config\_export.yml. Now you created a new environment called "export". \\
+\\
+You can now configure the environment to your project needs. \\
