@@ -24,6 +24,8 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Terrific\ExporterBundle\Object\ActionRequirementStack;
     use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Service\ConfigFinder;
+    use Terrific\ExporterBundle\Helper\FileHelper;
 
     /**
      *
@@ -184,6 +186,10 @@ namespace Terrific\ExporterBundle\Command {
             /** @var $fs Filesystem */
             $fs = $this->getContainer()->get("filesystem");
 
+            /** @var $configFinder ConfigFinder */
+            $configFinder = $this->getContainer()->get("terrific.exporter.configfinder");
+
+
             if (!empty($ret["build_path"]) && $fs->isAbsolutePath($ret["build_path"])) {
                 $ret["exportPath"] = $ret["build_path"];
             } else if (!empty($ret["build_path"])) {
@@ -193,15 +199,30 @@ namespace Terrific\ExporterBundle\Command {
 
             // append build options
             if (!empty($ret["build_settings"])) {
-                $buildOptions->setFile($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"]);
+                $file = $this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"];
 
-                $version = $buildOptions["version"];
+                try {
+                    if(!$fs->exists(dirname($file))) {
+                        FileHelper::createPathRecursive(dirname($file));
+                    }
 
-                if ($ret["export_with_version"]) {
-                    $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
-                } else {
-                    $ret["exportPath"] .= "/" . $version["name"];
+                    if(!$fs->exists($file)) {
+                        $defaultConfig = $configFinder->find("build.ini");
+                        $fs->copy($defaultConfig, $file);
+                    }
 
+                    $buildOptions->setFile($file);
+
+                    $version = $buildOptions["version"];
+
+                    if ($ret["export_with_version"]) {
+                        $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
+                    } else {
+                        $ret["exportPath"] .= "/" . $version["name"];
+
+                    }
+                } catch (IOException $ex) {
+                    throw $ex;
                 }
             }
 
