@@ -1,3 +1,15 @@
+\newcommand{\cmdoptiondesc}[2]{
+    \begin{adjustwidth}{0cm}{0cm}
+        \noindent \textbf{#1}\\
+        \vspace{-1em}
+        \begin{adjustwidth}{\parindent}{0cm}
+            #2
+        \end{adjustwidth}
+    \end{adjustwidth}
+    \vspace{1em}
+}
+
+
 \section{Usage}
 
 To startup an export use the following command.
@@ -10,4 +22,63 @@ To startup an export use the following command.
 
 \subsection{Commandline options}
 
+\cmdoptiondesc{--no-image-optimization}{
+    Overrides configuration setting optimize\_images and starts the chain without optimizing Images. Skip actions:
+    \begin{itemize}
+          \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}OptimizeImages}
+    \end{itemize}
+}
 
+\cmdoptiondesc{--no-js-doc} {
+    Do not build a javascript documentation for this export run. This does skip the following actions:
+    \begin{itemize}
+        \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}BuildJSDoc}
+    \end{itemize}
+}
+
+\cmdoptiondesc{--no-validation} {
+    Ignores validation configuration and skip the following actions:
+    \begin{itemize}
+          \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateJS}
+          \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateCSS}
+          \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateModules}
+          \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateViews}
+    \end{itemize}
+}
+
+
+\subsection{Annotations}
+
+\cmdoptiondesc{@Export} {
+    To export a view it is necessary to annotate a controller method with this annotation. It is possible to control a set of options for each view directly within this annotation. This example is only valid if you don't have to export a localized version of a view.
+
+    % \begin{verbatim}
+    %     @Export(
+    %         name="viewname.html",
+    %         locales=[],
+    %         environment="env1,env2,..."
+    %     )
+    % \end{verbatim}
+}
+
+\cmdoptiondesc{@LocaleExport} {
+
+
+    % \begin{verbatim}
+    %     @LocaleExport(
+    %         name="viewname_de.html",
+    %         locale="de",
+    %         environment="env1,env2,..."
+    %     )
+    % \end{verbatim}
+
+    % Usage with @Export:
+    % \begin{verbatim}
+    %     @Export(
+    %         @LocaleExport(name="viewname_de.html", locale="de"),
+    %         @LocaleExport(name="viewname_en.html", locale="en", environment="env1"),
+    %         @LocaleExport(name="viewname_lv.html", locale="lv", environment="env2"),
+    %         ....
+    %     )
+    % \end{verbatim}
+}
