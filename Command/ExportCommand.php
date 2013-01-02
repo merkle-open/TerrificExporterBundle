@@ -40,7 +40,7 @@ namespace Terrific\ExporterBundle\Command {
          *
          */
         protected function configure() {
-            $this->setName('build:export')->setDescription('Builds m release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
+            $this->setName('build:export')->setDescription('Builds m release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
         }
 
         /**
@@ -202,13 +202,14 @@ namespace Terrific\ExporterBundle\Command {
                 $file = $this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"];
 
                 try {
-                    if(!$fs->exists(dirname($file))) {
+                    if (!$fs->exists(dirname($file))) {
                         FileHelper::createPathRecursive(dirname($file));
                     }
 
-                    if(!$fs->exists($file)) {
+                    if (!$fs->exists($file)) {
                         $defaultConfig = $configFinder->find("build.ini");
                         $fs->copy($defaultConfig, $file);
+                        LOG::warn("Installed default buildOptions file [%s]", array(basename($file)));
                     }
 
                     $buildOptions->setFile($file);
