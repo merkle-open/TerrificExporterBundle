@@ -163,17 +163,25 @@ namespace Terrific\ExporterBundle\Service {
         public function setContainer(ContainerInterface $container = null) {
             $this->container = $container;
 
-            if ($container != null) {
-                $a = array(
-                    (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'terrific_exporter.pathtemplates.view',
+            if ($container != null && $container->hasParameter("terrific_exporter")) {
+                $config = $this->container->getParameter("terrific_exporter");
+                if (isset($config["pathtemplates"])) {
+                    $config = $config["pathtemplates"];
 
-                    (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'terrific_exporter.pathtemplates.module_view'
-                );
+                    $a = array(
+                        (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'view',
 
-                foreach ($a as $key => $val) {
-                    if ($this->container->hasParameter($val)) {
-                        $this->pathTemplate[$key] = $this->container->getParameter($val);
+                        (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'module_view'
+                    );
+
+
+                    foreach ($a as $key => $val) {
+                        if (!empty($config[$val])) {
+                            $this->pathTemplate[$key] = $config[$val];
+                        }
                     }
+
+                    var_dump($this->pathTemplate);
                 }
             }
         }

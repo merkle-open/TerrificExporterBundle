@@ -71,6 +71,20 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                     ->end()
                 ->end()
 
+                ->arrayNode("pathtemplates")->children()
+                    ->scalarNode("image")->defaultValue("/img/common")->end()
+                    ->scalarNode("font")->defaultValue("/fonts")->end()
+                    ->scalarNode("css")->defaultValue("/css")->end()
+                    ->scalarNode("js")->defaultValue("/js")->end()
+                    ->scalarNode("view")->defaultValue("/views")->end()
+
+                    ->scalarNode("module_image")->defaultValue("/img/%module%")->end()
+                    ->scalarNode("module_font")->defaultValue("/fonts/%module%")->end()
+                    ->scalarNode("module_css")->defaultValue("/css/%module%")->end()
+                    ->scalarNode("module_js")->defaultValue("/js/%module%")->end()
+                    ->scalarNode("module_view")->defaultValue("/views/%module%")->end()
+
+                ->end()->end()
 
             /* Export type */
                 ->scalarNode('export_type')->defaultValue('zip')->validate()

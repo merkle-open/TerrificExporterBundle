@@ -89,6 +89,27 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 	See section '\hyperlink{chap-Actions}{Actions}' or '\hyperlink{chap-Extending}{Extending}' for further information.\\
 }
 
+\optiondesc{pathtemplates: (set of string values)}{
+	The pathtemplates option allows you to customize you paths within your export package. All paths begin with a starting '/' each given directory will begin relative to the given export\_path. So a value like '/img/common' will end up in '/exportpath/img/common'. The optional \%module\% variable within will be resolved by the PathResolver into a modulename. This variable only get matched in 'module\_*' options.
+	\\
+	It is possible to set paths for the following types of files:
+	\begin{itemize}
+		\item{image: (default: '/img/common')}
+		\item{font: (default: '/fonts')}
+		\item{css: (default: '/css')}
+		\item{js: (default: '/js')}
+		\item{view: (default: '/views')}
+
+		\item{module\_image: (default: '/img/\%module\%')}
+		\item{module\_font: (default: '/fonts/\%module\%')}
+		\item{module\_css: (default: '/css/\%module\%')}
+		\item{module\_js: (default: '/js/\%module\%')}
+		\item{module\_view: (default: '/views/\%module\%')}
+	\end{itemize}
+
+	\noindent See actions '\hyperlink{sec-Actions-ExportModules}{ExportModules}', '\hyperlink{sec-Actions-ExportAssets}{ExportAssets}' and '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
+}
+
 \optiondesc{sprites: (list of objects)}{
 	Here you can setup sprite information. The exporter will build the sprites with the given data.
 	\\See section '\hyperlink{sec-Actions-GenerateSprites}{GenerateSprites}'.\\
@@ -114,11 +135,24 @@ terrific_exporter:
 	export_modules:           true
 	export_type:              folder
 
+	pathtemplates:
+        image:     "/bilder/common23"
+        font:      "/schriften"
+        css:       "/styles"
+        js:        "/scripts"
+        view:      "/html"
+
+        module_image: "/module/%%module%%/bilder"
+        module_font:  "/module/%%module%%/schriften"
+        module_css:   "/module/%%module%%/styles"
+        module_js:    "/module/%%module%%/scripts"
+        module_view:  "/module/%%module%%/html"
+
 	sprites:
-	      - {
-	      	  directory: "PROD/internet_sprite_icons",
-	      	  target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
-	      	}
+              - {
+                directory: "PROD/internet_sprite_icons",
+                target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
+              }
 
 \end{verbatim}
 
