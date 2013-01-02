@@ -1,4 +1,4 @@
-\section{Configuration}
+\hsection{Configuration}
 
 \newcommand{\optiondesc}[2]{
 	\begin{adjustwidth}{0cm}{0cm}
@@ -13,15 +13,18 @@
 All configuration settings goes beyond a terrific\_exporter node within your environment configuration file.\\
 \\
 \optiondesc{build\_local\_paths: (true/false)}{
-	If build\_local\_paths is enabled the exporter will change all urls within html and css files to match within the exported package.\\
+	If build\_local\_paths is enabled the exporter will change all urls within html and css files to match within the exported package.
+	\\See actions '\hyperlink{sec-Actions-ExportAssets}{ExportAssets}' and '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
 }
 
 \optiondesc{build\_js\_doc: (true/false)}{
-	Enables the export of a javascript documentation. The documentation is generated using YUIDoc.\\
+	Enables the export of a javascript documentation. The documentation is generated using YUIDoc.
+	\\See action '\hyperlink{sec-Actions-BuildJSDoc}{BuildJSDoc}'.\\
 }
 
 \optiondesc{build\_settings: (path)}{
-	This setting should target to a build.ini file. Within this file there are only settings for the projektname an versioning data.\\
+	This setting should target to a build.ini file. Within this file there are only settings for the projektname an versioning data.
+	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
 \optiondesc{build\_path: (path)}{
@@ -29,31 +32,38 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 }
 
 \optiondesc{export\_with\_version: (true/false)}{
-	Set to true if the exporter should build zips/folders with version numbers within its name.\\
+	Set to true if the exporter should build zips/folders with version numbers within its name.
+	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
 \optiondesc{autoincrement\_build: (true/false)}{
-	True if the exporter should increase the revision after each build.\\
+	True if the exporter should increase the revision after each build.
+	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
 \optiondesc{validate\_js: (true/false)}{
-	Activates the validation of javascript. Validation is done using jshint.\\
+	Activates the validation of javascript. Validation is done using jshint.
+	\\See action '\hyperlink{sec-Actions-ValidateJS}{ValidateJS}'.\\
 }
 
 \optiondesc{validate\_css: (true/false)}{
-	Activate the validation of css. Validation is done using csshint.\\
+	Activate the validation of css. Validation is done using csshint.
+	\\See action '\hyperlink{sec-Actions-ValidateCSS}{ValidateCSS}'.\\
 }
 
 \optiondesc{optimize\_image: (true/false)}{
-	Set to true to optimize images in the output directory. Optimization is done using jpegoptim, optipng and advpng.\\
+	Set to true to optimize images in the output directory. Optimization is done using jpegoptim, optipng and advpng.
+	\\See action '\hyperlink{sec-Actions-OptimizeImages}{OptimizeImages}'.\\
 }
 
 \optiondesc{export\_views: (true/false)}{
-	Activates the export of the views marked with a @Export annotation.\\
+	Activates the export of the views marked with a @Export annotation.
+	\\See action '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
 }
 
 \optiondesc{export\_modules: (true/false)}{
-	Activates the export of plain module html. The url within this modules are not rewriten even if the build\_local\_paths option is activated.\\
+	Activates the export of plain module html. The url within this modules are not rewriten even if the build\_local\_paths option is activated.
+	\\See action '\hyperlink{sec-Actions-ExportModules}{ExportModules}'.\\
 }
 
 \optiondesc{export\_type: (string: folder/zip)}{
@@ -76,11 +86,12 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportModules}
 	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportViews}
 	\end{itemize}
-	See section 'Extending' for further information.\\
+	See section '\hyperlink{chap-Actions}{Actions}' or '\hyperlink{chap-Extending}{Extending}' for further information.\\
 }
 
 \optiondesc{sprites: (list of objects)}{
-	Here you can setup sprite information. The exporter will build the sprites with the given data.\\
+	Here you can setup sprite information. The exporter will build the sprites with the given data.
+	\\See section '\hyperlink{sec-Actions-GenerateSprites}{GenerateSprites}'.\\
 }
 
 
@@ -112,7 +123,7 @@ terrific_exporter:
 \end{verbatim}
 
 \subsection{YUIDoc}
-The exporter will use the yuidoc configuration file named yuidoc.json within the app/config directory. The syntax of the file could be read on the YUIDoc page http://yui.github.com/yuidoc/args/index.html.
+The exporter will use the yuidoc configuration file named yuidoc.json within the app/config directory. The syntax of the file could be read on the YUIDoc page \url{http://yui.github.com/yuidoc/args/index.html}.
 
 \subsection{csslint}
 Csslint will use a configuration if one is found under app/config, if there is no configuration named csslint.cfg the exporter will use its default configuration found within\\
@@ -127,9 +138,9 @@ csslint --list-rules
 \subsection{jshint}
 JShint will also use a configuration file named jshint.json, normally found within app/config. If no configuration file is found there the default within ....ExporterBundle/Resources/config is used.\\
 \\
-See http://www.jshint.com/docs/ configuration settings.\\
+See \url{http://www.jshint.com/docs/} configuration settings.\\
 
-\subsection{build.ini}
+\hsubsection{build.ini}
 
 \begin{verbatim}
 [version]

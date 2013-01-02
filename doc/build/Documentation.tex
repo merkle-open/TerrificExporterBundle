@@ -12,7 +12,8 @@
 \hypersetup{
 	pdfauthor={Bruno Lorenz},
 	pdftitle={TerrificExporterBundle Documentation},
-	colorlinks=true
+	colorlinks=true,
+  linkcolor=blue
 }
 
 \renewcommand{\familydefault}{\sfdefault}
@@ -23,6 +24,13 @@
 	\item{#1}
 }
 
+\newcommand{\hsection}[1]{
+  \hypertarget{chap-#1}{\section{#1}}
+}
+
+\newcommand{\hsubsection}[1]{
+ \hypertarget{sec-#1}{\section{#1}}
+}
 
 \title{TerrificExporterBundle Documentation}
 \author{Bruno Lorenz\\
@@ -37,7 +45,7 @@
 
 \begin{abstract}
     \Large This documentation covers ExportBundle version 2.0.\\
-    \Large At the current state this documentation is not complete.
+    \Large At the current state this document is not complete.
 \end{abstract}
 
 \newpage

@@ -36,13 +36,13 @@ There are a number of tools needed depending on your configuration and tasks.\\
 	\litem{optipng}
 	\litem{advpng}
 	\litem{montage}
-\end{itemize} 
+\end{itemize}
 
 \noindent It is necessary to have all tools within path, the exporter won't search for tools on your hardrive. So you have to setup your path variable depending on your os system correctly to have all tools within path's.\\
 \\
-On Windows: http://www.computerhope.com/issues/ch000549.htm\\
+On Windows: \url{http://www.computerhope.com/issues/ch000549.htm}\\
 \\
-On *nix/MacOSX: http://www.troubleshooters.com/linux/prepostpath.htm\\
+On *nix/MacOSX: \url{http://www.troubleshooters.com/linux/prepostpath.htm}\\
 To do a permanent change it is necessary to change ~/.bashrc or ~/.bash\_profile depending on your os.
 
 % ##############################################################################################
@@ -54,7 +54,7 @@ After the installation is done open up a new commandline and install Node.js.
 npm -g install yuidocjs jslint csshint
 \end{verbatim}
 
-\noindent For further help and syntax for YUIDoc visit http://yui.github.com/yuidoc/.
+\noindent For further help and syntax for YUIDoc visit \url{http://yui.github.com/yuidoc/}.
 
 
 % ##############################################################################################
@@ -79,7 +79,7 @@ On Ubuntu/Debian based Linux it is possible to install jpegoptim directly using 
 sudo apt-get install jpegoptim advancecomp optipng imagemagick
 \end{verbatim}
 
-\noindent On RHEL/Fedora/Centos Linux you have to install jpegoptim from source, rest of the tools could be installed using yum. Download the current version from http://www.kokkonen.net/tjko/projects.html. \\
+\noindent On RHEL/Fedora/Centos Linux you have to install jpegoptim from source, rest of the tools could be installed using yum. Download the current version from \url{http://www.kokkonen.net/tjko/projects.html}. \\
 
 
 \begin{verbatim}
@@ -98,14 +98,14 @@ cd jpegoptim-1.2.4
 \paragraph{MacOSX\\}
 \noindent On MacOSX the easiest way to get the whole toolset is to install ImageOptim. This application contains all necessary image optimizing tools needed by the exporter.\\
 \\
-http://imageoptim.com/\\
+\url{http://imageoptim.com/}\\
 \\
 Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
-http://www.imagemagick.org/script/binary-releases.php\\
+\url{http://www.imagemagick.org/script/binary-releases.php}\\
 
 % ##############################################################################################
 \subsection{Setup an export environment}
 
 It is necessary to setup a new environment for you export. To setup an export environment just copy your app/config.yml to app/config\_export.yml. Now you created a new environment called "export". \\
 \\
-You can now configure the environment to your project needs. \\
+You can now configure the environment to your project needs. For further information visit \url{http://symfony.com/doc/current/cookbook/configuration/environments.html}.\\
