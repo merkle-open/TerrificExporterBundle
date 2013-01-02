@@ -180,7 +180,7 @@ namespace Terrific\ExporterBundle\Command {
          * @param array $extend
          * @return array
          */
-        protected function compileConfiguration(BuildOptions $buildOptions) {
+        protected function compileConfiguration(BuildOptions $buildOptions, InputInterface $input) {
             $ret = $this->getContainer()->getParameter("terrific_exporter");
 
             /** @var $fs Filesystem */
@@ -227,6 +227,21 @@ namespace Terrific\ExporterBundle\Command {
                 }
             }
 
+            // Setting console options
+            if ($input->hasParameterOption("--no-validation")) {
+                $ret["validate_js"] = false;
+                $ret["validate_html"] = false;
+                $ret["validate_css"] = false;
+            }
+
+            if ($input->hasParameterOption("--no-js-doc")) {
+                $ret["build_js_doc"] = false;
+            }
+
+            if ($input->hasParameterOption("--no-image-optimization")) {
+                $ret["optimize_images"] = false;
+            }
+
             return $ret;
         }
 
@@ -252,7 +267,7 @@ namespace Terrific\ExporterBundle\Command {
             // startup timer
             $timer->start();
 
-            $config = $this->compileConfiguration($buildOptions);
+            $config = $this->compileConfiguration($buildOptions, $input);
             $actionStack = $this->retrieveActionStack($config);
 
             $reRunTimer = array();

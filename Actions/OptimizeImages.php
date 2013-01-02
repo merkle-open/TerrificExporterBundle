@@ -20,6 +20,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Object\ActionRequirement;
     use Terrific\ExporterBundle\Service\Log;
     use Terrific\ExporterBundle\Helper\NumberHelper;
+    use Terrific\ExporterBundle\Helper\OSHelper;
 
     /**
      *
@@ -38,9 +39,14 @@ namespace Terrific\ExporterBundle\Actions {
         public static function getRequirements() {
             $ret = array();
 
-            $ret[] = new ActionRequirement("jpegoptim", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
             $ret[] = new ActionRequirement("advpng", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
             $ret[] = new ActionRequirement("optipng", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+
+
+            if (!OSHelper::isWin()) {
+                $ret[] = new ActionRequirement("jpegoptim", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\OptimizeImages');
+            }
+
 
             return $ret;
         }
@@ -98,6 +104,10 @@ namespace Terrific\ExporterBundle\Actions {
          * @param \Symfony\Component\Finder\SplFileInfo $file
          */
         public function optimizeJPEG(SplFileInfo $file) {
+            if (OSHelper::isWin()) {
+                return -1;
+            }
+
             $oldSize = $file->getSize();
 
             /** @var $process Process */
