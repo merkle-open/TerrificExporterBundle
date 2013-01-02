@@ -104,10 +104,6 @@ namespace Terrific\ExporterBundle\Actions {
          * @param \Symfony\Component\Finder\SplFileInfo $file
          */
         public function optimizeJPEG(SplFileInfo $file) {
-            if (OSHelper::isWin()) {
-                return -1;
-            }
-
             $oldSize = $file->getSize();
 
             /** @var $process Process */
@@ -143,8 +139,10 @@ namespace Terrific\ExporterBundle\Actions {
                         break;
 
                     case "JPG":
-                        $optimized = true;
-                        $compressed = $this->optimizeJPEG($file);
+                        if (!OSHelper::isWin()) {
+                            $optimized = true;
+                            $compressed = $this->optimizeJPEG($file);
+                        }
                         break;
                 }
 
