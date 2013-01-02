@@ -79,5 +79,42 @@ namespace Terrific\ExporterBundle\Helper {
         }
 
 
+        /**
+         * @param $content
+         * @return array
+         */
+        public static function retrieveFonts($content) {
+            $css = new \CssMin();
+            $tokenList = $css->parse($content);
+
+            $fonts = array();
+
+            foreach ($tokenList as $token) {
+                if ($token instanceof \CssAtFontFaceDeclarationToken && ($token->Property == "src")) {
+                    $matches = array();
+
+                    if (preg_match_all('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
+                        $fonts = array_merge($fonts, $matches[1]);
+                    }
+                }
+            }
+
+            $fonts = array_unique($fonts);
+
+            array_walk($fonts, function (&$item) {
+                if (stristr($item, "#") !== false) {
+                    list($font, $trash) = explode("#", $item);
+                    $item = $font;
+                }
+
+                if (stristr($item, "?") !== false) {
+                    list($font, $trash) = explode("?", $item);
+                    $item = $font;
+                }
+            });
+
+            return $fonts;
+        }
+
     }
 }

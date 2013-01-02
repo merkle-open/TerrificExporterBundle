@@ -75,12 +75,16 @@ namespace Terrific\ExporterBundle\Filter {
                 $exportPath = $this->pathResolver->resolve($targetPath);
 
                 $content = $asset->getContent();
+                $items = array();
+                $items = array_merge($items, AsseticHelper::retrieveImages($content));
+                $items = array_merge($items, AsseticHelper::retrieveFonts($content));
 
-                foreach (AsseticHelper::retrieveImages($content) as $img) {
-                    $nPath = $this->pathResolver->resolve($img);
+
+                foreach ($items as $item) {
+                    $nPath = $this->pathResolver->resolve($item);
 
                     $tPath = $fs->makePathRelative(dirname($nPath), dirname($exportPath));
-                    $content = str_replace($img, $tPath . basename($img), $content);
+                    $content = str_replace($item, $tPath . basename($item), $content);
                 }
 
                 $asset->setContent($content);

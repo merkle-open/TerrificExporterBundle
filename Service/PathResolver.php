@@ -180,8 +180,6 @@ namespace Terrific\ExporterBundle\Service {
                             $this->pathTemplate[$key] = $config[$val];
                         }
                     }
-
-                    var_dump($this->pathTemplate);
                 }
             }
         }
@@ -329,6 +327,7 @@ namespace Terrific\ExporterBundle\Service {
         public function locate($file, $assertedPath = "") {
             $this->initialize();
 
+            $assertedPath = ltrim($assertedPath, ".");
 
             if (strpos($assertedPath, "/terrificmodule") !== false) {
                 $modName = $this->getModuleName($assertedPath);
@@ -363,6 +362,9 @@ namespace Terrific\ExporterBundle\Service {
                 return $ret[0];
             }
 
+            if ($this->logger) {
+                $this->logger->err(print_r($locatedFiles, true));
+            }
             throw new \Exception("Cannot identify single path for asset");
         }
 
@@ -421,12 +423,13 @@ namespace Terrific\ExporterBundle\Service {
                     $fs = $this->container->get("filesystem");
 
                     $root_dir = $this->container->getParameter("kernel.root_dir");
-                    $locations = array($root_dir . "/../web/img");
+                    $locations = array($root_dir . "/../web/img", $root_dir . "/../web/font");
 
 
                     $root_dir .= "/../src/Terrific/Module";
                     foreach ($this->modules as $module) {
                         $locations[] = $root_dir . "/${module}/Resources/public/img";
+                        $locations[] = $root_dir . "/${module}/Resources/public/font";
                     }
 
                     $locations = array_filter($locations, function ($itm) use ($fs) {

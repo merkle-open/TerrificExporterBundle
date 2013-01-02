@@ -22,6 +22,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Filter\CSSPathRewriteFilter;
     use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Helper\AsseticHelper;
 
     /**
      *
@@ -106,6 +107,8 @@ namespace Terrific\ExporterBundle\Actions {
                 $this->logger->info("Using asset list: " . implode(", ", $assetList));
             }
 
+            $exportedFonts = array();
+
             $results = true;
             foreach ($assetManager->getNames() as $name) {
                 /** @var $asset FileAsset */
@@ -121,6 +124,23 @@ namespace Terrific\ExporterBundle\Actions {
                     $file = $tmpFileMgr->putContent($content);
                     $results &= $this->saveToPath($file, $nPath);
                     $ePoint = $timer->lap();
+
+                    if (FileHelper::isStylesheet($asset->getTargetPath())) {
+                        $beforeRewriteContent = $asset->dump();
+                        $fonts = AsseticHelper::retrieveFonts($beforeRewriteContent);
+
+                        foreach ($fonts as $f) {
+                            if (!in_array($f, $exportedFonts)) {
+                                $font = $pathResolver->locate(basename($f), $f);
+
+                                $target = $params["exportPath"] . $pathResolver->resolve($font);
+                                $this->saveToPath($font, $target);
+
+                                Log::info("Exported asset [%s]", array(basename($font)));
+                                $exportedFonts[] = $f;
+                            }
+                        }
+                    }
 
                     Log::info("Exported asset [%s]", array(basename($asset->getTargetPath())));
                     $this->logger->info(sprintf("Exporting took %s seconds", $timer->getTime($sPoint, $ePoint)));
