@@ -182,6 +182,8 @@ namespace Terrific\ExporterBundle\Command {
                 }
             }
 
+            $ret["changelogPath"] = realpath($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["changelog_path"]);
+
             // Setting console options
             if ($input->hasParameterOption("--no-validation")) {
                 $ret["validate_js"] = false;

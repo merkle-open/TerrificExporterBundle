@@ -102,6 +102,7 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}OptimizeImages}
 	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportModules}
 	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportViews}
+	      \item{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportChangelogs}
 	\end{itemize}
 	See section '\hyperlink{chap-Actions}{Actions}' or '\hyperlink{chap-Extending}{Extending}' for further information.\\
 }
@@ -135,8 +136,14 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 }
 
 
-\newpage
 % ################################################################################################################################
+\optiondesc{changelog\_path: (directory)}{
+	Set this value to a valid path which contains the changelogs for your project. If this folder doesn't exist no changelogs are appended. The value is also relative from the projectfolder like \mbox{'build\_path'} or \mbox{'build\_settings'}. Defaultvalue \mbox{'build/changelogs'}
+}
+
+
+% ################################################################################################################################
+\newpage
 \subsection{Example configuration}
 
 \begin{verbatim}

@@ -117,3 +117,9 @@ Retrieves a list of all module combinations (module <-> skin <-> view) and expor
 \hypertarget{sec-Actions-ExportViews}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportViews}}
 Retrieves a list of all controller methods which are annotated with @Export. If there is no such a method the exporter simply won't just export anything.
 \end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportChangelogs}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportChangelogs}}
+This action just copies your changelog files (file\_extensions: log, txt, md) to the exporting path. To append all changelogs create a folder under build/changelogs or setup your \mbox{'changelog\_path'} option. If this folder is not available no changelogs will appended.
+\end{minipage}

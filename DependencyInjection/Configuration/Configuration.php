@@ -40,15 +40,16 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                 ->booleanNode('optimize_images')->defaultTrue()->end()
                 ->booleanNode('export_views')->defaultTrue()->end()
                 ->booleanNode('export_modules')->defaultTrue()->end()
-                ->booleanNode('append_changelogs')->defaultTrue()->end()
                 ->booleanNode('export_with_version')->defaultTrue()->end()
                 ->booleanNode('autoincrement_build')->defaultTrue()->end()
+
 
                 ->arrayNode('build_actions')
                     ->prototype('scalar')
                     ->end()
                 ->end()
 
+                ->scalarNode('changelog_path')->defaultValue('build/changelogs')->end()
                 ->scalarNode('build_settings')->defaultValue('build/build.ini')->end()
                 ->scalarNode('build_path')->defaultValue('build')->end()
 

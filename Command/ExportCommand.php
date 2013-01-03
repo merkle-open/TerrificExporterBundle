@@ -61,6 +61,8 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\OptimizeImages';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportChangelogs';
+
             }
 
 
