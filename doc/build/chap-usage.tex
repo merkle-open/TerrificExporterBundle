@@ -47,8 +47,9 @@ To startup an export use the following command.
 
 \subsection{Annotations}
 
-
-\noindent \textbf{@Export}\\
+\noindent
+\begin{minipage}{\textwidth}
+\textbf{@Export}\\
 \vspace{-1em}
 \begin{adjustwidth}{\parindent}{0cm}
 To export a view it is necessary to annotate a controller method with this annotation. It is possible to control a set of options for each view directly within this annotation. This example is only valid if you don't have to export a localized version of a view.
@@ -62,9 +63,11 @@ To export a view it is necessary to annotate a controller method with this annot
 \end{verbatim}
 \end{adjustwidth}
 \vspace{1em}
+\end{minipage}
 
-
-\noindent \textbf{@LocaleExport}\\
+\noindent
+\begin{minipage}{\textwidth}
+\textbf{@LocaleExport}\\
 \vspace{-1em}
 \begin{adjustwidth}{\parindent}{0cm}
 Each view must have their own for each locale which should exported. To set different settings for each locale you have to use the @LocaleExport annotation. This annotation is used in combination with the @Export annotation. Setting up locale exportation will disable exporting the default language which means you have to annotate \textbf{all} locales that should exported.
@@ -80,5 +83,5 @@ Usage with @Export:
 \end{verbatim}
 \end{adjustwidth}
 \vspace{1em}
-
+\end{minipage}
 
