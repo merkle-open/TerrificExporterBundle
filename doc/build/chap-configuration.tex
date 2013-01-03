@@ -12,64 +12,77 @@
 
 All configuration settings goes beyond a terrific\_exporter node within your environment configuration file.\\
 \\
+% ################################################################################################################################
 \optiondesc{build\_local\_paths: (true/false)}{
 	If build\_local\_paths is enabled the exporter will change all urls within html and css files to match within the exported package.
 	\\See actions '\hyperlink{sec-Actions-ExportAssets}{ExportAssets}' and '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{build\_js\_doc: (true/false)}{
 	Enables the export of a javascript documentation. The documentation is generated using YUIDoc.
 	\\See action '\hyperlink{sec-Actions-BuildJSDoc}{BuildJSDoc}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{build\_settings: (path)}{
 	This setting should target to a build.ini file. Within this file there are only settings for the projektname an versioning data.
 	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{build\_path: (path)}{
 	Has to target to a path which is the export target path.\\
 }
 
+% ################################################################################################################################
 \optiondesc{export\_with\_version: (true/false)}{
 	Set to true if the exporter should build zips/folders with version numbers within its name.
 	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{autoincrement\_build: (true/false)}{
 	True if the exporter should increase the revision after each build.
 	\\See section '\hyperlink{sec-build.ini}{build.ini}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{validate\_js: (true/false)}{
 	Activates the validation of javascript. Validation is done using jshint.
 	\\See action '\hyperlink{sec-Actions-ValidateJS}{ValidateJS}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{validate\_css: (true/false)}{
 	Activate the validation of css. Validation is done using csshint.
 	\\See action '\hyperlink{sec-Actions-ValidateCSS}{ValidateCSS}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{optimize\_image: (true/false)}{
 	Set to true to optimize images in the output directory. Optimization is done using jpegoptim, optipng and advpng.
 	\\See action '\hyperlink{sec-Actions-OptimizeImages}{OptimizeImages}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{export\_views: (true/false)}{
 	Activates the export of the views marked with a @Export annotation.
 	\\See action '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{export\_modules: (true/false)}{
 	Activates the export of plain module html. The url within this modules are not rewriten even if the build\_local\_paths option is activated.
 	\\See action '\hyperlink{sec-Actions-ExportModules}{ExportModules}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{export\_type: (string: folder/zip)}{
 	Set the export type if the export should be done as folder or as a zip.\\
 }
 
+% ################################################################################################################################
 \optiondesc{build\_actions: (list of objects)}{
 	These option allows to setup a build chain. Here you can append project related exporting tasks or change the builtin order.
 	\begin{itemize}
@@ -89,8 +102,9 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 	See section '\hyperlink{chap-Actions}{Actions}' or '\hyperlink{chap-Extending}{Extending}' for further information.\\
 }
 
+% ################################################################################################################################
 \optiondesc{pathtemplates: (set of string values)}{
-	The pathtemplates option allows you to customize you paths within your export package. All paths begin with a starting '/' each given directory will begin relative to the given export\_path. So a value like '/img/common' will end up in '/exportpath/img/common'. The optional \%module\% variable within will be resolved by the PathResolver into a modulename. This variable only get matched in 'module\_*' options.
+	The pathtemplates option allows you to customize you paths within your export package. All paths begin with a starting '/' each given directory will begin relative to the given export\_path. So a value like '/img/common' will end up in '/exportpath/img/common'. The optional \mbox{\%module\%} variable within will be resolved by the PathResolver into a modulename. This variable only get matched in 'module\_*' options.
 	\\
 	It is possible to set paths for the following types of files:
 	\begin{itemize}
@@ -110,6 +124,7 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 	\noindent See actions '\hyperlink{sec-Actions-ExportModules}{ExportModules}', '\hyperlink{sec-Actions-ExportAssets}{ExportAssets}' and '\hyperlink{sec-Actions-ExportViews}{ExportViews}'.\\
 }
 
+% ################################################################################################################################
 \optiondesc{sprites: (list of objects)}{
 	Here you can setup sprite information. The exporter will build the sprites with the given data.
 	\\See section '\hyperlink{sec-Actions-GenerateSprites}{GenerateSprites}'.\\
@@ -117,6 +132,7 @@ All configuration settings goes beyond a terrific\_exporter node within your env
 
 
 \newpage
+% ################################################################################################################################
 \subsection{Example configuration}
 
 \begin{verbatim}
@@ -156,13 +172,15 @@ terrific_exporter:
 
 \end{verbatim}
 
+% ################################################################################################################################
 \subsection{YUIDoc}
 The exporter will use the yuidoc configuration file named yuidoc.json within the app/config directory. The syntax of the file could be read on the YUIDoc page \url{http://yui.github.com/yuidoc/args/index.html}.
 
+% ################################################################################################################################
 \subsection{csslint}
 Csslint will use a configuration if one is found under app/config, if there is no configuration named csslint.cfg the exporter will use its default configuration found within\\
 \%kernel.root\_dir\%/vendor/senuphtyz/terrific-exporter-bundle/Terrific/ExporterBundle/Resources/config. \\
-
+\\
 If you want to specify a different csslint.cfg you should take a copy from the default and change the settings within. Show a list of available options just enter the following command in your console.
 
 \begin{verbatim}
@@ -174,6 +192,7 @@ JShint will also use a configuration file named jshint.json, normally found with
 \\
 See \url{http://www.jshint.com/docs/} configuration settings.\\
 
+% ################################################################################################################################
 \hsubsection{build.ini}
 
 \begin{verbatim}

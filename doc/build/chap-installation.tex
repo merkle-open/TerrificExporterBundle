@@ -1,7 +1,12 @@
 
 \section{Installation}
 
-% ##############################################################################################
+
+% ################################################################################################################################
+\subsection{Requirements}
+During some functionality is only available since symfony 2.1 it is \textbf{necessary to have your project on a symfony 2.1 basis}. Some actions requires additional tools to do their work. \textbf{As long as this actions are part of the actionstack they will force you to have this tools installed and callable!} If you don't need this action and don't want to install the tools needed for it you have to configure a action stack without this specific action. See chapter '\mbox{\hyperlink{chap-Configuration}{Configuration}}' for more information about defining you own action stack.
+
+% ################################################################################################################################
 \subsection{Dependency management}
 Update your composer.json and add a new repository. \\
 
@@ -24,7 +29,7 @@ php composer.phar update
 \end{verbatim}
 \noindent This should now install alle necessary requirements for your project. \\
 
-% ##############################################################################################
+% ################################################################################################################################
 \subsection{Tooling}
 There are a number of tools needed depending on your configuration and tasks.\\
 
@@ -45,7 +50,7 @@ On Windows: \url{http://www.computerhope.com/issues/ch000549.htm}\\
 On *nix/MacOSX: \url{http://www.troubleshooters.com/linux/prepostpath.htm}\\
 To do a permanent change it is necessary to change ~/.bashrc or ~/.bash\_profile depending on your os.
 
-% ##############################################################################################
+% ################################################################################################################################
 \subsubsection{YUIDoc, jslint, csshint}
 YUIDoc, jslint and csshint are installed using Node.js. Just go to nodejs.org download the package fits for you operating system and install it. \\
 After the installation is done open up a new commandline and install Node.js.
@@ -57,10 +62,10 @@ npm -g install yuidocjs jslint csshint
 \noindent For further help and syntax for YUIDoc visit \url{http://yui.github.com/yuidoc/}.
 
 
-% ##############################################################################################
+% ################################################################################################################################
 \subsubsection{jpegoptim, optipng, advpng, montage}
 
-% ##############################################################################################
+% ################################################################################################################################
 \paragraph{Windows\\}
 \noindent Jpegoptim is currently not available on Windows systems.\\
 \\
@@ -71,7 +76,7 @@ Advpng or advancecomp can be fetched from http://advancemame.sourceforge.net/com
 Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
 http://www.imagemagick.org/script/binary-releases.php \\
 
-% ##############################################################################################
+% ################################################################################################################################
 \paragraph{Unix/Linux\\}
 On Ubuntu/Debian based Linux it is possible to install jpegoptim directly using your package manager.\\
 
@@ -94,7 +99,7 @@ cd jpegoptim-1.2.4
 \end{verbatim}
 
 
-% ##############################################################################################
+% ################################################################################################################################
 \paragraph{MacOSX\\}
 \noindent On MacOSX the easiest way to get the whole toolset is to install ImageOptim. This application contains all necessary image optimizing tools needed by the exporter.\\
 \\
@@ -103,7 +108,7 @@ cd jpegoptim-1.2.4
 Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
 \url{http://www.imagemagick.org/script/binary-releases.php}\\
 
-% ##############################################################################################
+% ################################################################################################################################
 \subsection{Setup an export environment}
 
 It is necessary to setup a new environment for you export. To setup an export environment just copy your app/config.yml to app/config\_export.yml. Now you created a new environment called "export". \\
