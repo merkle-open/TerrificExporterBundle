@@ -52,12 +52,11 @@ To startup an export use the following command.
 \textbf{@Export}\\
 \vspace{-1em}
 \begin{adjustwidth}{\parindent}{0cm}
-To export a view it is necessary to annotate a controller method with this annotation. It is possible to control a set of options for each view directly within this annotation. This example is only valid if you don't have to export a localized version of a view.
+To export a view it is necessary to annotate a controller method with this annotation. It is possible to control a set of options for each view directly within this annotation. This example is only valid if you don't have to export a localized version of a view. If no environment is given this view will exported in all environments.
 
 \begin{verbatim}
  @Export(
      name="viewname.html",
-     locales=[],
      environment="env1,env2,..."
  )
 \end{verbatim}
@@ -70,8 +69,8 @@ To export a view it is necessary to annotate a controller method with this annot
 \textbf{@LocaleExport}\\
 \vspace{-1em}
 \begin{adjustwidth}{\parindent}{0cm}
-Each view must have their own for each locale which should exported. To set different settings for each locale you have to use the @LocaleExport annotation. This annotation is used in combination with the @Export annotation. Setting up locale exportation will disable exporting the default language which means you have to annotate \textbf{all} locales that should exported.
-
+Each view must have their own for each locale which should exported. To set different settings for each locale you have to use the @LocaleExport annotation. This annotation is used in combination with the @Export annotation. Setting up locale exportation will disable exporting the default language which means you have to annotate \textbf{all} locales that should exported. If no environment is given this view will exported in all environments. \\
+\\
 Usage with @Export:
 \begin{verbatim}
 @Export(

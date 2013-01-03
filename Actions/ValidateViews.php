@@ -17,11 +17,12 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\HttpFoundation\Response;
     use Terrific\ExporterBundle\Service\W3CValidator;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Object\RouteLocale;
 
     /**
      *
      */
-    class ValidateViews extends AbstractAction implements IAction {
+    class ValidateViews extends AbstractValidateAction implements IAction {
         /**
          * Returns requirements for running this Action.
          *
@@ -66,14 +67,31 @@ namespace Terrific\ExporterBundle\Actions {
 
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
-                $resp = $pageManager->dumpRoute($route);
-                $file = $tmpFileMgr->putContent($resp->getContent());
+                if (!$route->isLocalized()) {
+                    $resp = $pageManager->dumpRoute($route);
+                    $file = $tmpFileMgr->putContent($resp->getContent());
 
-                $results = $w3Validator->validateFile($file);
+                    $results = $w3Validator->validateFile($file);
+                    $this->processValidationResults($results, $route->getExportName());
 
-                if ($results->hasErrors()) {
-                    $error = true;
+                    if ($results->hasErrors()) {
+                        $error = true;
+                    }
+                } else {
+                    /** @var $locale RouteLocale */
+                    foreach ($route->getLocales() as $locale) {
+                        $resp = $pageManager->dumpRoute($route, $locale->getLocale());
+                        $file = $tmpFileMgr->putContent($resp->getContent());
+
+                        $results = $w3Validator->validateFile($file);
+                        $this->processValidationResults($results, $locale->getExportName());
+
+                        if ($results->hasErrors()) {
+                            $error = true;
+                        }
+                    }
                 }
+
             }
 
             if ($error) {

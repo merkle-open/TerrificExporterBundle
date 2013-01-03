@@ -25,7 +25,7 @@ namespace Terrific\ExporterBundle\Actions {
     /**
      *
      */
-    class ValidateJS extends AbstractAction implements IAction {
+    class ValidateJS extends AbstractValidateAction implements IAction {
 
         /**
          * @var array
@@ -114,21 +114,7 @@ namespace Terrific\ExporterBundle\Actions {
                                 $this->log(AbstractAction::LOG_LEVEL_ERROR, $ret->getErrorOutput());
                                 $error = true;
                             } else {
-                                // OUT
-                                $error = $parseRet->hasErrors();
-
-                                $results = $parseRet->toOutputString('[%1$s : %2$s] %3$s');
-                                foreach ($results as $item) {
-                                    $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
-                                }
-
-
-                                $resultCount = count($results);
-                                if ($resultCount == 0) {
-                                    Log::info("Validated %s Found %d Issues.", array(basename($leafPath), $resultCount));
-                                } else {
-                                    Log::warn("Validated %s Found %d Issues.", array(basename($leafPath), $resultCount));
-                                }
+                                $this->processValidationResults($parseRet, basename($leafPath));
                             }
 
                         }

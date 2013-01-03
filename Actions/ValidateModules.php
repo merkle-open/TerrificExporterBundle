@@ -20,11 +20,15 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ComposerBundle\Entity\Module;
     use Terrific\ExporterBundle\Object\RouteModule;
     use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Service\ConfigFinder;
 
     /**
      *
      */
-    class ValidateModules extends AbstractAction implements IAction {
+    class ValidateModules extends AbstractValidateAction implements IAction {
+
+        private $cachedModuleTemplate = null;
+
         /**
          * Returns requirements for running this Action.
          *
@@ -70,6 +74,17 @@ namespace Terrific\ExporterBundle\Actions {
             return $resp->getContent();
         }
 
+        /**
+         * @param $moduleContent
+         */
+        protected function processTemplate($modName, $modContent) {
+            $ret = $this->cachedModuleTemplate;
+
+            $ret = str_replace("%MODULE_NAME%", $modName, $ret);
+            $ret = str_replace("%MODULE_CONTENT%", $modContent, $ret);
+
+            return $ret;
+        }
 
         /**
          * @param $params
@@ -78,6 +93,7 @@ namespace Terrific\ExporterBundle\Actions {
         public function run(OutputInterface $output, $params = array()) {
             /** @var $moduleManager ModuleManager */
             $moduleManager = $this->container->get("terrific.composer.module.manager");
+
 
             if ($moduleManager != null) {
                 /** @var $tmpFileMgr TempFileManager */
@@ -89,6 +105,11 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $w3Validator W3CValidator */
                 $w3Validator = $this->container->get("terrific.exporter.w3validator");
 
+                /** @var $configFinder ConfigFinder */
+                $configFinder = $this->container->get("terrific.exporter.configfinder");
+
+                $this->cachedModuleTemplate = file_get_contents($configFinder->find("module-template.tpl.html"));
+
                 $done = array();
 
                 /** @var $route Route */
@@ -97,10 +118,13 @@ namespace Terrific\ExporterBundle\Actions {
                     /** @var $module RouteModule */
                     foreach ($route->getModules() as $module) {
                         if (!in_array($module->getId(), $done)) {
-                            $content = $this->doDump($module);
+                            $modContent = $this->doDump($module);
+                            $content = $this->processTemplate($module->getModule(), $modContent);
                             $file = $tmpFileMgr->putContent($content);
+                            var_dump($content);
 
                             $results = $w3Validator->validateFile($file);
+                            $this->processValidationResults($results, $module->getExportingPath());
 
                             $done[] = $module->getId();
                         }

@@ -26,15 +26,12 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Service\Log;
     use Terrific\ExporterBundle\Service\ConfigFinder;
     use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Exception\ExporterException;
 
     /**
      *
      */
-    class ExportCommand extends ContainerAwareCommand {
-        /**
-         * @var LoggerInterface
-         */
-        protected $logger;
+    class ExportCommand extends AbstractExporterCommand {
 
         /**
          *
@@ -82,167 +79,10 @@ namespace Terrific\ExporterBundle\Command {
                 $stack[] = $refAction;
             }
 
-
-            $this->logger->debug("Checking Requirements");
-            Log::info("Checking Requirements");
-            Log::blkstart();
-
-            $failedOverall = false;
-
-            /** @var $req ActionRequirement */
-            foreach ($requirementStack->getStack(true) as $req) {
-                $failed = false;
-
-                switch ($req->getType()) {
-                    case ActionRequirement::TYPE_PHPEXT:
-                        $failed = !extension_loaded($req->getName());
-                        $str = "Check for PHP Extension [%s] => %s";
-                        break;
-
-                    case ActionRequirement::TYPE_PROCESS:
-                        $failed = !ProcessHelper::checkCommand($req->getName());
-                        $str = "Check for Command [%s] => %s";
-                        break;
-
-                    case ActionRequirement::TYPE_SETTING:
-                        $failed = !(isset($config[$req->getName()]) && !empty($config[$req->getName()]));
-                        $str = "Check for Setting [%s] => %s";
-                        break;
-                }
-
-
-                $ret = (!$failed ? 'passed' : 'failed');
-                $this->logger->debug(sprintf("- " . $str, $req->getName(), $ret));
-
-                if ($failed) {
-                    $failedOverall = true;
-                    Log::err($str, array($req->getName(), $ret));
-
-                    Log::blkstart();
-                    Log::err("Used by the following Actions:");
-
-                    /** @var $refAction \ReflectionClass */
-                    foreach ($requirementStack->findAffectedActions($req) as $refAction) {
-                        Log::err($refAction->getName(), array());
-                    }
-
-                    Log::blkend();
-                } else {
-                    Log::info($str, array($req->getName(), $ret));
-                }
-            }
-
-            Log::blkend();
-
-            if ($failedOverall) {
-                Log::err("Cannot proceed with requirement errors");
-                die();
-            }
+            $this->checkRequirements($requirementStack);
 
             $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
             return $stack;
-        }
-
-        /**
-         * Starts a ActionClass
-         *
-         * @param \ReflectionClass $refClass
-         * @return ActionResult
-         */
-        protected function runAction(\ReflectionClass $refClass, OutputInterface $output, $params) {
-            $action = $refClass->newInstance();
-
-            if ($action instanceof AbstractAction) {
-                $action->setLogger($this->logger);
-            }
-
-            if ($action instanceof IAction) {
-                if ($action->isRunnable($params)) {
-                    $action->setContainer($this->getContainer());
-
-                    $this->logger->debug("Starting command with params: " . print_r($params, true));
-                    Log::info("Start [" . $refClass->getShortName() . "]");
-                    Log::blkstart();
-                    $ret = $action->run($output, $params);
-                    Log::blkend();
-                    return $ret;
-                } else {
-                    Log::info("Skipped [" . $refClass->getShortName() . "]");
-                    $this->logger->info("Skipped tasks '" . $refClass->getName() . "' during config settings.");
-                }
-            }
-
-            return null;
-        }
-
-
-        /**
-         * @param array $extend
-         * @return array
-         */
-        protected function compileConfiguration(BuildOptions $buildOptions, InputInterface $input) {
-            $ret = $this->getContainer()->getParameter("terrific_exporter");
-
-            /** @var $fs Filesystem */
-            $fs = $this->getContainer()->get("filesystem");
-
-            /** @var $configFinder ConfigFinder */
-            $configFinder = $this->getContainer()->get("terrific.exporter.configfinder");
-
-
-            if (!empty($ret["build_path"]) && $fs->isAbsolutePath($ret["build_path"])) {
-                $ret["exportPath"] = $ret["build_path"];
-            } else if (!empty($ret["build_path"])) {
-                $ret["exportPath"] = realpath($this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_path"]);
-            }
-
-
-            // append build options
-            if (!empty($ret["build_settings"])) {
-                $file = $this->getContainer()->getParameter("kernel.root_dir") . "/../" . $ret["build_settings"];
-
-                try {
-                    if (!$fs->exists(dirname($file))) {
-                        FileHelper::createPathRecursive(dirname($file));
-                    }
-
-                    if (!$fs->exists($file)) {
-                        $defaultConfig = $configFinder->find("build.ini");
-                        $fs->copy($defaultConfig, $file);
-                        LOG::warn("Installed default buildOptions file [%s]", array(basename($file)));
-                    }
-
-                    $buildOptions->setFile($file);
-
-                    $version = $buildOptions["version"];
-
-                    if ($ret["export_with_version"]) {
-                        $ret["exportPath"] .= sprintf("/%s-%s.%s.%s", $version["name"], $version["major"], $version["minor"], $version["build"]);
-                    } else {
-                        $ret["exportPath"] .= "/" . $version["name"];
-
-                    }
-                } catch (IOException $ex) {
-                    throw $ex;
-                }
-            }
-
-            // Setting console options
-            if ($input->hasParameterOption("--no-validation")) {
-                $ret["validate_js"] = false;
-                $ret["validate_html"] = false;
-                $ret["validate_css"] = false;
-            }
-
-            if ($input->hasParameterOption("--no-js-doc")) {
-                $ret["build_js_doc"] = false;
-            }
-
-            if ($input->hasParameterOption("--no-image-optimization")) {
-                $ret["optimize_images"] = false;
-            }
-
-            return $ret;
         }
 
 
@@ -267,72 +107,77 @@ namespace Terrific\ExporterBundle\Command {
             // startup timer
             $timer->start();
 
-            $config = $this->compileConfiguration($buildOptions, $input);
-            $actionStack = $this->retrieveActionStack($config);
+            try {
+                $config = $this->compileConfiguration($buildOptions, $input);
+                $actionStack = $this->retrieveActionStack($config);
 
-            $reRunTimer = array();
-            for ($i = 0; $i < count($actionStack); $i++) {
-                /** @var $refClass \ReflectionClass */
-                $refClass = $actionStack[$i];
-                $queueItem = $refClass->getName();
+                $reRunTimer = array();
+                for ($i = 0; $i < count($actionStack); $i++) {
+                    /** @var $refClass \ReflectionClass */
+                    $refClass = $actionStack[$i];
+                    $queueItem = $refClass->getName();
 
-                if (!isset($reRunTimer[$queueItem])) {
-                    $reRunTimer[$queueItem] = 0;
-                }
-                $timer->lap("START-" . $refClass->getShortName());
-
-                $config["runnedTimer"] = $reRunTimer[$queueItem];
-                $ret = $this->runAction($refClass, $output, $config);
-
-                if ($ret instanceof ActionResult) {
-                    switch ($ret->getResultCode()) {
-                        case ActionResult::OK:
-                            break;
-
-                        case ActionResult::STOP:
-                            Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
-                            break 2;
-
-                        case ActionResult::TRY_AGAIN:
-                            $reRunTimer[$queueItem] += 1;
-                            if ($reRunTimer[$queueItem] < 10) {
-                                --$i;
-                            } else {
-                                $reRunTimer[$queueItem] = 0;
-                                Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
-                            }
-                            break;
-
-                        default:
-                            Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
-                            break;
+                    if (!isset($reRunTimer[$queueItem])) {
+                        $reRunTimer[$queueItem] = 0;
                     }
+                    $timer->lap("START-" . $refClass->getShortName());
+
+                    $config["runnedTimer"] = $reRunTimer[$queueItem];
+                    $ret = $this->runAction($refClass, $output, $config);
+
+                    if ($ret instanceof ActionResult) {
+                        switch ($ret->getResultCode()) {
+                            case ActionResult::OK:
+                                break;
+
+                            case ActionResult::STOP:
+                                Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
+                                break 2;
+
+                            case ActionResult::TRY_AGAIN:
+                                $reRunTimer[$queueItem] += 1;
+                                if ($reRunTimer[$queueItem] < 10) {
+                                    --$i;
+                                } else {
+                                    $reRunTimer[$queueItem] = 0;
+                                    Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
+                                }
+                                break;
+
+                            default:
+                                Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
+                                break;
+                        }
+                    }
+
+                    $timer->lap("STOP-" . $refClass->getShortName());
                 }
 
-                $timer->lap("STOP-" . $refClass->getShortName());
-            }
 
+                for ($i = 0; $i < count($actionStack); $i++) {
+                    $refClass = $actionStack[$i];
 
-            for ($i = 0; $i < count($actionStack); $i++) {
-                $refClass = $actionStack[$i];
+                    $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
+                    if ($this->logger) {
+                        $this->logger->info($msg);
+                    }
 
-                $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
-                if ($this->logger) {
-                    $this->logger->info($msg);
+                    Log::info($msg);
                 }
 
-                Log::info($msg);
-            }
+                // stop timer
+                $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
 
-            // stop timer
-            $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
-
-            if ($config["autoincrement_build"]) {
-                $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
-                $buildOptions->save();
+                if ($config["autoincrement_build"]) {
+                    $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
+                    $buildOptions->save();
+                }
+            } catch (ExporterException $ex) {
+                $this->logger->err($ex->getMessage());
+                $this->logger->debug($ex->getTraceAsString());
+                throw $ex;
             }
         }
-
 
     }
 }

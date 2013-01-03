@@ -101,7 +101,7 @@ namespace Terrific\ExporterBundle\Actions {
                             $path = $pathResolver->resolve(sprintf("/src/Terrific/Module/%s/Resource/views/%s", $module->getModule(), $module->getExportingPath()));
                             $this->saveToPath($file, $params["exportPath"] . "/" . $path);
 
-                            Log::info("Exported [%s]", array($module->getModule()));
+                            Log::info("Exported [%s]", array($module->getExportingPath()));
                             $modsDone[] = $module->getId();
                         }
                     }

@@ -28,7 +28,7 @@ namespace Terrific\ExporterBundle\Actions {
     /**
      *
      */
-    class ValidateCSS extends AbstractAction implements IAction {
+    class ValidateCSS extends AbstractValidateAction implements IAction {
         /**
          * Returns requirements for running this Action.
          *
@@ -129,21 +129,7 @@ namespace Terrific\ExporterBundle\Actions {
                             $this->log(AbstractAction::LOG_LEVEL_ERROR, $ret->getErrorOutput());
                             $error = true;
                         } else {
-                            // OUT
-                            $error = $parseRet->hasErrors();
-
-                            $results = $parseRet->toOutputString('[%1$s : %2$s] %3$s');
-                            foreach ($results as $item) {
-                                $this->log(AbstractAction::LOG_LEVEL_DEBUG, "--- " . $item);
-                            }
-
-                            $resultCount = count($results);
-
-                            if($resultCount == 0) {
-                                Log::info("Validated %s Found %d Issues.", array(basename($leaf->getTargetPath()), $resultCount));
-                            } else {
-                                Log::warn("Validated %s Found %d Issues.", array(basename($leaf->getTargetPath()), $resultCount));
-                            }
+                            $this->processValidationResults($parseRet, basename($leaf->getTargetPath()));
                         }
                     }
                 }
