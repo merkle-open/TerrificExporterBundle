@@ -123,3 +123,9 @@ Retrieves a list of all controller methods which are annotated with @Export. If 
 \hypertarget{sec-Actions-ExportChangelogs}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportChangelogs}}
 This action just copies your changelog files (file\_extensions: log, txt, md) to the exporting path. To append all changelogs create a folder under build/changelogs or setup your \mbox{'changelog\_path'} option. If this folder is not available no changelogs will appended.
 \end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportDiffs}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportDiffs}}
+ExportDiffs will generate diff files for each view and append it to your export. The exporter needs an additional information given as console parameter to find the last export. This argument is called \mbox{'--last-export=[directory]'} and need to be set to the last export package.
+\end{minipage}
