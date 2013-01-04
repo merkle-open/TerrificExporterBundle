@@ -37,7 +37,11 @@ namespace Terrific\ExporterBundle\Command {
          *
          */
         protected function configure() {
-            $this->setName('build:export')->setDescription('Builds m release')->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
+            $this->setName('build:export')->setDescription('Builds m release');
+            $this->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation");
+            $this->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images");
+            $this->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
+            $this->addOption("last-export", null, InputOption::VALUE_OPTIONAL, 'Folder to the last export to build a diff between the current and the old.');
         }
 
         /**
@@ -62,7 +66,7 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportChangelogs';
-
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportDiffs';
             }
 
 

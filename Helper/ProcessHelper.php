@@ -24,9 +24,7 @@ namespace Terrific\ExporterBundle\Helper {
             $retVal = 0;
             switch ($command) {
                 case "jpegoptim":
-                    $buildOp = array($command, "--version");
-                    break;
-
+                case "diff":
                 case "trimage":
                     $buildOp = array($command, "--version");
                     break;
@@ -34,6 +32,10 @@ namespace Terrific\ExporterBundle\Helper {
                 case "yuidoc":
                     $buildOp = array($command, "-v");
                     $retVal = 1;
+                    break;
+
+                case "git":
+                    $buildOp = array($command, "version");
                     break;
 
                 default:

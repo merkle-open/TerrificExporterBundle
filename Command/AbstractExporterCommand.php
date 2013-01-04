@@ -199,6 +199,16 @@ namespace Terrific\ExporterBundle\Command {
                 $ret["optimize_images"] = false;
             }
 
+            $ret["input"] = $input->getOptions();
+
+            if (isset($ret["input"]["last-export"])) {
+                $fs = new Filesystem();
+
+                if (!$fs->isAbsolutePath($ret["input"]["last-export"])) {
+                    $ret["input"]["last-export"] = realpath(getcwd() . "/" . $ret["input"]["last-export"]);
+                }
+            }
+
             return $ret;
         }
 

@@ -63,6 +63,7 @@ namespace Terrific\ExporterBundle\Actions {
                 Log::info("No changelog found");
             }
 
+            return new ActionResult(ActionResult::OK);
         }
     }
 }
