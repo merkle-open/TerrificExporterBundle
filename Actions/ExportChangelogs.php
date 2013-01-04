@@ -65,7 +65,7 @@ namespace Terrific\ExporterBundle\Actions {
                     $this->saveToPath($file->getPathname(), $params["exportPath"] . "/" . $target);
                 }
 
-                Log::info("Append %d changelog" . ($finder->count() == 1 ? : 's'), array($finder->count()));
+                Log::info("Append %d changelog" . ($finder->count() == 1 ? '' : 's'), array($finder->count()));
             } else {
                 Log::info("No changelog found");
             }

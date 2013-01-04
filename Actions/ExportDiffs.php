@@ -93,7 +93,7 @@ namespace Terrific\ExporterBundle\Actions {
                     $diff = trim($process->getOutput());
 
                     $tmpFile = $tmpFileMgr->putContent($diff);
-                    $targetPath = $pathResolver->resolve(basename($file->getFilename()) . ".diff");
+                    $targetPath = $pathResolver->resolve($file->getFilename() . ".diff");
                     $this->saveToPath($tmpFile, $params["exportPath"] . "/" . $targetPath);
                 }
             }
