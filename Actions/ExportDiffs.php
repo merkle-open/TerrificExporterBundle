@@ -15,6 +15,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Service\TempFileManager;
     use Terrific\ExporterBundle\Service\PageManager;
     use Terrific\ExporterBundle\Object\Route;
+    use Terrific\ExporterBundle\Object\RouteLocale;
     use Symfony\Component\Finder\Finder;
     use Symfony\Component\Finder\SplFileInfo;
     use Terrific\ExporterBundle\Service\PathResolver;
@@ -75,6 +76,10 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
                 if ($route->isLocalized()) {
+                    /** @var $locale RouteLocale */
+                    foreach ($route->getLocales() as $locale) {
+                        $finder->name($locale->getExportName());
+                    }
                 } else {
                     $finder->name($route->getExportName());
                 }
