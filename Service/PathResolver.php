@@ -27,9 +27,11 @@ namespace Terrific\ExporterBundle\Service {
         const TYPE_VIEW = 0x02;
         const TYPE_CSS = 0x04;
         const TYPE_JS = 0x08;
+        const TYPE_DIFF = 0x10;
+        const TYPE_CHANGELOG = 0x20;
 
-        const SCOPE_GLOBAL = 0x20;
-        const SCOPE_MODULE = 0x10;
+        const SCOPE_GLOBAL = 0x200;
+        const SCOPE_MODULE = 0x100;
 
         /** @var ContainerInterface */
         protected $container;
@@ -168,11 +170,20 @@ namespace Terrific\ExporterBundle\Service {
                 if (isset($config["pathtemplates"])) {
                     $config = $config["pathtemplates"];
 
-                    $a = array(
-                        (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => 'image', (self::TYPE_FONT | self::SCOPE_GLOBAL) => 'font', (self::TYPE_CSS | self::SCOPE_GLOBAL) => 'css', (self::TYPE_JS | self::SCOPE_GLOBAL) => 'js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => 'view',
-
-                        (self::TYPE_IMAGE | self::SCOPE_MODULE) => 'module_image', (self::TYPE_FONT | self::SCOPE_MODULE) => 'module_font', (self::TYPE_CSS | self::SCOPE_MODULE) => 'module_css', (self::TYPE_JS | self::SCOPE_MODULE) => 'module_js', (self::TYPE_VIEW | self::SCOPE_MODULE) => 'module_view'
-                    );
+                    $a = array();
+                    $a[(self::TYPE_IMAGE | self::SCOPE_GLOBAL)] = 'image';
+                    $a[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = 'font';
+                    $a[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = 'css';
+                    $a[(self::TYPE_JS | self::SCOPE_GLOBAL)] = 'js';
+                    $a[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = 'view';
+                    $a[(self::TYPE_IMAGE | self::SCOPE_MODULE)] = 'module_image';
+                    $a[(self::TYPE_FONT | self::SCOPE_MODULE)] = 'module_font';
+                    $a[(self::TYPE_CSS | self::SCOPE_MODULE)] = 'module_css';
+                    $a[(self::TYPE_JS | self::SCOPE_MODULE)] = 'module_js';
+                    $a[(self::TYPE_VIEW | self::SCOPE_MODULE)] = 'module_view';
+                    $a[(self::TYPE_VIEW | self::SCOPE_MODULE)] = 'module_view';
+                    $a[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
+                    $a[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
 
 
                     foreach ($a as $key => $val) {
@@ -282,25 +293,35 @@ namespace Terrific\ExporterBundle\Service {
                 case "GIF":
                 case "JPG":
                 case "PNG":
-                    return PathResolver::TYPE_IMAGE;
+                    return self::TYPE_IMAGE;
                     break;
 
                 case "EOT":
                 case "TTF":
                 case "WOFF":
-                    return PathResolver::TYPE_FONT;
+                    return self::TYPE_FONT;
                     break;
 
                 case "CSS":
-                    return PathResolver::TYPE_CSS;
+                    return self::TYPE_CSS;
                     break;
 
                 case "JS":
-                    return PathResolver::TYPE_JS;
+                    return self::TYPE_JS;
                     break;
 
                 case "HTML":
-                    return PathResolver::TYPE_VIEW;
+                    return self::TYPE_VIEW;
+                    break;
+
+                case "DIFF":
+                    return self::TYPE_DIFF;
+                    break;
+
+                case "MD":
+                case "TXT":
+                case "LOG":
+                    return self::TYPE_CHANGELOG;
                     break;
             }
         }
@@ -372,13 +393,15 @@ namespace Terrific\ExporterBundle\Service {
          * Builds a new path for the given path. The Path is generated against configuration settings.
          *
          * @param $sourcePath string
+         * @param $forcedScope int
+         * @param $forcedType int
          * @return string
          */
-        public function resolve($sourcePath) {
+        public function resolve($sourcePath, $forcedScope = null, $forcedType = null) {
             $ret = "";
             $sourcePath = $this->cleanPath($sourcePath);
-            $type = $this->getType($sourcePath);
-            $scope = $this->getScope($sourcePath);
+            $scope = ($forcedScope != null ? $forcedScope : $this->getScope($sourcePath));
+            $type = ($forcedType != null ? $forcedType : $this->getType($sourcePath));
 
             $tpl = $this->pathTemplate[($type | $scope)];
 
@@ -455,9 +478,21 @@ namespace Terrific\ExporterBundle\Service {
          * Constructor
          */
         public function __construct() {
-            $this->pathTemplate = array(
-                (self::TYPE_IMAGE | self::SCOPE_GLOBAL) => '/img/common', (self::TYPE_FONT | self::SCOPE_GLOBAL) => '/fonts', (self::TYPE_CSS | self::SCOPE_GLOBAL) => '/css', (self::TYPE_JS | self::SCOPE_GLOBAL) => '/js', (self::TYPE_VIEW | self::SCOPE_GLOBAL) => '/views', (self::TYPE_IMAGE | self::SCOPE_MODULE) => '/img/%module%', (self::TYPE_FONT | self::SCOPE_MODULE) => '/fonts/%module%', (self::TYPE_CSS | self::SCOPE_MODULE) => '/css/%module%', (self::TYPE_JS | self::SCOPE_MODULE) => '/js/%module%', (self::TYPE_VIEW | self::SCOPE_MODULE) => '/views/%module%'
-            );
+            $this->pathTemplate = array();
+
+            $this->pathTemplate[(self::TYPE_IMAGE | self::SCOPE_GLOBAL)] = '/img/common';
+            $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = '/fonts';
+            $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = '/css';
+            $this->pathTemplate[(self::TYPE_JS | self::SCOPE_GLOBAL)] = '/js';
+            $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = '/views';
+            $this->pathTemplate[(self::TYPE_IMAGE | self::SCOPE_MODULE)] = '/img/%module%';
+            $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_MODULE)] = '/fonts/%module%';
+            $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_MODULE)] = '/css/%module%';
+            $this->pathTemplate[(self::TYPE_JS | self::SCOPE_MODULE)] = '/js/%module%';
+            $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_MODULE)] = '/views/%module%';
+            $this->pathTemplate[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
+            $this->pathTemplate[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
+
 
             $this->modules = array();
             $this->moduleManager = null;

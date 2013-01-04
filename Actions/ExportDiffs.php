@@ -67,7 +67,6 @@ namespace Terrific\ExporterBundle\Actions {
             $tmpFileMgr = $this->container->get("terrific.exporter.temp_file_manager");
 
             $lastExportPath = $params["input"]["last-export"];
-            $changeLogPath = $params["exportPath"] . "/changelogs/diffs";
 
 
             $finder = new Finder();
@@ -94,7 +93,8 @@ namespace Terrific\ExporterBundle\Actions {
                     $diff = trim($process->getOutput());
 
                     $tmpFile = $tmpFileMgr->putContent($diff);
-                    $this->saveToPath($tmpFile, "${changeLogPath}/" . basename($file->getFilename()) . ".diff");
+                    $targetPath = $pathResolver->resolve(basename($file->getFilename()) . ".diff");
+                    $this->saveToPath($tmpFile, $params["exportPath"] . "/" . $targetPath);
                 }
             }
 

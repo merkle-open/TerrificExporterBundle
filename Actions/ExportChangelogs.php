@@ -12,6 +12,8 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Finder\SplFileInfo;
     use Terrific\ExporterBundle\Helper\FileHelper;
     use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Service\PathResolver;
+    use Terrific\ExporterBundle\Object\ActionResult;
 
     class ExportChangelogs extends AbstractExportAction {
         /**
@@ -41,8 +43,10 @@ namespace Terrific\ExporterBundle\Actions {
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
-            $finder = new Finder();
+            /** @var $pathResolver PathResolver */
+            $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
+            $finder = new Finder();
             $finder->in($params["changelogPath"]);
             $finder->name("*.md")->name("*.txt")->name("*.log");
 
@@ -52,13 +56,16 @@ namespace Terrific\ExporterBundle\Actions {
                 FileHelper::createPathRecursive($exportPath);
 
                 $this->log(self::LOG_LEVEL_DEBUG, "Append Changelogs:");
+
                 /** @var $file SplFileInfo */
                 foreach ($finder as $file) {
                     $this->log(self::LOG_LEVEL_DEBUG, "-- Append Changelog: " . $file->getFilename());
-                    $this->fs->copy($file->getPathname(), $exportPath . "/" . $file->getFilename());
+
+                    $target = $pathResolver->resolve($file->getFilename(), PathResolver::SCOPE_GLOBAL, PathResolver::TYPE_CHANGELOG);
+                    $this->saveToPath($file->getPathname(), $params["exportPath"] . "/" . $target);
                 }
 
-                Log::info("Append %d changelogs", array($finder->count()));
+                Log::info("Append %d changelog" . ($finder->count() == 1 ? : 's'), array($finder->count()));
             } else {
                 Log::info("No changelog found");
             }
