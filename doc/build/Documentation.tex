@@ -8,17 +8,48 @@
 \usepackage{pdfpages}
 \usepackage{lscape}
 \usepackage{changepage}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
 
 \hypersetup{
 	pdfauthor={Bruno Lorenz},
-	pdftitle={TerrificExporterBundle Documentation},
+	pdftitle={ExporterBundle Documentation},
 	colorlinks=true,
   linkcolor=blue
 }
 
+%###############################################################################################
+\title{ExporterBundle Documentation}
+\author{Bruno Lorenz\\
+  Namics AG\\
+  Watzmannstraße 1a\\
+  81541 München\\
+  Germany\\
+  \texttt{bruno.lorenz@namics.com}}
+\date{\today}
+
+%###############################################################################################
+\definecolor{wmark1}{HTML}{9B1329}
+\definecolor{wmark2}{HTML}{FF0000}
+\definecolor{wmark3}{HTML}{009036}
+%###############################################################################################
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\cfoot{}
+
+\renewcommand{\headrulewidth}{0pt}
+
+
 \renewcommand{\familydefault}{\sfdefault}
 \renewcommand{\baselinestretch}{1.10}\normalsize
 
+\def\Version#1{\def\version{#1}}
+\Version{0.1a}
+%###############################################################################################
 \newcommand{\litem}[1]{
 	\vspace{-0.2cm}
 	\item{#1}
@@ -32,24 +63,21 @@
  \hypertarget{sec-#1}{\section{#1}}
 }
 
-\title{TerrificExporterBundle Documentation}
-\author{Bruno Lorenz\\
-  Namics AG\\
-  Watzmannstraße 1a\\
-  81541 München\\
-  Germany\\
-  \texttt{bruno.lorenz@namics.com}}
-\date{\today}
+%###############################################################################################
+
 
 \begin{document}
 
-\begin{abstract}
-    \Large This documentation covers ExportBundle version 2.0.\\
-    \Large At the current state this document is not complete.
-\end{abstract}
+\include{titlepage} \newpage
 
-\tableofcontents
-\newpage
+\include{versions} \newpage
+
+
+\lfoot{ExporterBundle Documentation}
+\rfoot{\textnormal{\thepage} / \textnormal{\pageref*{LastPage}}}
+\renewcommand{\footrulewidth}{0.4pt}
+\setcounter{page}{1}
+\tableofcontents \newpage
 
 
 \include{chap-installation}
