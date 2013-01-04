@@ -41,6 +41,7 @@ There are a number of tools needed depending on your configuration and tasks.\\
 	\litem{optipng}
 	\litem{advpng}
 	\litem{montage}
+    \litem{diff}
 \end{itemize}
 
 \noindent It is necessary to have all tools within path, the exporter won't search for tools on your hardrive. So you have to setup your path variable depending on your os system correctly to have all tools within path's.\\
@@ -69,12 +70,12 @@ npm -g install yuidocjs jslint csshint
 \noindent \textbf{Windows}\\
 \noindent Jpegoptim is currently not available on Windows systems.\\
 \\
-Optipng can be retrieved from http://optipng.sourceforge.net/. Just download the Windows package unzip it no installation required.\\
+Optipng can be retrieved from \mbox{\url{http://optipng.sourceforge.net/}}. Just download the Windows package unzip it no installation required.\\
 \\
-Advpng or advancecomp can be fetched from http://advancemame.sourceforge.net/comp-download.html. The same just download and unzip.\\
+Advpng or advancecomp can be fetched from \mbox{\url{http://advancemame.sourceforge.net/comp-download.html}}. The same just download and unzip.\\
 \\
 Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
-http://www.imagemagick.org/script/binary-releases.php \\
+\mbox{\url{http://www.imagemagick.org/script/binary-releases.php}} \\
 
 % ################################################################################################################################
 
@@ -110,6 +111,28 @@ cd jpegoptim-1.2.4
 \\
 Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
 \url{http://www.imagemagick.org/script/binary-releases.php}\\
+
+
+% ################################################################################################################################
+\subsubsection{diff}
+
+\noindent \textbf{Windows}\\
+\noindent On windows there are a number of tools doing the same job as diff on *nixes. You can install a commandline version from diff with \mbox{\href{http://www.cygwin.com/}{cygwin}}.
+
+\noindent \textbf{Unix/Linux}\\
+\noindent Normally diff should be installed on all *nixes. If not just install it using your packagemanager. \\
+\begin{verbatim}
+# Debian/Ubuntu:
+sudo apt-get install diff
+
+# RHEL/CentOS/Fedora:
+sudo yum install diff
+\end{verbatim}
+
+\noindent \textbf{MacOSX}\\
+\noindent On MacOSX diff is already installed.
+
+
 
 % ################################################################################################################################
 \subsection{Setup an export environment}
