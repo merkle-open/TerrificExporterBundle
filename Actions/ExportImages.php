@@ -119,6 +119,7 @@ namespace Terrific\ExporterBundle\Actions {
             $assetManager = $this->container->get("assetic.asset_manager");
 
             $styles = array();
+            $count = 0;
 
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
@@ -137,10 +138,12 @@ namespace Terrific\ExporterBundle\Actions {
 
                         $content = $leaf->dump();
                         $imageList = AsseticHelper::retrieveImages($content);
-                        $this->saveImage($imageList, $pathResolver, $params);
+                        $count += $this->saveImage($imageList, $pathResolver, $params);
                     }
                 }
             }
+
+            return $count;
         }
 
 

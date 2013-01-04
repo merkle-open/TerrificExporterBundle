@@ -8,7 +8,11 @@
  */
 namespace Terrific\ExporterBundle\Helper {
     use Symfony\Component\Filesystem\Filesystem;
-    use IOException;
+    use Symfony\Component\Finder\Finder;
+    use Symfony\Component\Finder\SplFileInfo;
+    use Symfony\Component\Filesystem\Exception\IOException;
+    use ZipArchive;
+
 
     /**
      *
@@ -85,6 +89,51 @@ namespace Terrific\ExporterBundle\Helper {
             if (!$fs->exists($targetPath)) {
                 throw new IOException("Couldn't create path [${targetPath}]");
             }
+        }
+
+        /**
+         * Builds a zipArchive from the given folder and removes it if $removeFolder = true.
+         * Returns the new filename.
+         *
+         * @param string $folder
+         * @param string|null $target
+         * @param bool $removeFolder
+         * @return string
+         */
+        public static function buildZip($folder, $target = null, $removeFolder = false) {
+            $fs = new Filesystem();
+            $finder = new Finder();
+
+            if (!$fs->exists($folder)) {
+                throw new IOException(sprintf("Cannot find source folder [%s]", $folder));
+            }
+
+            if ($target == null) {
+                $target = $folder . ".zip";
+            }
+
+            $zip = new ZipArchive();
+
+            if ($zip->open($target, ZipArchive::CREATE) !== true) {
+                throw new IOException(sprintf("Cannot create zip archive [%s]", $target));
+            }
+
+            $finder->in($folder);
+
+            /** @var $file SplFileInfo */
+            foreach ($finder->files() as $file) {
+                $zip->addFile($file->getPathname(), $file->getRelativePathname());
+            }
+
+            if ($zip->close() === true) {
+                if ($removeFolder === true) {
+                    $fs->remove($folder);
+                }
+            } else {
+                throw new IOException("Could not save zip file");
+            }
+
+            return $target;
         }
     }
 }

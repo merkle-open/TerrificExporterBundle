@@ -171,6 +171,12 @@ namespace Terrific\ExporterBundle\Command {
                     Log::info($msg);
                 }
 
+                if (!empty($config["export_type"]) && strtolower($config["export_type"]) === "zip") {
+                    $file = FileHelper::buildZip($config["exportPath"], null, true);
+                    Log::info(sprintf("Built zipfile [%s]", basename($file)));
+                }
+
+
                 // stop timer
                 $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
 

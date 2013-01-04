@@ -78,6 +78,8 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                     ->scalarNode("css")->defaultValue("/css")->end()
                     ->scalarNode("js")->defaultValue("/js")->end()
                     ->scalarNode("view")->defaultValue("/views")->end()
+                    ->scalarNode("changelog")->defaultValue("/changelogs")->end()
+                    ->scalarNode("diff")->defaultValue("/changelogs/diff")->end()
 
                     ->scalarNode("module_image")->defaultValue("/img/%module%")->end()
                     ->scalarNode("module_font")->defaultValue("/fonts/%module%")->end()
