@@ -91,44 +91,6 @@ namespace Terrific\ExporterBundle\Command {
             return $stack;
         }
 
-<<<<<<< HEAD
-    private function findLocationsToUrl($url)
-    {
-        $eList = $this->getContainer()->getParameter('terrific_exporter.layout_export_list');
-
-        foreach ($eList as $k => $v) {
-            if ($v["url"] == $url) {
-                return $v["locations"];
-            }
-        }
-    }
-
-    private function backupLocales()
-    {
-        return array(
-            $this->getContainer()->get("session")->getLocale(),
-            $this->getContainer()->get("translator")->getLocale()
-        );
-    }
-
-    private function restoreLocales($locales)
-    {
-        $this->getContainer()->get("session")->setLocale($locales[0]);
-        $this->getContainer()->get("translator")->setLocale($locales[1]);
-    }
-
-
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     */
-    protected function exportLayouts(InputInterface $input, OutputInterface $output)
-    {
-        $exportFilter = $this->getContainer()->get('terrific.exporter.filter.html');
-        $pageManager = $this->getContainer()->get("terrific.composer.page.manager");
-        $http = $this->getContainer()->get("http_kernel");
-=======
->>>>>>> refactored
 
         /**
          * @param InputInterface $input
@@ -141,56 +103,11 @@ namespace Terrific\ExporterBundle\Command {
 
             $this->logger = $this->getContainer()->get('logger');
 
-<<<<<<< HEAD
-        $localeBackup = $this->backupLocales();
-
-        foreach ($pageManager->getPages() as $page) {
-            if ($exportList == null || in_array($page->getUrl(), $exportList)) {
-                $locales = $this->findLocationsToUrl($page->getUrl());
-
-                if (count($locales) == 0) {
-                    $urlList = array($page->getUrl());
-                } else {
-                    $urlList = array();
-                    foreach ($locales as $loc) {
-                        $urlList[$loc] = $page->getUrl() . "/" . $loc;
-                    }
-                }
-
-
-                foreach ($urlList as $loc => $url) {
-                    $tplName = $page->getName();
-                    if (is_string($loc)) {
-                        $tplName .= "_" . $loc;
-                        $this->restoreLocales(array($loc, $loc));
-                    }
-
-                    $request = Request::create($url);
-                    $resp = $http->handle($request);
-                    $ret = $resp->getContent();
-
-                    if ($this->getContainer()->getParameter('terrific_exporter.build_local_paths')) {
-                        $ret = $exportFilter->filter($ret);
-                    }
-
-                    file_put_contents($tempPath . "/" . $tplName . ".html", $ret);
-                    $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Built layout " . $tplName));
-                }
-
-
-            }
-        }
-
-        $this->restoreLocales($localeBackup);
-    }
-=======
             /** @var $timer TimerService */
             $timer = $this->getContainer()->get("terrific.exporter.timerservice");
 
             /** @var $buildOptions BuildOptions */
             $buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
-
->>>>>>> refactored
 
             // startup timer
             $timer->start();
@@ -241,54 +158,8 @@ namespace Terrific\ExporterBundle\Command {
                     $timer->lap("STOP-" . $refClass->getShortName());
                 }
 
-
-<<<<<<< HEAD
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start Asset export"));
-            #$returnCode = $command->run($cmdInput, $output);
-            $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
-
-
-            $tempPath = $this->buildTempPath(true);
-
-            //
-            // build sprites
-            //
-            if ($this->getContainer()->getParameter('terrific_exporter.build_sprites')) {
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Build Sprites"));
-                $command = $this->getApplication()->find('build:sprites');
-                $returnCode = $command->run($cmdInput, $output);
-            }
-
-            $this->getContainer()->enterScope('request');
-
-            if ($input->getOption("export-lang") != "") {
-                $this->getContainer()->get("session")->setLocale($input->getOption("export-lang"));
-                $this->getContainer()->get("translator")->setLocale($input->getOption("export-lang"));
-            }
-
-            $this->exportAssets($input, $output);
-
-            if ($this->getContainer()->getParameter('terrific_exporter.export_modules')) {
-                $this->exportModules($input, $output);
-            }
-
-            if ($this->getContainer()->getParameter('terrific_exporter.export_layouts')) {
-                $this->exportLayouts($input, $output);
-            }
-
-            $this->getContainer()->leaveScope('request');
-
-
-            if ($this->getContainer()->getParameter('terrific_exporter.export_rewrite_routes')) {
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Output router rules"));
-                $sOutput = new StreamOutput(fopen($tempPath . "/.htaccess", "w"));
-                $command = $this->getApplication()->find('router:dump-apache');
-                $returnCode = $command->run($cmdInput, $sOutput);
-            }
-=======
                 for ($i = 0; $i < count($actionStack); $i++) {
                     $refClass = $actionStack[$i];
->>>>>>> refactored
 
                     $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
                     if ($this->logger) {
