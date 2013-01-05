@@ -1,0 +1,16 @@
+\hsection{Known Problems}
+During the complexity of a project and this exporter there will always some constructs which are problematic and the exporter won't export. Some of the currently known limitations are written down here.
+
+\subsection{Module command with parameter set by the controller}
+Constructs like \emph{tc.module(module,skins,views)} which needs data from the controller will currently not work. This is due to the fact that PageManager generates a list of assets from the templates directly and won't call the controller method for this.
+
+\subsection{Methods that returns a response rather than connect a view with @Template()}
+
+\subsection{Assets with the path and name but different content within the same export}
+If two or more views use a asset named default.css but with different content, the export won't understand that this files named the same but different content so it will tell you that there is already a file with this name and stop exporting.
+
+\subsection{Asset usage commands within parent templates}
+At the moment the PageManager generates a list of all views with all used assets. Currently the PageManager ignores twig's block overrides. This means the exporter will also export assets within overriden unused blocks.
+
+\subsection{Templates engines other than Twig}
+Currently not supported during the usage of the twig template lexer to find used assets within the templates.

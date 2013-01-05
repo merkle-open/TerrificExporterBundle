@@ -1,0 +1,142 @@
+
+\section{Installation}
+
+
+% ################################################################################################################################
+\subsection{Requirements}
+During some functionality is only available since symfony 2.1 it is \textbf{necessary to have your project on a symfony 2.1 basis}. Some actions requires additional tools to do their work. \textbf{As long as this actions are part of the actionstack they will force you to have this tools installed and callable!} If you don't need this action and don't want to install the tools needed for it you have to configure a action stack without this specific action. See chapter '\mbox{\hyperlink{chap-Configuration}{Configuration}}' for more information about defining you own action stack.
+
+% ################################################################################################################################
+\subsection{Dependency management}
+Update your composer.json and add a new repository. \\
+
+\begin{verbatim}
+{
+"type" : "vcs",
+"url"  : "http://github.com/senuphtyz/TerrificExporterBundle"
+}
+\end{verbatim}
+
+\noindent After that add a new requirement to your project. \\
+
+\begin{verbatim}
+"senuphtyz/terrific-exporter-bundle" : "dev-refactored"
+\end{verbatim}
+\noindent Now update your project using the composer. \\
+
+\begin{verbatim}
+php composer.phar update
+\end{verbatim}
+\noindent This should now install alle necessary requirements for your project. \\
+
+% ################################################################################################################################
+\subsection{Tooling}
+There are a number of tools needed depending on your configuration and tasks.\\
+
+\begin{itemize}
+	\litem{YUIDoc}
+	\litem{csshint}
+	\litem{jslint}
+	\litem{jpegoptim}
+	\litem{optipng}
+	\litem{advpng}
+	\litem{montage}
+    \litem{diff}
+\end{itemize}
+
+\noindent It is necessary to have all tools within path, the exporter won't search for tools on your hardrive. So you have to setup your path variable depending on your os system correctly to have all tools within path's.\\
+\\
+On Windows: \url{http://www.computerhope.com/issues/ch000549.htm}\\
+\\
+On *nix/MacOSX: \url{http://www.troubleshooters.com/linux/prepostpath.htm}\\
+To do a permanent change it is necessary to change ~/.bashrc or ~/.bash\_profile depending on your os.
+
+% ################################################################################################################################
+\subsubsection{YUIDoc, jslint, csshint}
+YUIDoc, jslint and csshint are installed using Node.js. Just go to nodejs.org download the package fits for you operating system and install it. \\
+After the installation is done open up a new commandline and install Node.js.
+
+\begin{verbatim}
+npm -g install yuidocjs jslint csshint
+\end{verbatim}
+
+\noindent For further help and syntax for YUIDoc visit \url{http://yui.github.com/yuidoc/}.
+
+
+% ################################################################################################################################
+\subsubsection{jpegoptim, optipng, advpng, montage}
+
+% ################################################################################################################################
+\noindent \textbf{Windows}\\
+\noindent Jpegoptim is currently not available on Windows systems.\\
+\\
+Optipng can be retrieved from \mbox{\url{http://optipng.sourceforge.net/}}. Just download the Windows package unzip it no installation required.\\
+\\
+Advpng or advancecomp can be fetched from \mbox{\url{http://advancemame.sourceforge.net/comp-download.html}}. The same just download and unzip.\\
+\\
+Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
+\mbox{\url{http://www.imagemagick.org/script/binary-releases.php}} \\
+
+% ################################################################################################################################
+
+\noindent \textbf{Unix/Linux}\\
+\noindent On Ubuntu/Debian based Linux it is possible to install jpegoptim directly using your package manager.\\
+
+
+\begin{verbatim}
+sudo apt-get install jpegoptim advancecomp optipng imagemagick
+\end{verbatim}
+
+\noindent
+On RHEL/Fedora/Centos Linux you have to install jpegoptim from source, rest of the tools could be installed using yum. Download the current version from \url{http://www.kokkonen.net/tjko/projects.html}. \\
+
+
+\begin{verbatim}
+sudo yum install advancecomp optipng ImageMagick
+\end{verbatim}
+
+\noindent \textbf{jpegoptim}
+\begin{verbatim}
+tar zxf jpegoptim-1.2.4.tar.gz
+cd jpegoptim-1.2.4
+./configure && make && make install
+\end{verbatim}
+
+
+% ################################################################################################################################
+\noindent \textbf{MacOSX}\\
+\noindent On MacOSX the easiest way to get the whole toolset is to install ImageOptim. This application contains all necessary image optimizing tools needed by the exporter.\\
+\\
+\url{http://imageoptim.com/}\\
+\\
+Montage is part of the ImageMagick toolset. To install ImageMagick visit:\\
+\url{http://www.imagemagick.org/script/binary-releases.php}\\
+
+
+% ################################################################################################################################
+\subsubsection{diff}
+
+\noindent \textbf{Windows}\\
+\noindent On windows there are a number of tools doing the same job as diff on *nixes. You can install a commandline version from diff with \mbox{\href{http://www.cygwin.com/}{cygwin}}.
+
+\noindent \textbf{Unix/Linux}\\
+\noindent Normally diff should be installed on all *nixes. If not just install it using your packagemanager. \\
+\begin{verbatim}
+# Debian/Ubuntu:
+sudo apt-get install diff
+
+# RHEL/CentOS/Fedora:
+sudo yum install diff
+\end{verbatim}
+
+\noindent \textbf{MacOSX}\\
+\noindent On MacOSX diff is already installed.
+
+
+
+% ################################################################################################################################
+\subsection{Setup an export environment}
+
+It is necessary to setup a new environment for you export. To setup an export environment just copy your app/config.yml to app/config\_export.yml. Now you created a new environment called "export". \\
+\\
+You can now configure the environment to your project needs. For further information visit \url{http://symfony.com/doc/current/cookbook/configuration/environments.html}.\\

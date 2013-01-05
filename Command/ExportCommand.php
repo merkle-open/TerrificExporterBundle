@@ -8,305 +8,90 @@
  */
 
 
-namespace Terrific\ExporterBundle\Command;
-
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Console\Output\StreamOutput;
-use Assetic\Asset\AssetInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Console\Input\ArrayInput;
-use ZipArchive;
-
-class ExportCommand extends AbstractCommand
-{
-    protected $fsys = null;
-
-
-    /**
-     * @param $array
-     * @param $attrib
-     */
-    private function retrieveList($array, $attrib)
-    {
-        $exportList = $array;
-        if (count($exportList) == 0) {
-            $exportList = null;
-        } else {
-            $tmpList = array();
-            foreach ($exportList as $e) {
-                $tmpList[] = $e[$attrib];
-            }
-            $exportList = $tmpList;
-        }
-
-        return $exportList;
-    }
-
-    /**
-     * @param $attrib
-     */
-    private function retrieveLayoutList($attrib)
-    {
-        return $this->retrieveList($this->getContainer()->getParameter('terrific_exporter.layout_export_list'), $attrib);
-    }
-
-    private function retrieveModuleList($attrib)
-    {
-        return $this->retrieveList($this->getContainer()->getParameter('terrific_exporter.module_export_list'), $attrib);
-    }
-
+namespace Terrific\ExporterBundle\Command {
+    use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+    use Symfony\Component\Console\Input\InputInterface;
+    use Symfony\Component\Console\Output\OutputInterface;
+    use Symfony\Component\Console\Input\InputOption;
+    use Symfony\Component\HttpKernel\Log\LoggerInterface;
+    use Terrific\ExporterBundle\Object\ActionResult;
+    use Terrific\ExporterBundle\Actions\IAction;
+    use Terrific\ExporterBundle\Actions\AbstractAction;
+    use Terrific\ExporterBundle\Helper\TimerService;
+    use Symfony\Component\Filesystem\Filesystem;
+    use Terrific\ExporterBundle\Service\BuildOptions;
+    use Terrific\ExporterBundle\Object\ActionRequirement;
+    use Terrific\ExporterBundle\Helper\ProcessHelper;
+    use Terrific\ExporterBundle\Object\ActionRequirementStack;
+    use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Service\ConfigFinder;
+    use Terrific\ExporterBundle\Helper\FileHelper;
+    use Terrific\ExporterBundle\Exception\ExporterException;
 
     /**
      *
      */
-    protected function configure()
-    {
-        $this
-            ->setName('build:export')
-            ->setDescription('Builds a release')
-            ->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation")
-            ->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images")
-            ->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc')
-            ->addOption('export-lang', null, InputOption::VALUE_OPTIONAL, 'Used to export a specific language');
-    }
+    class ExportCommand extends AbstractExporterCommand {
 
-
-    /**
-     * @throws \Exception
-     */
-    protected function buildTempPath($removeIfExists = false, $path = null)
-    {
-        $tempPath = sys_get_temp_dir() . "/TerrificExport" . ($path != null ? "/" . $path : "");
-        if ($removeIfExists && file_exists($tempPath)) {
-            $this->fsys->remove($tempPath);
-        }
-        if (false === $this->fsys->mkdir($tempPath, 0777)) {
-            throw new \Exception("Couldn't create temp path.");
+        /**
+         *
+         */
+        protected function configure() {
+            $this->setName('build:export')->setDescription('Builds m release');
+            $this->addOption('no-validation', null, InputOption::VALUE_OPTIONAL, "no build validation");
+            $this->addOption('no-image-optimization', null, InputOption::VALUE_OPTIONAL, "Do not optimize images");
+            $this->addOption('no-js-doc', null, InputOption::VALUE_OPTIONAL, 'Do not generate javascript doc');
+            $this->addOption("last-export", null, InputOption::VALUE_OPTIONAL, 'Folder to the last export to build a diff between the current and the old.');
         }
 
-        return $tempPath;
-    }
+        /**
+         *
+         */
+        protected function retrieveActionStack(array $config) {
+            $ret = array();
 
-
-    /**
-     *
-     */
-    protected function exportAssets(InputInterface $input, OutputInterface $output)
-    {
-        $tempPath = $this->buildTempPath();
-        $assets = $this->getContainer()->get('assetic.asset_manager');
-        $moduleExportList = $this->retrieveModuleList('name');
-
-        foreach ($assets->getNames() as $name) {
-            $targetPath = $this->buildAssetPath($assets->get($name)->getTargetPath(), $tempPath, true);
-
-            if (!file_exists(dirname($targetPath)) && false === $this->fsys->mkdir(dirname($targetPath), 0777)) {
-                throw new \Exception("Couldn't create temp path.");
-            }
-
-            $sourceFile = $this->buildAssetPath($assets->get($name)->getTargetPath(), $this->rootPath . "/../web");
-            if (file_exists($sourceFile)) {
-                $this->fsys->copy($sourceFile, $targetPath);
-            }
-        }
-
-
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Fetching js dependencies"));
-        $depPath = $this->buildTempPath(false, "js/dependencies");
-        $finder = new Finder();
-        foreach ($finder->in(realpath($this->rootPath . "/../web/js/dependencies"))->files()->name('*.js') as $f) {
-            $file = $depPath . "/" . $f->getFileName();
-
-            if (file_exists($file)) {
-                throw new \Exception(sprintf('File [%s] already found in dependencies folder.', $f->getFileName()));
-            }
-
-            $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Fetching dependency:" . $f->getFileName()));
-            copy($f->getPathName(), $file);
-        }
-
-
-        $moduleManager = $this->getContainer()->get("terrific.composer.module.manager");
-        $modules = $moduleManager->getModules();
-
-        //
-        // removing composer specific assets
-        //
-        $finder = new Finder();
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Removing composer specific assets for production usage"));
-        foreach ($finder->in($tempPath)->files()->name('*composer*') as $f) {
-            $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Removing: " . $f->getFileName()));
-            $this->fsys->remove($f->getPathName());
-        }
-
-        if ($this->getContainer()->getParameter('terrific_exporter.base_files_workaround')) {
-            $finder = new Finder();
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Removing base specific assets for production usage"));
-
-            foreach ($finder->in($tempPath)->files()->name('base.*') as $f) {
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Removing: " . $f->getFileName()));
-                $this->fsys->remove($f->getPathName());
-            }
-        }
-
-
-        //
-        // appending module documentation
-        //
-        if ($this->getContainer()->getParameter('terrific_exporter.export_modules')) {
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending module documentation'));
-            foreach ($modules as $mod) {
-                if ($moduleExportList == null || in_array($mod->getName(), $moduleExportList)) {
-                    $tempPath = $this->buildTempPath(false, "modules/" . $mod->getName());
-
-                    $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Appending documentation for module : " . $mod->getName()));
-
-                    $finder = new Finder();
-                    foreach ($finder->in($this->modulePath . "/" . $mod->getName())->files()->name('*.md') as $f) {
-                        $this->fsys->copy($f->getPathName(), $tempPath . "/" . $f->getFileName());
-                    }
-                }
-            }
-        }
-
-        if ($this->getContainer()->getParameter('terrific_exporter.export_fonts')) {
-            $finder = new Finder();
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending fonts'));
-
-            $depPath = $this->buildTempPath(false, "font");
-            foreach ($finder->in(realpath($this->rootPath . "/../web/font"))->files()->name('*.*') as $f) {
-                $file = $depPath . "/" . $f->getFileName();
-                copy($f->getPathName(), $file);
-            }
-        }
-
-
-        //
-        // appending images
-        //
-        $imgCount = 0;
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending images'));
-        foreach ($modules as $mod) {
-            if ($moduleExportList == null || in_array($mod->getName(), $moduleExportList)) {
-                $tempPath = $this->buildTempPath(false, "img/" . $mod->getName());
-
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Appending images for module : " . $mod->getName()));
-
-                $finder = new Finder();
-                foreach ($finder->in($this->modulePath . "/" . $mod->getName() . "/Resources")->files()->name('*.png')->name('*.jpg')->name('*.gif') as $f) {
-                    $this->fsys->copy($f->getPathName(), $tempPath . "/" . $f->getFileName());
-                    $imgCount++;
-                }
-            }
-        }
-
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending common images'));
-        $finder = new Finder();
-        $imgPath = realpath($this->rootPath . "/../web/img");
-        if ($imgPath !== false) {
-            foreach ($finder->in($imgPath)->files() as $f) {
-                $tempPath = $this->buildTempPath(false, "img/common" . dirname(str_replace($imgPath, "", $f->getPathName())));
-                $this->fsys->copy($f->getPathName(), $tempPath . "/" . $f->getFileName());
-                $imgCount++;
-            }
-        }
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, sprintf('Added %d images', $imgCount)));
-
-
-        //
-        // Optimize Images !
-        //
-        if (!$input->hasParameterOption('--no-image-optimization') && $this->getContainer()->getParameter('terrific_exporter.optimize_images')) {
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking trimage installation for optimising Images'));
-
-            if ($this->checkCommand('trimage --help 2>&1', 0)) {
-                $imgPath = $this->buildTempPath(false, "img");
-
-                $ret = array();
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Starting image optimization'));
-                exec(sprintf('trimage -d %s 2> /dev/null', realpath($imgPath)), $ret, $retval);
-
-                foreach ($ret as $r) {
-                    $output->writeln(" " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, str_replace($imgPath, "", $r)));
-                }
-            }
-        }
-
-        //
-        // build javascript api documentation
-        //
-        if (!$input->hasParameterOption('--no-js-doc') && $this->getContainer()->getParameter('terrific_exporter.build_js_doc')) {
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Checking yuidoc installation'));
-
-            if ($this->checkCommand('yuidoc -v 2>&1', 1)) {
-                $ret = json_decode(file_get_contents($this->rootPath . "/../yuidoc.json"));
-                $ret->version = sprintf("%d.%d.%d", $this->buildOptions["version.major"], $this->buildOptions["version.minor"], $this->buildOptions["version.build"]);
-                file_put_contents($this->rootPath . "/../yuidoc.json", json_encode($ret));
-
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Building API Doc'));
-                exec(sprintf('yuidoc -o "%s" 2>&1', $this->buildTempPath(false, "apidoc/")), $ret, $retval);
+            if (!empty($config["build_actions"]) && is_array($config["build_actions"])) {
+                $ret = $config["build_actions"];
             } else {
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_WARN, 'Yuidoc not found in path. Cannot build API Doc :('));
+                $ret[] = 'Terrific\ExporterBundle\Actions\ClearAction';
+                $ret[] = 'Terrific\ExporterBundle\Actions\BuildJSDoc';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateJS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateCSS';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateModules';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ValidateViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\GenerateSprites';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportImages';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportAssets';
+                $ret[] = 'Terrific\ExporterBundle\Actions\OptimizeImages';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportModules';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportViews';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportChangelogs';
+                $ret[] = 'Terrific\ExporterBundle\Actions\ExportDiffs';
             }
-        }
 
-        //
-        // Append Changelogs
-        //
-        if ($this->getContainer()->getParameter('terrific_exporter.append_changelogs')) {
-            if (realpath($this->buildPath . "/changelogs") !== false) {
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Append Changelogs'));
-                $finder = new Finder();
-                $logPath = $this->buildTempPath(false, 'changelogs/');
 
-                foreach ($finder->in($this->buildPath . "/changelogs")->files()->name('*.md') as $file) {
-                    $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, 'Appending Changelog: ' . $file->getPathName()));
-                    $this->fsys->copy($file->getPathName(), $logPath . "/" . $file->getFileName());
+            $requirementStack = new ActionRequirementStack();
+
+            $stack = array();
+            foreach ($ret as $action) {
+                $refAction = new \ReflectionClass($action);
+
+                if ($refAction->implementsInterface('Terrific\ExporterBundle\Actions\IAction')) {
+                    /** @var $method \ReflectionMethod */
+                    $method = $refAction->getMethod("getRequirements");
+
+                    $requirementStack->addStacks($method->invoke(null));
                 }
+                $stack[] = $refAction;
             }
+
+            $this->checkRequirements($requirementStack);
+
+            $this->logger->debug("Retrieved actionstack:\n" . print_r($ret, true));
+            return $stack;
         }
 
-    }
-
-    /**
-     *
-     */
-    protected function exportModules(InputInterface $input, OutputInterface $output)
-    {
-        $moduleManager = $this->getContainer()->get("terrific.composer.module.manager");
-        $modules = $moduleManager->getModules();
-        $http = $this->getContainer()->get("http_kernel");
-
-        $exportList = $this->retrieveModuleList('name');
-
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building modules"));
-        foreach ($modules as $mod) {
-            if ($exportList == null || in_array($mod->getName(), $exportList)) {
-                $tempPath = $this->buildTempPath(false, "modules/" . $mod->getName());
-                $m = $moduleManager->getModuleByName($mod->getName());
-
-                foreach ($m->getTemplates() as $tpl) {
-                    $request = Request::create(sprintf("/terrific/composer/module/details/%s", $mod->getName()));
-                    $resp = $http->handle($request);
-                    $ret = $resp->getContent();
-
-                    file_put_contents($tempPath . "/" . $tpl->getName() . ".html", $ret);
-                }
-
-                $output->writeln("  " . $this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Built module " . $mod->getName()));
-            }
-        }
-    }
-
+<<<<<<< HEAD
     private function findLocationsToUrl($url)
     {
         $eList = $this->getContainer()->getParameter('terrific_exporter.layout_export_list');
@@ -342,12 +127,21 @@ class ExportCommand extends AbstractCommand
         $exportFilter = $this->getContainer()->get('terrific.exporter.filter.html');
         $pageManager = $this->getContainer()->get("terrific.composer.page.manager");
         $http = $this->getContainer()->get("http_kernel");
+=======
+>>>>>>> refactored
 
-        $exportList = $this->retrieveLayoutList('url');
+        /**
+         * @param InputInterface $input
+         * @param OutputInterface $output
+         * @return int|void
+         */
+        protected function execute(InputInterface $input, OutputInterface $output) {
+            // Init console logger !
+            Log::init($output);
 
-        $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Building layouts"));
-        $tempPath = $this->buildTempPath(false, "layouts");
+            $this->logger = $this->getContainer()->get('logger');
 
+<<<<<<< HEAD
         $localeBackup = $this->backupLocales();
 
         foreach ($pageManager->getPages() as $page) {
@@ -389,78 +183,66 @@ class ExportCommand extends AbstractCommand
 
         $this->restoreLocales($localeBackup);
     }
+=======
+            /** @var $timer TimerService */
+            $timer = $this->getContainer()->get("terrific.exporter.timerservice");
 
-    /**
-     *
-     */
-    protected function buildExportName($asFile = true)
-    {
-        $ret = sprintf("%s-%d.%d.%d", $this->buildOptions["version.name"], $this->buildOptions["version.major"], $this->buildOptions["version.minor"], $this->buildOptions["version.build"]);
-        if ($asFile) {
-            $ret .= ".zip";
-        }
-        return $ret;
-    }
+            /** @var $buildOptions BuildOptions */
+            $buildOptions = $this->getContainer()->get("terrific.exporter.build_options");
 
+>>>>>>> refactored
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int|void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        //
-        // Always override environment and debugging options
-        // no one will export dev or debugging files
-        //
-        $input->setOption('env', 'export');
-        $input->setOption('no-debug', true);
+            // startup timer
+            $timer->start();
 
+            try {
+                $config = $this->compileConfiguration($buildOptions, $input);
+                $actionStack = $this->retrieveActionStack($config);
 
-        $cmdInput = new ArrayInput(array(
-            'command' => '',
-            '--env' => 'export',
-            '--no-debug' => false,
-            '--help' => false,
-            '--quiet' => $input->getOption('quiet'),
-            '--verbose' => $input->getOption('verbose'),
-            '--version' => $input->getOption('version'),
-            '--ansi' => $input->getOption('ansi'),
-            '--no-ansi' => $input->getOption('no-ansi'),
-            '--no-interaction' => $input->getOption('no-interaction'),
-            '--shell' => $input->getOption('shell')
-        ));
+                $reRunTimer = array();
+                for ($i = 0; $i < count($actionStack); $i++) {
+                    /** @var $refClass \ReflectionClass */
+                    $refClass = $actionStack[$i];
+                    $queueItem = $refClass->getName();
 
+                    if (!isset($reRunTimer[$queueItem])) {
+                        $reRunTimer[$queueItem] = 0;
+                    }
+                    $timer->lap("START-" . $refClass->getShortName());
 
-        try {
-            parent::execute($input, $output);
+                    $config["runnedTimer"] = $reRunTimer[$queueItem];
+                    $ret = $this->runAction($refClass, $output, $config);
 
-            $this->fsys = $this->getContainer()->get("filesystem");
+                    if ($ret instanceof ActionResult) {
+                        switch ($ret->getResultCode()) {
+                            case ActionResult::OK:
+                                break;
 
-            if (!$input->hasParameterOption('--no-validation')) {
+                            case ActionResult::STOP:
+                                Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
+                                break 2;
 
-                if ($this->getContainer()->getParameter('terrific_exporter.validate_css')) {
-                    $command = $this->getApplication()->find('build:validatecss');
-                    $returnCode = $command->run($cmdInput, $output);
+                            case ActionResult::TRY_AGAIN:
+                                $reRunTimer[$queueItem] += 1;
+                                if ($reRunTimer[$queueItem] < 10) {
+                                    --$i;
+                                } else {
+                                    $reRunTimer[$queueItem] = 0;
+                                    Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
+                                }
+                                break;
+
+                            default:
+                                Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
+                                break;
+                        }
+                    }
+
+                    $timer->lap("STOP-" . $refClass->getShortName());
                 }
 
-                if ($this->getContainer()->getParameter('terrific_exporter.validate_js')) {
-                    $command = $this->getApplication()->find('build:validatejs');
-                    $returnCode = $command->run($cmdInput, $output);
-                }
 
-                if ($this->getContainer()->getParameter('terrific_exporter.validate_html')) {
-                    $command = $this->getApplication()->find('build:validatehtml');
-                    $returnCode = $command->run($cmdInput, $output);
-                }
-            }
-
-
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start dumping assets"));
-
-            $command = $this->getApplication()->find('assetic:dump');
-
+<<<<<<< HEAD
             $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Start Asset export"));
             #$returnCode = $command->run($cmdInput, $output);
             $returnCode = $command->run($cmdInput, new \Terrific\ExporterBundle\Service\EmptyOutput());
@@ -503,37 +285,37 @@ class ExportCommand extends AbstractCommand
                 $command = $this->getApplication()->find('router:dump-apache');
                 $returnCode = $command->run($cmdInput, $sOutput);
             }
+=======
+                for ($i = 0; $i < count($actionStack); $i++) {
+                    $refClass = $actionStack[$i];
+>>>>>>> refactored
 
-
-            $finder = new Finder();
-            if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "zip") {
-                // build zip
-                $file = $this->retrieveExportPath(true, $input->getOption("export-lang"));
-                $zip = new ZipArchive();
-                $zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-
-                foreach ($finder->in($tempPath)->files()->sortByName() as $f) {
-                    $zip->addFile($f->getPathName(), str_replace(sys_get_temp_dir(), "", $f->getPathName()));
-                }
-
-                $zip->close();
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Exported to file: " . realpath($file)));
-            } else if ($this->getContainer()->getParameter('terrific_exporter.export_type') == "folder") {
-                //$path = $this->rootPath . "/../build/" . $this->buildExportName(false);
-                $path = $this->retrieveExportPath(true, $input->getOption("export-lang"));
-
-
-                if (file_exists($path) || mkdir($path)) {
-                    foreach ($finder->in($tempPath)->depth("0")->directories() as $dir) {
-                        $this->fsys->mirror($dir->getPathName(), $path . "/" . $dir->getRelativePathName(), null, array('copy_on_windows' => true));
+                    $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
+                    if ($this->logger) {
+                        $this->logger->info($msg);
                     }
-                }
-                $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_INFO, "Exported to directory: " . realpath($path)));
-            }
 
-            $this->buildOptions["version.build"] = ((int)$this->buildOptions["version.build"]) + 1;
-        } catch (\Exception $ex) {
-            $output->writeln($this->getMessage(AbstractCommand::MSG_LEVEL_ERROR, $ex->getMessage()));
+                    Log::info($msg);
+                }
+
+                if (!empty($config["export_type"]) && strtolower($config["export_type"]) === "zip") {
+                    $file = FileHelper::buildZip($config["exportPath"], null, true);
+                    Log::info(sprintf("Built zipfile [%s]", basename($file)));
+                }
+
+
+                // stop timer
+                $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));
+
+                if ($config["autoincrement_build"]) {
+                    $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
+                    $buildOptions->save();
+                }
+            } catch (ExporterException $ex) {
+                $this->logger->err($ex->getMessage());
+                $this->logger->debug($ex->getTraceAsString());
+                throw $ex;
+            }
         }
 
     }

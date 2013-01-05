@@ -26,6 +26,8 @@ namespace Terrific\ExporterBundle {
         {
             parent::build($container);
 
+            ini_set('memory_limit', '512M');
+
             $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/Resources/config'));
             $loader->load("services.xml");
         }

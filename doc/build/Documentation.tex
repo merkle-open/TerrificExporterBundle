@@ -1,0 +1,98 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[a4paper]{geometry}
+\usepackage{helvet}
+\usepackage[pdftex]{hyperref}
+\usepackage{pdfpages}
+\usepackage{lscape}
+\usepackage{changepage}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{arydshln}
+
+
+\hypersetup{
+	pdfauthor={Bruno Lorenz},
+	pdftitle={ExporterBundle Documentation},
+	colorlinks=true,
+  linkcolor=blue
+}
+
+%###############################################################################################
+\title{ExporterBundle}
+
+\author{Bruno Lorenz\\
+  Namics AG\\
+  Watzmannstraße 1a\\
+  81541 München\\
+  Germany\\
+  \texttt{bruno.lorenz@namics.com}
+}
+\date{\today}
+
+%###############################################################################################
+\definecolor{wmark1}{HTML}{9B1329}
+\definecolor{wmark2}{HTML}{FF0000}
+\definecolor{wmark3}{HTML}{009036}
+%###############################################################################################
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\cfoot{}
+
+\renewcommand{\headrulewidth}{0pt}
+
+
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\baselinestretch}{1.10}\normalsize
+
+\def\Version#1{\def\version{#1}}
+\Version{0.1a}
+%###############################################################################################
+\newcommand{\litem}[1]{
+	\vspace{-0.2cm}
+	\item{#1}
+}
+
+\newcommand{\hsection}[1]{
+  \hypertarget{chap-#1}{\section{#1}}
+}
+
+\newcommand{\hsubsection}[1]{
+ \hypertarget{sec-#1}{\section{#1}}
+}
+
+%###############################################################################################
+
+
+\begin{document}
+
+\include{titlepage} \newpage
+
+\include{versions} \newpage
+
+
+\lfoot{ExporterBundle Documentation}
+\rfoot{\textnormal{\thepage} / \textnormal{\pageref*{LastPage}}}
+\renewcommand{\footrulewidth}{0.4pt}
+\setcounter{page}{1}
+\tableofcontents \newpage
+
+
+\include{chap-installation}
+\include{chap-configuration}
+\include{chap-usage}
+\include{chap-debugging}
+\include{chap-actions}
+\include{chap-extending}
+\include{chap-problems}
+%\include{chap-appendix}
+\include{bibliography}
+
+
+\end{document}
+

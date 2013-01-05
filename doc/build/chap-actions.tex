@@ -1,0 +1,131 @@
+\hsection{Actions}
+
+All buildin actions are documented within these chapter. This maybe have some helpful information when you have to build your own action chain.
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ClearAction}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ClearAction}}
+
+This action simple just clear all data from the target directory. If configuration option \mbox{'export\_with\_version'} is activated this action does simply nothing cause normally the export folder should not exists during startup.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-BuildJSDoc}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}BuildJSDoc}}
+BuildJSDoc will first test if yuidoc is callable. After that test it look for a suitable yuidoc.json file, if a file has been found the action starts the yuidoc command with the found configuration. \\
+\\
+An example call could look like this, and is going to be called withing the current project folder.
+\begin{verbatim}
+yuidoc -c /data/symfony2-project/app/config/yuidoc.json
+\end{verbatim}
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ValidateJS}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateJS}}
+Javascript will be validated within this action. This action will get a list of all necessary javascript assets from the PageManager class. After retrieving this list it temporary removes the min filters and place the content for \textbf{each part} of the asset within a temporary file. After saving that file the jslint command will looking for a suitable configuration file an starts to verify the contents of the temp file. \\
+\\
+An example call could look like this:
+\begin{verbatim}
+jshint --jslint-reporter --config /sf2-prj/app/config/jshint.json /tmp/ZIEASDZER
+\end{verbatim}
+\end{minipage}
+
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ValidateCSS}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateCSS}}
+Stylesheets will be validated using this actions. This action also retrieves a list of all potential used style assets from the PageManager class. After retrieving this list the minfilter will be removed for dumping the content \textbf{each part} the asset to a temp files.\\
+\\
+Example for the csslint validation command:
+\begin{verbatim}
+csslint
+    --format=lint-xml
+    --errors=[from cfg]
+    --warning=[from cfg]
+    --ignore=[from cfg]
+    /tmpdir/ASDFETZ
+\end{verbatim}
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ValidateModules}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateModules}}
+First of all this action has a additional requirement on the configuration. This configuration must have enabled the options 'validate\_html' and 'export\_modules'. If one of them is not activated this action will be skipped. After starting this action it retrieves a list of all module combinations (module <-> skin <-> view) from the PageManager class. The modules are exported without any HTML from the view, just the plain modules. After exporting this HTML to a temp file the action try's to send this file to the W3CValidator (\url{http://validator.w3.org/}). Its required to have a internet connection to start this action. \\
+\\
+To generate a valid HTML ValidateModule uses a template file. This template file (module-template.tpl.html) can be replaced by placing a file with the same name in your app/config folder. Within this file just two variables are special \mbox{'\%MODULE\_NAME\%'} and \mbox{'\%MODULE\_CONTENT\%'}. Both variables are replaced with the corresponding content before sending to the W3CValidator.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ValidateViews}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ValidateViews}}
+This action handles the validation for the views just like the ValidateModules action. The difference between this both action are that ValidateViews requires other configuration options to start ('export\_views' and 'validate\_html'). The views also have all source code from the used modules within this view. This ValdationAction also uses the W3CValidator.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-GenerateSprites}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}GenerateSprites}}
+GenerateSprites needs some more configuration than the other actions. Each sprite which should be generated must have an entry within the config file. If there is no configured sprite(s) the action will just be skipped. To generate a sprite this action uses the montage tool from the ImageMagick toolset. After retrieving a filelist for merging as a sprite the action will sort this files by name. This offers you the possibility to order you images within your sprite. Filenames like 0000\_arrow.png are best practice. If this file is part of the export, which should be the normal usecase, this action has to \textbf{run before ExportImages}.\\
+\\
+Example for a sprite generation call:
+\begin{verbatim}
+montage
+    -mode Concatenate
+    -tile x${height * count images}
+    -geometry ${width}x${height}+0+0
+    -bordercolor none
+    -background none
+    ${list of files} ${target}
+\end{verbatim}
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportImages}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportImages}}
+All images which are used within the exported views should be exported by ExportImages. To control which image is part of the export you have to encapsulate each image within the \textbf{Twig's asset()} function. \textbf{Imagepath's which are not generated using this function won't be part the export!} The images used within the css file(s) will also be exported but there is it not possible to control which should be part of the export. \textbf{This action have to run before OptimizeImages}.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportAssets}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportAssets}}
+Just simply do dumps of all used assets (css and javascript). It also retrieve a list of used assets from the PageManager and dump the assets to the exporting files. This time the exported assets are also get minified if its configured! If the 'build\_local\_paths' options is enabled the paths within the css files are change to match the exporting paths. \textbf{Paths within javascript files currently won't get changed!}
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-OptimizeImages}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}OptimizeImages}}
+All images within the export path are optimized. So the startup of the OptimizeImages action depends on the ExportImages action. After retrieving a list of all image files in the export the action will optimize file by file depending on the file extension. After running this command it will print the amount of bytes saved for each file and as total amount.\\
+\\
+Example commands for optimizing images:
+\begin{verbatim}
+optipng -o7 /exportpath/img/picture.png
+
+advpng -q -4 /exportpath/img/picture.png
+
+jpegopim -q /exportpath/img/picture.jpg
+\end{verbatim}
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportModules}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportModules}}
+Retrieves a list of all module combinations (module <-> skin <-> view) and exports the HTML for all modules in a seperate folder within the exporting path.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportViews}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportViews}}
+Retrieves a list of all controller methods which are annotated with @Export. If there is no such a method the exporter simply won't just export anything.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportChangelogs}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportChangelogs}}
+This action just copies your changelog files (file\_extensions: log, txt, md) to the exporting path. To append all changelogs create a folder under build/changelogs or setup your \mbox{'changelog\_path'} option. If this folder is not available no changelogs will appended.
+\end{minipage}
+
+\noindent \begin{minipage}{\textwidth}
+\vspace{1.5em}
+\hypertarget{sec-Actions-ExportDiffs}{\subsection{Terrific\textnormal{\textbackslash}ExporterBundle\textnormal{\textbackslash}Actions\textnormal{\textbackslash}ExportDiffs}}
+ExportDiffs will generate diff files for each view and append it to your export. The exporter needs an additional information given as console parameter to find the last export. This argument is called \mbox{'--last-export=[directory]'} must be set to the last export package. To customize your diff path see chapter \mbox{'\hyperlink{chap-Configuration}{Configuration}'}.
+\end{minipage}

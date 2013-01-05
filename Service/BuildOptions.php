@@ -10,8 +10,7 @@ namespace Terrific\ExporterBundle\Service {
     use ArrayAccess;
     use ArrayObject;
 
-    class BuildOptions implements ArrayAccess
-    {
+    class BuildOptions implements ArrayAccess {
 
         private $data = null;
         private $file = null;
@@ -19,8 +18,7 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * @param $file
          */
-        public function setFile($file)
-        {
+        public function setFile($file) {
             $this->file = $file;
             if (!file_exists($this->file)) {
                 copy(__DIR__ . "/../Resources/config/build.ini", $file);
@@ -32,8 +30,7 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * @return null
          */
-        public function getFile()
-        {
+        public function getFile() {
             return $this->file;
         }
 
@@ -41,23 +38,20 @@ namespace Terrific\ExporterBundle\Service {
          *
          * @param $file
          */
-        public function __construct()
-        {
+        public function __construct() {
         }
 
         /**
          *
          */
-        public function __destruct()
-        {
+        public function __destruct() {
             $this->save();
         }
 
         /**
          * @param $path
          */
-        private function rebuildPath($path, $parent = ".")
-        {
+        private function rebuildPath($path, $parent = ".") {
             $ret = "";
             foreach ($path as $key => $val) {
                 if (is_array($val)) {
@@ -76,19 +70,19 @@ namespace Terrific\ExporterBundle\Service {
         /**
          *
          */
-        public function save()
-        {
-            $ret = "";
-            foreach ($this->data as $key => $group) {
-                $ret .= sprintf("[%s]", $key) . "\n";
-                if (is_array($group)) {
-                    $ret .= $this->rebuildPath($group);
+        public function save() {
+            if (is_array($this->data)) {
+                $ret = "";
+                foreach ($this->data as $key => $group) {
+                    $ret .= sprintf("[%s]", $key) . "\n";
+                    if (is_array($group)) {
+                        $ret .= $this->rebuildPath($group);
+                    }
+                    $ret .= "\n\n";
                 }
-                $ret .= "\n\n";
+
+                return (file_put_contents($this->file, $ret) !== false);
             }
-
-
-            return (file_put_contents($this->file, $ret) !== false);
         }
 
 
@@ -96,8 +90,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param $offset
          * @return array
          */
-        private function buildPath($offset, $root = null)
-        {
+        private function buildPath($offset, $root = null) {
             if ($root == null) {
                 $root = $this->data;
             }
@@ -130,8 +123,7 @@ namespace Terrific\ExporterBundle\Service {
          * <p>
          * The return value will be casted to boolean if non-boolean was returned.
          */
-        public function offsetExists($offset)
-        {
+        public function offsetExists($offset) {
             return ($this->offsetGet($offset) != null);
         }
 
@@ -144,8 +136,7 @@ namespace Terrific\ExporterBundle\Service {
          * </p>
          * @return mixed Can return all value types.
          */
-        public function offsetGet($offset)
-        {
+        public function offsetGet($offset) {
             $path = $this->buildPath($offset);
 
             $root = $this->data;
@@ -173,17 +164,16 @@ namespace Terrific\ExporterBundle\Service {
          * </p>
          * @return void
          */
-        public function offsetSet($offset, $value)
-        {
+        public function offsetSet($offset, $value) {
             $path = $this->buildPath($offset);
-            $root = &$this->data;
+            $root = & $this->data;
 
             foreach ($path as $p) {
                 if (!isset($root[$p])) {
                     $root[$p] = array();
                 }
 
-                $root = &$root[$p];
+                $root = & $root[$p];
             }
 
             $root = $value;
@@ -198,8 +188,7 @@ namespace Terrific\ExporterBundle\Service {
          * </p>
          * @return void
          */
-        public function offsetUnset($offset)
-        {
+        public function offsetUnset($offset) {
             if ($this->offsetExists($offset)) {
                 $this[$offset] = null;
             }

@@ -1,3 +1,6 @@
-Exporter for Terrific-Composer.
+# Exporter for Terrifc-Composer
 
-placeholder !
+See doc/Documentation.pdf for additional information.
+
+
+ 

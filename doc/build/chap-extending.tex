@@ -1,0 +1,204 @@
+\hsection{Extending}
+This chapter describes how to build your own action and how to use the available infrastructure get retrieve your results.
+
+% ################################################################################################################################
+\subsection{Components \& Services}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{BuildOptions}
+ConfigFinder is just a simple class that holds data hierarchical data. After startup the BuildOptions class will get initialized with a file given in the project configuration. When initalizing is complete you can access all data from the *.ini file like a array. A dot is used to do step downwards in the hierarchy. Saving is normally done in the destructor of this service. If you're having trouble to wait on the destructor call you can manually run the save() function. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$majorVersion = $buildOptions["version.major"];
+$buildOptions["version.major"] = 2;
+\end{verbatim}
+\end{minipage}
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{ConfigFinder}
+This service helps you to find configuration files. It will first look for a configuration file within the app/config directory and after that in the bundle's resources/config directory. You will just receive a path for the file which is first found. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$configFile = $configFinder->find('jshint.json');
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{Log}
+Just a simple logging wrapper for console output. During the fact it is a static class you can simply use it without initializing it or retrieve it from the servicecontainer. After the ExportCommand the Log class is feeded with all data needed to do outputs on the console. This wrapper is also helpful to do hierarchically output using the blkstart() and blkend() functions.
+
+\begin{verbatim}
+Log::info("Console info");
+Log::blkstart(); // intends the output for info/err/warns until blkend() called
+    Log::err("Console error");
+    Log::warning("Console warning")
+Log::blkend(); // safety always reset your hierarchy
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{PathResolver}
+This service just have two tasks first look for a specific asset in your path's, second resolve a new path (export path) for the given asset url. To build an export path this class takes all configuration options from the pathtemplates option from the configuration. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$asset = $pathResolver->find('filename', 'path_with_file');
+$exportPath = $pathResolver->resolve('/terrificmoduleTest/img/testimage.png');
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{TempFileManager}
+It's a manger that handles temporary files. Normally you receive some output from the project and just safe a temp file for it than do further operations until the final results are received. This service helps you to always get a clean file with no content and removes all files during service destruction which were created during the whole export run. To prevent the Manager from removing the temporary content you can set the keepTemp property to true. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$content = "some content here";
+$tempFileMgr->putContent($content); // returns a complete path to a file
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{TimerService}
+This service just helps get the span between two specific points of time. You can receive the difference between these points. The service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+
+$timer->lap("START-doSomething");
+// do something
+$timer->lap("END-doSomething");
+
+$time = $timer->getTime("START-doSomething", "END-doSomething");
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{W3CValidator}
+A service which uses the online w3c validator to validate content or complete files against the online validator. Both validation commands will return a ValidationResult object. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$w3val->validateFile('/path/to/file');
+$w3val->validate('html content here');
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{PageManager}
+PageManager is the complexest service within the exporter. It manages to retrieve get all routes from the router and all assets which are used in the twig templates. During the huge amount of time PageManager needs to initialize it caches most of the data and do a lazy initalization after the first method is called, so the first answer may need some time depending on the amount of views/routes which are configured within your frontend project. This service resides within the servicecontainer id \mbox{'TODO: FILL IN ID'}.
+
+\begin{verbatim}
+$pageManager->findRoutes(true);
+\end{verbatim}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsection{Helpers}
+The exporter sometimes do specific things more than one time. This helpers are used to concentrate specific things to a concrete class. \textbf{All helper classes are static so you can just call the methods within.}
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{AsseticHelper}
+Helper contains functions to work with assetic and asset specific tasks. Currently the AsseticHelper can export fonts and images from css content and removes minification filter from assetic.
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{FileHelper}
+This helper helps you with file identification like it is a stylesheet / javascript. Other functionalities are removing query params from urls or create whole paths without having to create the parent folders.
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{NumberHelper}
+Currently this helper just can format byte information to the highest possibly unit.
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{OSHelper}
+At the moment OSHelper just can give an answer if the current running OS isWin().
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{ProcessHelper}
+The ProcessHelper has two specific tasks. First check a command if its available. Second start the command. The command string will be retrieved using the ProcessBuilder class from symfony 2.1.
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{StringHelper}
+StringHelper currently just helps you to build working filenames and strip chars like \& or / out from the filename.
+\end{minipage}
+
+% ################################################################################################################################
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{XmlLintHelper}
+This helper is a verify specific helper. It helps to convert a linter xml format to ValidationResult objects.
+\end{minipage}
+
+% ################################################################################################################################
+
+\noindent
+\begin{minipage}{\textwidth}
+\vspace{1.5em}
+\subsubsection{GitHelper}
+GitHelper help you to retrieve informations from git archives using the git commandline executeable. This helper is currently not in use and maybe used in future builtin actions or project based actions.
+\end{minipage}
+
+% ################################################################################################################################
+\subsection{Build own actions}
+To write you own action you have at least to implement the IAction interface. This interface will guarantee that all methods that are called by the ExportCommand are available.
+
+\begin{verbatim}
+public function setWorkingDir($directory);
+public function run(OutputInterface $output, $params = array());
+public function isRunnable(array $params);
+public static function getRequirements();
+\end{verbatim}
+
+\noindent
+First the ExportCommand will retrieve all requirements from the action stack. After checking all requirements it looks for the necessary to run this action with calling the isRunnable() method. When all requirements are fit and this action should be run the ExportCommand will run your action.\\
+\\
+To make it more easy to implement your own action you can just use a predefined abstract class which already have some useful functions. There are two of them AbstractAction and AbstractExportAction. AbstractAction contains helpers like a reference to the servicecontainer and initializes a filesystem object. AbstractExportAction contains all function the AbstractAction class contains and adds a helper function for saving files to a directory. \\
+\\
+To get further information on implementing own actions just take a look on the api documentation.\\
