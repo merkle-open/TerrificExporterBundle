@@ -37,6 +37,12 @@ namespace Terrific\ExporterBundle\Tests\Filter {
             $this->assertEquals("Content_Image", StringHelper::escapeFileLabel("Content@Image"), "Char @ were not correctly replaced.");
         }
 
+        /**
+         *
+         */
+        public function testLineWrap() {
+            $this->assertEquals("a\nb\nc", StringHelper::lineWrap("a b c", 1, "\n"));
+        }
 
     }
 }

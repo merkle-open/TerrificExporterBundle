@@ -74,6 +74,10 @@
             <call method="setHttpKernel">
                 <argument type="service" id="http_kernel"/>
             </call>
+
+            <call method="setModuleManager">
+                <argument type="service" id="terrific.composer.module.manager" on-invalid="ignore" />
+            </call>
         </service>
 
         <service id="terrific.exporter.w3validator" class="%terrific.exporter.w3validator.class%">

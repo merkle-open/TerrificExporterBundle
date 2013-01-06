@@ -25,6 +25,8 @@ namespace Terrific\ExporterBundle\Service {
     use Terrific\ExporterBundle\Annotation\LocaleExport;
     use Symfony\Component\HttpFoundation\Session\Session;
     use Symfony\Component\Translation\Translator;
+    use Terrific\ComposerBundle\Service\ModuleManager;
+
 
     /**
      *
@@ -57,6 +59,24 @@ namespace Terrific\ExporterBundle\Service {
 
         /** @var array */
         private $assetCache = array();
+
+        /** @var ModuleManager */
+        protected $moduleManager;
+
+
+        /**
+         * @param \Terrific\ExporterBundle\Service\ModuleManager $moduleManager
+         */
+        public function setModuleManager($moduleManager) {
+            $this->moduleManager = $moduleManager;
+        }
+
+        /**
+         * @return \Terrific\ExporterBundle\Service\ModuleManager
+         */
+        public function getModuleManager() {
+            return $this->moduleManager;
+        }
 
         /**
          * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
@@ -116,14 +136,14 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
-         * @param \Terrific\ExporterBundle\Service\Twig_Environment $twig
+         * @param \Twig_Environment $twig
          */
         public function setTwig($twig) {
             $this->twig = $twig;
         }
 
         /**
-         * @return \Terrific\ExporterBundle\Service\Twig_Environment
+         * @return \Twig_Environment
          */
         public function getTwig() {
             return $this->twig;
@@ -141,6 +161,22 @@ namespace Terrific\ExporterBundle\Service {
          */
         public function getHttpKernel() {
             return $this->http_kernel;
+        }
+
+        /**
+         * @param $modName
+         */
+        protected function findModuleName($modName) {
+            $modList = $this->moduleManager->getModules();
+
+            foreach ($modList as $mod) {
+                if (strtolower($mod->getName()) == strtolower($modName)) {
+                    $modName = $mod->getName();
+                    break;
+                }
+            }
+
+            return $modName;
         }
 
 
@@ -166,6 +202,48 @@ namespace Terrific\ExporterBundle\Service {
 
             while (!$stream->isEOF()) {
                 $token = $stream->next();
+
+                $skins = array();
+                $connectors = array();
+
+                if (($this->moduleManager != null) && ($token instanceof \Twig_Token)) {
+
+
+                    if (strpos($token->getValue(), "<div") !== false) {
+                        $classMatches = array();
+                        $conMatches = array();
+                        $skinMatches = array();
+                        $modName = "";
+
+                        preg_match('#class=[\'"]([^\'"]*)#i', $token->getValue(), $classMatches);
+                        preg_match('#data-connectors=[\'"]([^\'"]*)#i', $token->getValue(), $conMatches);
+
+                        if (isset($classMatches[1])) {
+                            $mm = explode(" ", $classMatches[1]);
+
+                            foreach ($mm as $m) {
+                                switch (true) {
+                                    case (substr($m, 0, 4) == "mod-"):
+                                        $modName = substr($m, 4);
+                                        break;
+
+                                    case (substr($m, 0, 5) == "skin-"):
+                                        $skins[] = substr($m, 5);
+                                        break;
+                                }
+                            }
+
+                            $connectors = (isset($conMatches[1]) ? explode(",", $conMatches[1]) : array());
+
+                            if ($modName != "") {
+                                $modName = $this->findModuleName($modName);
+                                $routeModule = new RouteModule($modName, basename($filePath), $skins, $connectors);
+                                $in[] = $routeModule;
+                            }
+                        }
+                    }
+                }
+
 
                 if ($token->getValue() === "extends") {
                     $newTpl = $stream->getCurrent()->getValue();
@@ -198,8 +276,6 @@ namespace Terrific\ExporterBundle\Service {
 
                     $module = $token->getValue();
 
-                    $skins = array();
-
                     if ($stream->getCurrent()->getValue() != ")") {
                         $token = $stream->next();
                         $token = $stream->next();
@@ -224,12 +300,26 @@ namespace Terrific\ExporterBundle\Service {
                                 $token = $stream->next();
                             }
                         }
+
+                        if ($stream->next()->getValue() === ",") {
+                            $token = $stream->next();
+                            if ($token->getValue() == "[") {
+                                $token = $stream->next();
+                                while ($token->getValue() != "]") {
+                                    if (trim($token->getValue()) !== "") {
+                                        $connectors[] = $token->getValue();
+                                    }
+                                    $token = $stream->next();
+                                }
+                            }
+                        }
+
                     } else {
                         $view = strtolower($module) . ".html.twig";
                     }
 
 
-                    $routeModule = new RouteModule($module, $view, $skins);
+                    $routeModule = new RouteModule($module, $view, $skins, $connectors);
                     $in[] = $routeModule;
 
                     try {
@@ -287,6 +377,54 @@ namespace Terrific\ExporterBundle\Service {
                 $assets = $this->findAssetsByFile($route->getTemplate());
                 $route->addAssets($assets);
             }
+        }
+
+        /**
+         * @param $connector
+         * @return array
+         */
+        public function findConnectedModules($connector) {
+            $this->initialize();
+
+            $ret = array();
+
+            /** @var $route Route */
+            foreach ($this->findRoutes(true) as $route) {
+
+                /** @var $route RouteModule */
+                foreach ($route->getModules() as $module) {
+                    if ($module->isConnectedTo($connector)) {
+                        $ret[$module->getId()] = $module;
+                    }
+                }
+            }
+
+            return array_values($ret);
+        }
+
+        /**
+         * @return array
+         */
+        public function findAllConnectedModules() {
+            $connectors = array();
+
+            /** @var $route Route */
+            foreach ($this->findRoutes(true) as $route) {
+
+                /** @var $route RouteModule */
+                foreach ($route->getModules() as $module) {
+                    $connectors = array_merge($connectors, $module->getConnectors());
+                }
+            }
+
+            $connectors = array_unique($connectors);
+
+            $ret = array();
+            foreach ($connectors as $c) {
+                $ret[$c] = $this->findConnectedModules($c);
+            }
+
+            return $ret;
         }
 
 

@@ -27,5 +27,29 @@ namespace Terrific\ExporterBundle\Helper {
             return $label;
         }
 
+
+        /**
+         *
+         */
+        public static function lineWrap($content, $maxChars = 80, $lineEnding = "\n") {
+            $words = explode(" ", $content);
+
+            $ret = "";
+            $cLine = 0;
+
+            foreach ($words as $w) {
+                $len = mb_strlen($w);
+                if ($cLine + $len > $maxChars) {
+                    $ret = rtrim($ret, " ");
+                    $ret .= $lineEnding;
+                    $cLine = 0;
+                }
+
+                $ret .= $w . " ";
+                $cLine += $len;
+            }
+
+            return rtrim($ret, " ");
+        }
     }
 }
