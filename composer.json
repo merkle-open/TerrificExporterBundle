@@ -1,10 +1,10 @@
 {
-    "name"       :"senuphtyz/terrific-exporter-bundle",
-    "description":"Exports your terrific frontend",
-    "keywords"   :["frontend", "terrific", "export"],
-    "type"       :"symfony-bundle",
-    "license"    :"MIT",
-    "authors"    :[
+    "name"        :"senuphtyz/terrific-exporter-bundle",
+    "description" :"Exports your terrific frontend",
+    "keywords"    :["frontend", "terrific", "export"],
+    "type"        :"symfony-bundle",
+    "license"     :"MIT",
+    "authors"     :[
         {
             "name":"Bruno Lorenz"
         },
@@ -13,7 +13,7 @@
             "homepage":"https://github.com/senuphtyz/TerrificExporterBundle/contributors"
         }
     ],
-    "require"    :{
+    "require"     :{
         "symfony/framework-bundle":"2.1.*",
         "symfony/form"            :"2.1.*",
         "symfony/validator"       :"2.1.*",
@@ -23,14 +23,14 @@
         "natxet/CssMin"           :"dev-master",
         "kriswallsmith/assetic"   :"dev-master"
     },
-    "require-dev":{
+    "require-dev" :{
         "symfony/yaml"      :"2.1.*",
         "symfony/filesystem":"2.1.*"
     },
-    "autoload"   :{
+    "autoload"    :{
         "psr-0":{
             "Terrific\\ExporterBundle":""
         }
     },
-    "target-dir" :"Terrific/ExporterBundle"
+    "target-dir"  :"Terrific/ExporterBundle"
 }

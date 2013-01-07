@@ -1,5 +1,5 @@
 {
-    "hash": "31731125ea6fd0ed7e3fe97d2ca6e495",
+    "hash": "af1ef803e899338e0223bf2084f03353",
     "packages": [
         {
             "name": "doctrine/common",
@@ -180,6 +180,18 @@
                 "css",
                 "minify"
             ]
+        },
+        {
+            "name": "rvanvelzen/MinifyJS",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rvanvelzen/MinifyJS.git",
+                "reference": "master"
+            },
+            "type": "library",
+            "installation-source": "source",
+            "time": "2012-11-07 14:06:34"
         },
         {
             "name": "symfony/config",
@@ -1022,6 +1034,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "natxet/cssmin": 20,
-        "kriswallsmith/assetic": 20
+        "kriswallsmith/assetic": 20,
+        "rvanvelzen/minifyjs": 20
     }
 }

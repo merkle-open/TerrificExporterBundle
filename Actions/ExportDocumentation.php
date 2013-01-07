@@ -22,6 +22,8 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Renderer\Document\DocumentRenderer;
     use Terrific\ExporterBundle\Renderer\Document\IDocumentRenderer;
     use Terrific\ExporterBundle\Object\RouteModule;
+    use Terrific\ExporterBundle\Helper\JavascriptHelper;
+    use Assetic\Asset\FileAsset;
 
     /**
      *
@@ -65,6 +67,9 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $renderer IDocumentRenderer */
             $renderer = DocumentRenderer::factory('Terrific\ExporterBundle\Renderer\Document\MarkdownFile');
 
+            /** @var $assetManager LazyAssetManager */
+            $assetManager = $this->container->get("assetic.asset_manager");
+
 
             $renderer->section("Module connections");
             foreach ($pageManager->findAllConnectedModules() as $connector => $modules) {
@@ -77,8 +82,20 @@ namespace Terrific\ExporterBundle\Actions {
                 $renderer->subsection("Connector '" . $connector . "'")->addList($modNames, "1");
             }
 
+            foreach ($assetManager->getNames() as $name) {
+                /** @var $asset FileAsset */
+                $asset = $assetManager->get($name);
 
-            echo $renderer->getContent();
+                if (\Terrific\ExporterBundle\Helper\FileHelper::isJavascript($asset->getTargetPath())) {
+                    foreach ($asset as $leaf) {
+                        $ll = \Terrific\ExporterBundle\Helper\AsseticHelper::removeMinFilters($leaf);
+                        $content = $ll->dump();
+
+                        JavascriptHelper::retrieveTerrificEvents($content);
+                    }
+                }
+            }
+
             die();
 
             return new ActionResult(ActionResult::OK);
