@@ -23,8 +23,25 @@ namespace Terrific\ExporterBundle\Object {
         private $skins;
 
         /** @var array */
-        private $assets;
+        private $assets = array();
 
+        /** @var array */
+        private $connectors;
+
+
+        /**
+         * @param $connector
+         */
+        public function isConnectedTo($connector) {
+            return (in_array($connector, $this->connectors));
+        }
+
+        /**
+         * @return array
+         */
+        public function getConnectors() {
+            return $this->connectors;
+        }
 
         /**
          *
@@ -123,10 +140,11 @@ namespace Terrific\ExporterBundle\Object {
          * @param string $template
          * @param array $skins
          */
-        public function __construct($module, $template, array $skins) {
+        public function __construct($module, $template, array $skins, array $connectors) {
             $this->module = $module;
             $this->template = $template;
             $this->skins = $skins;
+            $this->connectors = $connectors;
         }
     }
 }

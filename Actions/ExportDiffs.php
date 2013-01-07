@@ -19,6 +19,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Finder\Finder;
     use Symfony\Component\Finder\SplFileInfo;
     use Terrific\ExporterBundle\Service\PathResolver;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -97,6 +98,8 @@ namespace Terrific\ExporterBundle\Actions {
                     $this->saveToPath($tmpFile, $params["exportPath"] . "/" . $targetPath);
                 }
             }
+
+            Log::info("Created %d diff files", array($finder->count()));
 
             return new ActionResult(ActionResult::OK);
         }
