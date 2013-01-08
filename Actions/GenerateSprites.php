@@ -69,7 +69,6 @@ namespace Terrific\ExporterBundle\Actions {
             $fsIterator = $finder->in($directory)->sortByName()->files()->getIterator();
 
             $dirList = iterator_to_array($fsIterator);
-            $maxHeight = $height * count($dirList);
 
             $processParams = array();
             $processParams[] = "-mode";
