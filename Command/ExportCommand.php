@@ -68,8 +68,6 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportChangelogs';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportDiffs';
             }
-            $ret = array();
-
 
             $requirementStack = new ActionRequirementStack();
 
