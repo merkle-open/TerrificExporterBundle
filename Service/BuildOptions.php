@@ -71,7 +71,7 @@ namespace Terrific\ExporterBundle\Service {
          *
          */
         public function save() {
-            if (is_array($this->data)) {
+            if (is_array($this->data) || $this->data instanceof \ArrayObject) {
                 $ret = "";
                 foreach ($this->data as $key => $group) {
                     $ret .= sprintf("[%s]", $key) . "\n";
@@ -80,7 +80,6 @@ namespace Terrific\ExporterBundle\Service {
                     }
                     $ret .= "\n\n";
                 }
-
                 return (file_put_contents($this->file, $ret) !== false);
             }
         }

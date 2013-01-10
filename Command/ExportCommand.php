@@ -68,6 +68,7 @@ namespace Terrific\ExporterBundle\Command {
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportChangelogs';
                 $ret[] = 'Terrific\ExporterBundle\Actions\ExportDiffs';
             }
+            $ret = array();
 
 
             $requirementStack = new ActionRequirementStack();
@@ -180,7 +181,8 @@ namespace Terrific\ExporterBundle\Command {
 
                 if ($config["autoincrement_build"]) {
                     $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
-                    $buildOptions->save();
+
+                    var_dump($buildOptions);
                 }
             } catch (ExporterException $ex) {
                 $this->logger->err($ex->getMessage());
