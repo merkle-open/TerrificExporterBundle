@@ -179,8 +179,6 @@ namespace Terrific\ExporterBundle\Command {
 
                 if ($config["autoincrement_build"]) {
                     $buildOptions["version.build"] = intval($buildOptions["version.build"]) + 1;
-
-                    var_dump($buildOptions);
                 }
             } catch (ExporterException $ex) {
                 $this->logger->err($ex->getMessage());
