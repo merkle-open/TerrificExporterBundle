@@ -579,6 +579,52 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
+         * @param $name
+         * @return RouteModule
+         */
+        public function &findRouteModule($name) {
+            $this->initialize();
+
+
+            /** @var $route Route */
+            foreach ($this->routeList as $route) {
+
+                /** @var $mod RouteModule */
+                foreach ($route->getModules() as $mod) {
+                    if ($mod->getModule() === $name) {
+                        return $mod;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+        /**
+         * @param $name
+         * @return array
+         */
+        public function findAllRouteModules($name = null) {
+            $this->initialize();
+
+            $ret = array();
+
+            /** @var $route Route */
+            foreach ($this->routeList as $route) {
+
+                /** @var $mod RouteModule */
+                foreach ($route->getModules() as $mod) {
+                    if ($mod->getModule() === $name || $name === null) {
+                        $ret[] = & $mod;
+                    }
+                }
+            }
+
+            return $ret;
+        }
+
+        /**
          * @param \Terrific\ExporterBundle\Object\Route $route
          */
         protected function buildUrlParameters(Route $route) {
