@@ -66,8 +66,8 @@ namespace Terrific\ExporterBundle\Helper {
                         case "background-image":
                             $matches = array();
 
-                            if (preg_match('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
-                                $images[] = $matches[1];
+                            if (preg_match('/url\(([^\)]+)/', $token->Value, $matches)) {
+                                $images[] = trim($matches[1], '"\'');
                             }
 
                             break;
@@ -93,8 +93,10 @@ namespace Terrific\ExporterBundle\Helper {
                 if ($token instanceof \CssAtFontFaceDeclarationToken && ($token->Property == "src")) {
                     $matches = array();
 
-                    if (preg_match_all('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
-                        $fonts = array_merge($fonts, $matches[1]);
+                    if (preg_match_all('/url\(([^\)]+)/', $token->Value, $matches)) {
+                        foreach ($matches[1] as $m) {
+                            $fonts[] = trim($m, '"\'');
+                        }
                     }
                 }
             }
