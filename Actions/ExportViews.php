@@ -50,10 +50,12 @@ namespace Terrific\ExporterBundle\Actions {
         protected function buildLocalPaths(Route $route, PathResolver $pathResolver, $content, $targetPath, $params) {
             if (!empty($params["build_local_paths"]) && $params["build_local_paths"] === true) {
                 foreach ($route->getAllAssets() as $asset) {
+
+                    $asset = ltrim($pathResolver->buildWebPath($asset), "/");
+
                     $nAssetPath = $params["exportPath"] . "/" . ltrim($pathResolver->resolve($asset), "/");
                     $retPath = $this->fs->makePathRelative(dirname($nAssetPath), dirname($targetPath));
                     $nAsset = $retPath . basename($nAssetPath);
-
 
                     // TODO: Find a better solutation than this
                     foreach (array("../${asset}?1", "/${asset}?1") as $f) {
