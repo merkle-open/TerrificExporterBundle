@@ -91,7 +91,7 @@ namespace Terrific\ExporterBundle\Actions {
          * @param $params
          */
         protected function exportModuleImage(PageManager $pageManager, PathResolver $pathResolver, $params) {
-            $count = 0;
+            $files = array();
 
             /** @var $route Route */
             foreach ($pageManager->findRoutes(true) as $route) {
@@ -101,12 +101,12 @@ namespace Terrific\ExporterBundle\Actions {
 
                     foreach ($module->getAssets(array('IMG')) as $img) {
                         $this->saveImage($img, $pathResolver, $params);
-                        ++$count;
+                        $files[] = $img;
                     }
                 }
             }
 
-            return $count;
+            return count(array_unique($files));
         }
 
         /**
