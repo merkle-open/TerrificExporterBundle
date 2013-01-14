@@ -57,10 +57,8 @@ namespace Terrific\ExporterBundle\Actions {
                     $retPath = $this->fs->makePathRelative(dirname($nAssetPath), dirname($targetPath));
                     $nAsset = $retPath . basename($nAssetPath);
 
-                    // TODO: Find a better solutation than this
-                    foreach (array("../${asset}?1", "/${asset}?1") as $f) {
-                        $content = str_replace($f, $nAsset, $content);
-                    }
+                    $regex = '#(\.\.)?(/)?' . $asset . '(\?1)?#';
+                    $content = preg_replace($regex, $nAsset, $content);
                 }
             }
             return $content;
