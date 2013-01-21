@@ -86,7 +86,15 @@ namespace Terrific\ExporterBundle\Helper {
             $fs = new \Symfony\Component\Filesystem\Filesystem();
 
             if (!$fs->isAbsolutePath($file)) {
-                return dirname($css) . "/${file}";
+                $cssSplit = explode("/", dirname($css));
+                $fileSplit = explode("/", $file);
+
+                while ($fileSplit[0] == "..") {
+                    array_shift($fileSplit);
+                    unset($cssSplit[count($cssSplit) - 1]);
+                }
+
+                return implode("/", array_merge($cssSplit, $fileSplit));
             }
 
             return $file;

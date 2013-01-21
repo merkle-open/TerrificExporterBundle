@@ -56,7 +56,7 @@ namespace Terrific\ExporterBundle\Tests\Filter {
 
             $ret = AsseticHelper::convertRelativeCSSPaths($target, $cssFile);
 
-            $this->assertEquals(realpath(__DIR__ . "/../App/web/img/blub.jpg"), realpath($ret));
+            $this->assertEquals(__DIR__ . "/../App/web/img/blub.jpg", $ret);
         }
     }
 }
