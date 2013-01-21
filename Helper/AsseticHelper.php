@@ -83,7 +83,13 @@ namespace Terrific\ExporterBundle\Helper {
          * @param $css
          */
         public static function convertRelativeCSSPaths($file, $css) {
-            return realpath(dirname($css) . "/${file}");
+            $fs = new \Symfony\Component\Filesystem\Filesystem();
+
+            if (!$fs->isAbsolutePath($file)) {
+                return dirname($css) . "/${file}";
+            }
+
+            return $file;
         }
 
 
