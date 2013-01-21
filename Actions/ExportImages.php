@@ -138,7 +138,13 @@ namespace Terrific\ExporterBundle\Actions {
 
                         $content = $leaf->dump();
                         $imageList = AsseticHelper::retrieveImages($content);
-                        $count += $this->saveImage($imageList, $pathResolver, $params);
+
+                        $list = array();
+                        foreach ($imageList as $img) {
+                            $list[] = AsseticHelper::convertRelativeCSSPaths($img, $asset->getTargetPath());
+                        }
+
+                        $count += $this->saveImage($list, $pathResolver, $params);
                     }
                 }
             }

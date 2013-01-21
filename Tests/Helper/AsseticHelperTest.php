@@ -46,5 +46,17 @@ namespace Terrific\ExporterBundle\Tests\Filter {
             $this->assertContains("/font/frutiger-45-light.ttf", $assets);
             $this->assertContains("/font/frutiger-45-light.svg", $assets);
         }
+
+        /**
+         * @covers AsseticHelper::convertRelativeCSSPaths()
+         */
+        public function testConvertRelativeCSSPaths() {
+            $cssFile = __DIR__ . "/../App/web/css/test.css";
+            $target = "../img/blub.jpg";
+
+            $ret = AsseticHelper::convertRelativeCSSPaths($target, $cssFile);
+
+            $this->assertEquals(realpath(__DIR__ . "/../App/web/img/blub.jpg"), realpath($ret));
+        }
     }
 }

@@ -78,6 +78,14 @@ namespace Terrific\ExporterBundle\Helper {
             return array_unique($images);
         }
 
+        /**
+         * @param $file
+         * @param $css
+         */
+        public static function convertRelativeCSSPaths($file, $css) {
+            return realpath(dirname($css) . "/${file}");
+        }
+
 
         /**
          * @param $content
