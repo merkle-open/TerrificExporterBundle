@@ -13,6 +13,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Terrific\ExporterBundle\Helper\ProcessHelper;
     use Terrific\ExporterBundle\Object\ActionRequirement;
     use Terrific\ExporterBundle\Service\Log;
+    use Terrific\ExporterBundle\Service\BuildOptions;
 
     /**
      *
@@ -32,6 +33,22 @@ namespace Terrific\ExporterBundle\Actions {
             $ret[] = new ActionRequirement("yuidoc", ActionRequirement::TYPE_PROCESS, 'Terrific\ExporterBundle\Actions\BuildJSDoc');
 
             return $ret;
+        }
+
+        /**
+         * @param $file
+         */
+        protected function updateYUIDocConfig($file, $params) {
+            /** @var $buildOptions BuildOptions */
+            $buildOptions = $this->container->get("terrific.exporter.build_options");
+
+            $content = file_get_contents($file);
+            $obj = json_decode($content);
+
+            $obj->version = sprintf("%d.%d.%d", $buildOptions["version.major"], $buildOptions["version.minor"], $buildOptions["version.build"]);
+
+            $content = json_encode($obj);
+            file_put_contents($file, $content);
         }
 
         /**
@@ -55,8 +72,12 @@ namespace Terrific\ExporterBundle\Actions {
             $kernelRootDir = realpath($this->container->getParameter("kernel.root_dir") . "/../");
 
             $configFile = $configFinder->find("yuidoc.json");
+            $this->updateYUIDocConfig($configFile, $params);
 
-            $process = ProcessHelper::startCommand("yuidoc", array("-c", $configFile), $kernelRootDir);
+            $targetPath = $params["exportPath"] . "/apidoc";
+            \Terrific\ExporterBundle\Helper\FileHelper::createPathRecursive($targetPath);
+
+            $process = ProcessHelper::startCommand("yuidoc", array("-c", $configFile, "-o", $targetPath), $kernelRootDir);
 
             if (!$process->isSuccessful()) {
                 Log::err("Cannot build javascript documentation");

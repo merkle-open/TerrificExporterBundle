@@ -23,7 +23,7 @@ namespace Terrific\ExporterBundle\Object {
         private $skins;
 
         /** @var array */
-        private $assets;
+        private $assets = array();
 
         /** @var array */
         private $connectors;

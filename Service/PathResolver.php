@@ -343,10 +343,38 @@ namespace Terrific\ExporterBundle\Service {
 
 
         /**
+         * @param $filePath
+         */
+        public function buildWebPath($filePath) {
+            if (file_exists($filePath)) {
+
+                $file = realpath($filePath);
+
+                if (!$file) {
+                    throw new \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException("Cannot build a webpath from a non existing path: " . $file);
+                }
+
+                $modName = $this->getModuleName($file);
+                $file = substr($file, strpos($file, "public/") + 7);
+                $file = "/bundles/terrificmodule" . strtolower($modName) . "/${file}";
+
+                return $file;
+            }
+
+            return $filePath;
+        }
+
+
+        /**
          * @param $file
          */
         public function locate($file, $assertedPath = "") {
             $this->initialize();
+
+            if (file_exists($assertedPath)) {
+                $assertedPath = realpath($assertedPath);
+                $assertedPath = str_replace(realpath($this->container->getParameter("kernel.root_dir") . "/../") . "/", "", $assertedPath);
+            }
 
             $assertedPath = ltrim($assertedPath, ".");
 
@@ -362,12 +390,12 @@ namespace Terrific\ExporterBundle\Service {
                 $assertedPath = $nPath;
             }
 
-
             $locatedFiles = $this->fileLocator->locate($file, null, false);
 
             $ret = array();
             foreach ($locatedFiles as $file) {
                 $file = realpath($file);
+
                 $found = (strpos($file, $assertedPath) !== false);
 
                 if ($this->logger) {
@@ -386,7 +414,7 @@ namespace Terrific\ExporterBundle\Service {
             if ($this->logger) {
                 $this->logger->err(print_r($locatedFiles, true));
             }
-            throw new \Exception("Cannot identify single path for asset");
+            throw new \Exception("Cannot identify single path for asset: " . $file);
         }
 
         /**

@@ -66,8 +66,8 @@ namespace Terrific\ExporterBundle\Helper {
                         case "background-image":
                             $matches = array();
 
-                            if (preg_match('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
-                                $images[] = $matches[1];
+                            if (preg_match('/url\(([^\)]+)/', $token->Value, $matches)) {
+                                $images[] = trim($matches[1], '"\'');
                             }
 
                             break;
@@ -76,6 +76,28 @@ namespace Terrific\ExporterBundle\Helper {
             }
 
             return array_unique($images);
+        }
+
+        /**
+         * @param $file
+         * @param $css
+         */
+        public static function convertRelativeCSSPaths($file, $css) {
+            $fs = new \Symfony\Component\Filesystem\Filesystem();
+
+            if (!$fs->isAbsolutePath($file)) {
+                $cssSplit = explode("/", dirname($css));
+                $fileSplit = explode("/", $file);
+
+                while ($fileSplit[0] == "..") {
+                    array_shift($fileSplit);
+                    unset($cssSplit[count($cssSplit) - 1]);
+                }
+
+                return implode("/", array_merge($cssSplit, $fileSplit));
+            }
+
+            return $file;
         }
 
 
@@ -93,8 +115,10 @@ namespace Terrific\ExporterBundle\Helper {
                 if ($token instanceof \CssAtFontFaceDeclarationToken && ($token->Property == "src")) {
                     $matches = array();
 
-                    if (preg_match_all('/url\([\'"]([^\'"]+)/', $token->Value, $matches)) {
-                        $fonts = array_merge($fonts, $matches[1]);
+                    if (preg_match_all('/url\(([^\)]+)/', $token->Value, $matches)) {
+                        foreach ($matches[1] as $m) {
+                            $fonts[] = trim($m, '"\'');
+                        }
                     }
                 }
             }

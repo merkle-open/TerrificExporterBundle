@@ -296,8 +296,23 @@ namespace Terrific\ExporterBundle\Service {
                         if ($token->getValue() == "[") {
                             $token = $stream->next();
                             while ($token->getValue() != "]") {
-                                $skins[] = $token->getValue();
+                                if ($token->getValue() != ",") {
+                                    $skins[] = $token->getValue();
+                                }
                                 $token = $stream->next();
+                            }
+                        }
+
+                        if ($stream->next()->getValue() === ",") {
+                            $token = $stream->next();
+                            if ($token->getValue() == "[") {
+                                $token = $stream->next();
+                                while ($token->getValue() != "]") {
+                                    if (trim($token->getValue()) !== "") {
+                                        $connectors[] = $token->getValue();
+                                    }
+                                    $token = $stream->next();
+                                }
                             }
                         }
 
@@ -571,6 +586,52 @@ namespace Terrific\ExporterBundle\Service {
 
             if ($ret == "") {
                 $ret = sprintf("view%s.html", ucfirst($route->getMethod()->getShortName()));
+            }
+
+            return $ret;
+        }
+
+        /**
+         * @param $name
+         * @return RouteModule
+         */
+        public function &findRouteModule($name) {
+            $this->initialize();
+
+
+            /** @var $route Route */
+            foreach ($this->routeList as $route) {
+
+                /** @var $mod RouteModule */
+                foreach ($route->getModules() as $mod) {
+                    if ($mod->getModule() === $name) {
+                        return $mod;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+        /**
+         * @param $name
+         * @return array
+         */
+        public function findAllRouteModules($name = null) {
+            $this->initialize();
+
+            $ret = array();
+
+            /** @var $route Route */
+            foreach ($this->routeList as $route) {
+
+                /** @var $mod RouteModule */
+                foreach ($route->getModules() as $mod) {
+                    if ($mod->getModule() === $name || $name === null) {
+                        $ret[] = & $mod;
+                    }
+                }
             }
 
             return $ret;

@@ -75,10 +75,10 @@ namespace Terrific\ExporterBundle\Actions {
             $processParams[] = "Concatenate";
 
             $processParams[] = "-tile";
-            $processParams[] = "x${height}";
+            $processParams[] = "1x";
 
             $processParams[] = "-geometry";
-            $processParams[] = "${width}x${height}+0+0";
+            $processParams[] = "1x1<";
 
             $processParams[] = "-bordercolor";
             $processParams[] = " none";
