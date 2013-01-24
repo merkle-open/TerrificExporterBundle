@@ -30,6 +30,10 @@ namespace Terrific\ExporterBundle\Actions {
      */
     class ExportDocumentation extends AbstractExportAction {
 
+        /** @var PageManager */
+        private $pageManager;
+
+
         /**
          * Returns requirements for running this Action.
          *
@@ -54,12 +58,79 @@ namespace Terrific\ExporterBundle\Actions {
 
 
         /**
+         * @param $modName
+         */
+        protected function getDocumentationContent($modName) {
+            $file = $this->container->getParameter("kernel.root_dir") . "/../src/Terrific/Module/${modName}/README.md";
+
+            if (file_exists($file)) {
+                return file_get_contents($file);
+            }
+
+            return "";
+        }
+
+        /**
+         * @param \Terrific\ExporterBundle\Renderer\Document\DocumentRenderer $renderer
+         */
+        protected function generateModuleList(IDocumentRenderer $renderer) {
+            $renderer->section("Modules");
+
+
+            $alphaList = array();
+
+            /** @var $module RouteModule */
+            foreach ($this->pageManager->findAllRouteModules() as $module) {
+                $alphaList[$module->getModule()] = $module;
+            }
+
+
+            ksort($alphaList);
+
+
+            /** @var $module RouteModule */
+            foreach ($alphaList as $module) {
+                $renderer->subsection($module->getModule());
+
+                $doc = $this->getDocumentationContent($module->getModule());
+                if($doc != "") {
+                    $renderer->rawText($doc);
+                    $renderer->block("");
+                }
+
+
+                if (count($module->getSkins()) > 0) {
+                    $renderer->subsubsection("Skins");
+                    $renderer->addList($module->getSkins(), "-");
+                }
+            }
+
+        }
+
+        /**
+         * @param \Terrific\ExporterBundle\Renderer\Document\DocumentRenderer $renderer
+         */
+        protected function generateModuleConnections(IDocumentRenderer $renderer) {
+            $renderer->section("Module connections");
+            foreach ($this->pageManager->findAllConnectedModules() as $connector => $modules) {
+                $modNames = array();
+                /** @var $mod RouteModule */
+                foreach ($modules as $mod) {
+                    $modNames[] = $mod->getModule();
+                }
+
+                $renderer->subsection("Connector '" . $connector . "'")->addList($modNames, "1");
+            }
+        }
+
+
+        /**
          * @param $params
          * @return ActionResult
          */
         public function run(OutputInterface $output, $params = array()) {
             /** @var $pageManager PageManager */
-            $pageManager = $this->container->get("terrific.exporter.page_manager");
+            $this->pageManager = $this->container->get("terrific.exporter.page_manager");
 
             /** @var $pathResolver PathResolver */
             $pathResolver = $this->container->get("terrific.exporter.pathresolver");
@@ -70,31 +141,26 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $assetManager LazyAssetManager */
             $assetManager = $this->container->get("assetic.asset_manager");
 
+            $this->generateModuleList($renderer);
+            $this->generateModuleConnections($renderer);
 
-            $renderer->section("Module connections");
-            foreach ($pageManager->findAllConnectedModules() as $connector => $modules) {
-                $modNames = array();
-                /** @var $mod RouteModule */
-                foreach ($modules as $mod) {
-                    $modNames[] = $mod->getModule();
-                }
 
-                $renderer->subsection("Connector '" . $connector . "'")->addList($modNames, "1");
-            }
+//            foreach ($assetManager->getNames() as $name) {
+//                /** @var $asset FileAsset */
+//                $asset = $assetManager->get($name);
+//
+//                if (\Terrific\ExporterBundle\Helper\FileHelper::isJavascript($asset->getTargetPath())) {
+//                    foreach ($asset as $leaf) {
+//                        $ll = \Terrific\ExporterBundle\Helper\AsseticHelper::removeMinFilters($leaf);
+//                        $content = $ll->dump();
+//
+//                        JavascriptHelper::retrieveTerrificEvents($content);
+//                    }
+//                }
+//            }
 
-            foreach ($assetManager->getNames() as $name) {
-                /** @var $asset FileAsset */
-                $asset = $assetManager->get($name);
-
-                if (\Terrific\ExporterBundle\Helper\FileHelper::isJavascript($asset->getTargetPath())) {
-                    foreach ($asset as $leaf) {
-                        $ll = \Terrific\ExporterBundle\Helper\AsseticHelper::removeMinFilters($leaf);
-                        $content = $ll->dump();
-
-                        JavascriptHelper::retrieveTerrificEvents($content);
-                    }
-                }
-            }
+            \Terrific\ExporterBundle\Helper\FileHelper::createPathRecursive($params["exportPath"]);
+            $renderer->save($params["exportPath"] . "/Documentation.md");
 
             die();
 

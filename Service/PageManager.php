@@ -235,6 +235,11 @@ namespace Terrific\ExporterBundle\Service {
 
                             $connectors = (isset($conMatches[1]) ? explode(",", $conMatches[1]) : array());
 
+                            array_walk($connectors, function (&$itm) {
+                                $itm = trim($itm);
+                                return $itm;
+                            });
+
                             if ($modName != "") {
                                 $modName = $this->findModuleName($modName);
                                 $routeModule = new RouteModule($modName, basename($filePath), $skins, $connectors);
@@ -629,7 +634,7 @@ namespace Terrific\ExporterBundle\Service {
                 /** @var $mod RouteModule */
                 foreach ($route->getModules() as $mod) {
                     if ($mod->getModule() === $name || $name === null) {
-                        $ret[] = & $mod;
+                        $ret[] = $mod;
                     }
                 }
             }
