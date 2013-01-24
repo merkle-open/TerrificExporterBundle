@@ -17,7 +17,7 @@ namespace Terrific\ExporterBundle\Command {
     use Terrific\ExporterBundle\Object\ActionResult;
     use Terrific\ExporterBundle\Actions\IAction;
     use Terrific\ExporterBundle\Actions\AbstractAction;
-    use Terrific\ExporterBundle\Helper\TimerService;
+    use Terrific\ExporterBundle\Service\TimerService;
     use Symfony\Component\Filesystem\Filesystem;
     use Terrific\ExporterBundle\Service\BuildOptions;
     use Terrific\ExporterBundle\Object\ActionRequirement;
@@ -47,7 +47,7 @@ namespace Terrific\ExporterBundle\Command {
         /**
          *
          */
-        protected function retrieveActionStack(array $config) {
+        protected function retrieveActionStack(array $config, InputInterface $input) {
             $ret = array();
 
             if (!empty($config["build_actions"]) && is_array($config["build_actions"])) {
@@ -91,6 +91,76 @@ namespace Terrific\ExporterBundle\Command {
         }
 
 
+        protected function runChain(TimerService $timer, OutputInterface $output, array $actionStack, array $config) {
+            $reRunTimer = array();
+            for ($i = 0; $i < count($actionStack); $i++) {
+                /** @var $refClass \ReflectionClass */
+                $refClass = $actionStack[$i];
+                $queueItem = $refClass->getName();
+
+                if (!isset($reRunTimer[$queueItem])) {
+                    $reRunTimer[$queueItem] = 0;
+                }
+                $timer->lap("START-" . $refClass->getShortName());
+
+                $config["runnedTimer"] = $reRunTimer[$queueItem];
+                $ret = $this->runAction($refClass, $output, $config);
+
+                if ($ret instanceof ActionResult) {
+                    switch ($ret->getResultCode()) {
+                        case ActionResult::OK:
+                            break;
+
+                        case ActionResult::STOP:
+                            Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
+                            break 2;
+
+                        case ActionResult::TRY_AGAIN:
+                            $reRunTimer[$queueItem] += 1;
+                            if ($reRunTimer[$queueItem] < 10) {
+                                --$i;
+                            } else {
+                                $reRunTimer[$queueItem] = 0;
+                                Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
+                            }
+                            break;
+
+                        default:
+                            Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
+                            break;
+                    }
+                }
+
+                $timer->lap("STOP-" . $refClass->getShortName());
+            }
+        }
+
+        /**
+         * @param \Terrific\ExporterBundle\Service\TimerService $timer
+         * @param array $actionStack
+         */
+        protected function printTimings(TimerService $timer, array $actionStack) {
+            for ($i = 0; $i < count($actionStack); $i++) {
+                $refClass = $actionStack[$i];
+
+                $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
+                if ($this->logger) {
+                    $this->logger->info($msg);
+                }
+
+                Log::info($msg);
+            }
+        }
+
+        /**
+         *
+         */
+        protected function buildZipFile(array $config) {
+            $file = FileHelper::buildZip($config["exportPath"], null, true);
+            Log::info(sprintf("Built zipfile [%s]", basename($file)));
+        }
+
+
         /**
          * @param InputInterface $input
          * @param OutputInterface $output
@@ -113,66 +183,15 @@ namespace Terrific\ExporterBundle\Command {
 
             try {
                 $config = $this->compileConfiguration($buildOptions, $input);
-                $actionStack = $this->retrieveActionStack($config);
+                $actionStack = $this->retrieveActionStack($config, $input);
+                $this->runChain($timer, $output, $actionStack, $config);
 
-                $reRunTimer = array();
-                for ($i = 0; $i < count($actionStack); $i++) {
-                    /** @var $refClass \ReflectionClass */
-                    $refClass = $actionStack[$i];
-                    $queueItem = $refClass->getName();
+                $this->printTimings($timer, $actionStack);
 
-                    if (!isset($reRunTimer[$queueItem])) {
-                        $reRunTimer[$queueItem] = 0;
-                    }
-                    $timer->lap("START-" . $refClass->getShortName());
-
-                    $config["runnedTimer"] = $reRunTimer[$queueItem];
-                    $ret = $this->runAction($refClass, $output, $config);
-
-                    if ($ret instanceof ActionResult) {
-                        switch ($ret->getResultCode()) {
-                            case ActionResult::OK:
-                                break;
-
-                            case ActionResult::STOP:
-                                Log::info("Stopping export after [" . $refClass->getShortName() . "] Action");
-                                break 2;
-
-                            case ActionResult::TRY_AGAIN:
-                                $reRunTimer[$queueItem] += 1;
-                                if ($reRunTimer[$queueItem] < 10) {
-                                    --$i;
-                                } else {
-                                    $reRunTimer[$queueItem] = 0;
-                                    Log::err("Aborted after > 10 retries [" . $refClass->getShortName() . "] Action");
-                                }
-                                break;
-
-                            default:
-                                Log::warn("Retrieved unknown return from " . $refClass->getShortName() . " Code: " . $ret->getResultCode());
-                                break;
-                        }
-                    }
-
-                    $timer->lap("STOP-" . $refClass->getShortName());
-                }
-
-                for ($i = 0; $i < count($actionStack); $i++) {
-                    $refClass = $actionStack[$i];
-
-                    $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
-                    if ($this->logger) {
-                        $this->logger->info($msg);
-                    }
-
-                    Log::info($msg);
-                }
 
                 if (!empty($config["export_type"]) && strtolower($config["export_type"]) === "zip") {
-                    $file = FileHelper::buildZip($config["exportPath"], null, true);
-                    Log::info(sprintf("Built zipfile [%s]", basename($file)));
+                    $this->buildZipFile($config);
                 }
-
 
                 // stop timer
                 $this->logger->info(sprintf("Export completed in %s seconds", $timer->stop()));

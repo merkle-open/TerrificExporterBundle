@@ -121,7 +121,6 @@ namespace Terrific\ExporterBundle\Actions {
                             $modContent = $this->doDump($module);
                             $content = $this->processTemplate($module->getModule(), $modContent);
                             $file = $tmpFileMgr->putContent($content);
-                            var_dump($content);
 
                             $results = $w3Validator->validateFile($file);
                             $this->processValidationResults($results, $module->getExportingPath());
