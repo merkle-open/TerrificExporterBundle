@@ -127,12 +127,23 @@ namespace Terrific\ExporterBundle\Actions {
 
                     if (FileHelper::isStylesheet($asset->getTargetPath())) {
                         $beforeRewriteContent = $asset->dump();
+                        // Parse CSS
                         $fonts = AsseticHelper::retrieveFonts($beforeRewriteContent);
+                        
+                        // var_dump('$fonts: ', $fonts);
 
                         foreach ($fonts as $f) {
                             if (!in_array($f, $exportedFonts)) {
+                                // var_dump('$f: ', $f);
+                                // var_dump('$basename($f): ', basename($f));
+                                
+                                $f = FileHelper::cleanRecursivePath($f);
+                                // var_dump('$f: ', $f);
+                                
+                                
                                 $font = $pathResolver->locate(basename($f), $f);
-
+                                // var_dump('$font: ', $font);
+                               
                                 $target = $params["exportPath"] . $pathResolver->resolve($font);
                                 $this->saveToPath($font, $target);
 

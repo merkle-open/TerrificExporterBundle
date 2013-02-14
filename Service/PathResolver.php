@@ -390,6 +390,7 @@ namespace Terrific\ExporterBundle\Service {
                 $assertedPath = $nPath;
             }
 
+            var_dump($file);
             $locatedFiles = $this->fileLocator->locate($file, null, false);
 
             $ret = array();
@@ -474,13 +475,19 @@ namespace Terrific\ExporterBundle\Service {
                     $fs = $this->container->get("filesystem");
 
                     $root_dir = $this->container->getParameter("kernel.root_dir");
-                    $locations = array($root_dir . "/../web/img", $root_dir . "/../web/font");
-
+                    
+                    // Hard coded location paths for WHERE should be searched
+                    $locations = array(
+                        $root_dir . "/../web/img",
+                        $root_dir . "/../web/font",
+                        $root_dir . "/../web/fonts"
+                    );
 
                     $root_dir .= "/../src/Terrific/Module";
                     foreach ($this->modules as $module) {
                         $locations[] = $root_dir . "/${module}/Resources/public/img";
                         $locations[] = $root_dir . "/${module}/Resources/public/font";
+                        $locations[] = $root_dir . "/${module}/Resources/public/fonts";
                     }
 
                     $locations = array_filter($locations, function ($itm) use ($fs) {

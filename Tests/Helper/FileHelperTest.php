@@ -60,5 +60,12 @@ namespace Terrific\ExporterBundle\Tests\Filter {
             $this->assertFalse(FileHelper::isImage('test-file-css'), "test-file-css is not a image.");
         }
 
+        /**
+         * @covers \Terrific\ExporterBundle\Helper\FileHelper::cleanRecursivePath
+         */
+        public function testCleanRecursivePath() {
+            $this->assertEquals(FileHelper::cleanRecursivePath('../../test'), 'test', "Cleaning recursive path ../ not possible.");
+        }
+
     }
 }

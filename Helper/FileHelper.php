@@ -52,13 +52,27 @@ namespace Terrific\ExporterBundle\Helper {
         }
 
         /**
-         * Removes // from the given path.
+         * Removes '//' from the given path.
          *
          * @param String $path
          * @return String
          */
         public static function cleanPath($path) {
             return str_replace("//", "/", $path);
+        }
+
+        /**
+         * Removes '../' from the given path.
+         *
+         * @param String $path
+         * @return String
+         */
+        public static function cleanRecursivePath($path) {
+            while(substr($path, 0, 3) == '../') {
+                // remove first 3 chars
+                $path = substr($path, 3);
+            }
+            return $path;
         }
 
         /**

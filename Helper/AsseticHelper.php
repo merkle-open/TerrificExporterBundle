@@ -106,6 +106,7 @@ namespace Terrific\ExporterBundle\Helper {
          * @return array
          */
         public static function retrieveFonts($content) {
+            // Get help from CSSMin parser functionalities
             $css = new \CssMin();
             $tokenList = $css->parse($content);
 
@@ -114,10 +115,10 @@ namespace Terrific\ExporterBundle\Helper {
             foreach ($tokenList as $token) {
                 if ($token instanceof \CssAtFontFaceDeclarationToken && ($token->Property == "src")) {
                     $matches = array();
-
                     if (preg_match_all('/url\(([^\)]+)/', $token->Value, $matches)) {
                         foreach ($matches[1] as $m) {
                             $fonts[] = trim($m, '"\'');
+
                         }
                     }
                 }
@@ -126,11 +127,12 @@ namespace Terrific\ExporterBundle\Helper {
             $fonts = array_unique($fonts);
 
             array_walk($fonts, function (&$item) {
+                // Catch '#' e.g. 'fontname.eot?#iefix'
                 if (stristr($item, "#") !== false) {
                     list($font, $trash) = explode("#", $item);
                     $item = $font;
                 }
-
+                // Catch '?' e.g. 'fontname.eot?#iefix'
                 if (stristr($item, "?") !== false) {
                     list($font, $trash) = explode("?", $item);
                     $item = $font;
