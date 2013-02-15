@@ -21,11 +21,12 @@ See doc/Documentation.pdf for additional information (maybe no the latest versio
 
 }
 ```
+
 2. Check if there is a `logs` folder in `app/`. If not available, `$ mkdir logs` one.
 
 3. Create a new directory named `build` in the root project folder. Add a file `build.ini` into it. `name` describes the output folder or zip file (e.g. Terrific, frontend). Don't add the zip file extension to that name - this will be done later within the export process - depending on your options.
 
-```
+```yml
 [version]
 name=frontend
 major=0
@@ -34,7 +35,7 @@ build=0
 ```
 
 4. Create a file named `config_export.yml` in folder `app/config/` or just copy your `config.yml`. The Exporter Configuration starts at line `terrific_exporter:`.
-```
+```yml
 # /app/config/config_export.yml
 imports:
     - { resource: config.yml }
@@ -128,6 +129,7 @@ terrific_exporter:
 ```
 
 # Usage
+Remember to clear cache when you change the `config_export.yml` files.
 
 * one
 * two
