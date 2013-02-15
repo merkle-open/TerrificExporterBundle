@@ -1,5 +1,5 @@
 {
-    "name"       :"senuphtyz/terrific-exporter-bundle",
+    "name"       :"namics/terrific-exporter-bundle",
     "description":"Exports your terrific frontend",
     "keywords"   :["frontend", "terrific", "export"],
     "type"       :"symfony-bundle",
@@ -10,7 +10,7 @@
         },
         {
             "name"    :"Terrific Symfony Community",
-            "homepage":"https://github.com/senuphtyz/TerrificExporterBundle/contributors"
+            "homepage":"https://github.com/namics/TerrificExporterBundle/contributors"
         }
     ],
     "require"    :{
