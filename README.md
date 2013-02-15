@@ -8,6 +8,7 @@ See doc/Documentation.pdf for additional information (maybe no the latest versio
 ## Installation
 
 1. Edit `app/AppKernel.php` and add a new entry to the `$bundles` array:
+
 ```php
 {
     public function registerBundles()
@@ -35,6 +36,7 @@ build=0
 ```
 
 4. Create a file named `config_export.yml` in folder `app/config/` or just copy your `config.yml`. The Exporter Configuration starts at line `terrific_exporter:`.
+
 ```yml
 # /app/config/config_export.yml
 imports:
