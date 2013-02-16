@@ -6,12 +6,12 @@
 	- [Requirements](#requirements)
 	- [Dependency management](#dependency-management)
 	- [Tooling](#tooling)
-		- [Node.js: YUIDoc, JSHint, CSSLint](#nodejs:-yuidoc-jshint-csslint)
+		- [Node.js with YUIDoc, JSHint and CSSLint](#nodejs-with-yuidoc-jshint-and-csslint)
 		- [jpegoptim, optipng, advpng, montage](#jpegoptim-optipng-advpng-montage)
 		- [diff](#diff)
 - [Configuration](#configuration)
 	- [1. Setup an export environment](#1-setup-an-export-environment)
-	- [2. Register TerrificExporterBundle in `app/AppKernel.php`](#2-register-terrificexporterbundle-in-app/appkernelphp)
+	- [2. Register TerrificExporterBundle in `AppKernel.php`](#2-register-terrificexporterbundle-in-appkernelphp)
 	- [3. Configuration Settings](#3-configuration-settings)
 	- [Example configuration](#example-configuration)
 		- [YUIDoc](#yuidoc)
@@ -22,24 +22,24 @@
 		- [Export](#export)
 		- [Export command line options](#export-command-line-options)
 		- [Annotations](#annotations)
-			- [@Export](#@export)
-		- [@LocaleExport](#@localeexport)
+			- [Export](#export)
+		- [LocaleExport](#localeexport)
 	- [Debugging and Logging](#debugging-and-logging)
 	- [Actions](#actions)
-		- [`Terrific/ExporterBundle/Actions/ClearAction`](#terrific/exporterbundle/actions/clearaction)
-		- [`Terrific/ExporterBundle/Actions/BuildJSDoc`](#terrific/exporterbundle/actions/buildjsdoc)
-		- [`Terrific/ExporterBundle/Actions/ValidateJS`](#terrific/exporterbundle/actions/validatejs)
-		- [`Terrific/ExporterBundle/Actions/ValidateCSS`](#terrific/exporterbundle/actions/validatecss)
-		- [`Terrific/ExporterBundle/Actions/ValidateModules`](#terrific/exporterbundle/actions/validatemodules)
-		- [`Terrific/ExporterBundle/Actions/ValidateViews`](#terrific/exporterbundle/actions/validateviews)
-		- [`Terrific/ExporterBundle/Actions/GenerateSprites`](#terrific/exporterbundle/actions/generatesprites)
-		- [`Terrific/ExporterBundle/Actions/ExportImages`](#terrific/exporterbundle/actions/exportimages)
-		- [`Terrific/ExporterBundle/Actions/ExportAssets`](#terrific/exporterbundle/actions/exportassets)
-		- [`Terrific/ExporterBundle/Actions/OptimizeImages`](#terrific/exporterbundle/actions/optimizeimages)
-		- [`Terrific/ExporterBundle/Actions/ExportModules`](#terrific/exporterbundle/actions/exportmodules)
-		- [`Terrific/ExporterBundle/Actions/ExportViews`](#terrific/exporterbundle/actions/exportviews)
-		- [`Terrific/ExporterBundle/Actions/ExportChangelogs`](#terrific/exporterbundle/actions/exportchangelogs)
-		- [`Terrific/ExporterBundle/Actions/ExportDiffs`](#terrific/exporterbundle/actions/exportdiffs)
+		- [`ClearAction`](#clearaction)
+		- [`BuildJSDoc`](#buildjsdoc)
+		- [`ValidateJS`](#validatejs)
+		- [`ValidateCSS`](#validatecss)
+		- [`ValidateModules`](#validatemodules)
+		- [`ValidateViews`](#validateviews)
+		- [`GenerateSprites`](#generatesprites)
+		- [`ExportImages`](#exportimages)
+		- [`ExportAssets`](#exportassets)
+		- [`OptimizeImages`](#optimizeimages)
+		- [`ExportModules`](#exportmodules)
+		- [`ExportViews`](#exportviews)
+		- [`ExportChangelogs`](#exportchangelogs)
+		- [`ExportDiffs`](#exportdiffs)
 	- [Extending](#extending)
 		- [Components and Services](#components-and-services)
 			- [`BuildOptions`](#buildoptions)
@@ -61,6 +61,7 @@
 			- [`GitHelper`](#githelper)
 		- [Build own actions](#build-own-actions)
 	- [Known Problems](#known-problems)
+- [Some notes](#some-notes)
 - [Authors](#authors)
 
 # Terrific Exporter Bundle for the Terrific Composer - Documentation #
@@ -120,7 +121,7 @@ It is necessary to have all the tools within path, the exporter won't search for
 
 To do a permanent change it is necessary to change `~/.bashrc` or `~/.bash_profile` depending on your OS.
 
-### Node.js: YUIDoc, JSHint, CSSLint ###
+### Node.js with YUIDoc, JSHint and CSSLint ###
 
 YUIDoc, JSHint and CSSLint are installed using Node.js. Just go to nodejs.org download the package fits for you operating system and install it. After the installation is done open up a new commandline and install Node.js and the Node.js Pakage Manager.
 
@@ -188,7 +189,7 @@ Now you can configure the environment to your project needs. Visit [Symfony2 - H
 
 
 
-## 2. Register TerrificExporterBundle in `app/AppKernel.php` ##
+## 2. Register TerrificExporterBundle in `AppKernel.php` ##
 
 Edit `app/AppKernel.php` and add a new entry to the `$bundles` array:
 
@@ -420,9 +421,9 @@ To startup an export use the following command: `$ app/console build:export --en
 
 ### Annotations ###
 
-#### @Export ####
+#### Export ####
 
-To export a view it is necessary to annotate a controller method with this annotation.
+To export a view it is necessary to annotate a controller method with this `@Export` annotation.
 
     // Terrific/Composition/Controller/DefaultController.php
 
@@ -462,7 +463,7 @@ It is possible to control a set of options for each view directly within this an
     @Export(name="viewname.html", environment="env1,env2,...")
 
 
-### @LocaleExport ###
+### LocaleExport ###
 
 Each view must have their own for each locale which should exported. To set different settings for each locale you have to use the `@LocaleExport` annotation. This annotation is used in combination with the `@Export` annotation. Setting up locale exportation will disable exporting the default language which means you have to annotate **all** locales that should exported. If no environment is given this view will exported in all environments.
 
@@ -511,48 +512,48 @@ Usage with @Export:
 All builtin actions are documented within these chapter. This maybe have some helpful information when you have to build your own action chain.
 
 
-### `Terrific/ExporterBundle/Actions/ClearAction` ###
+### `ClearAction` ###
 
-* `ClearAction` simply just clears all data from the target directory.
+* `Terrific/ExporterBundle/Actions/ClearAction` simply just clears all data from the target directory.
 * If configuration option `export_with_version` is activated this action does simply nothing cause normally the export folder should not exists during startup.
 
 
-### `Terrific/ExporterBundle/Actions/BuildJSDoc` ###
+### `BuildJSDoc` ###
 
-* `BuildJSDoc` will first test if `yuidoc` is callable. After that test it looks for a suitable `yuidoc.json` file, if a file has been found the action starts the `yuidoc` command with the found configuration.
+* `Terrific/ExporterBundle/Actions/BuildJSDoc` will first test if `yuidoc` is callable. After that test it looks for a suitable `yuidoc.json` file, if a file has been found the action starts the `yuidoc` command with the found configuration.
 * An example call could look like this and is going to be called withing the current project folder: `$ yuidoc -c /data/symfony2-project/app/config/yuidoc.json`
 
 
-### `Terrific/ExporterBundle/Actions/ValidateJS` ###
+### `ValidateJS` ###
 
-* Javascript will be validated within this action. This action will get a list of all necessary javascript assets from the `PageManager` class. After retrieving this list it temporary removes the min filters and place the content for *each part* of the asset within a temporary file. After saving that file the `jslint` command will looking for a suitable configuration file and starts to verify the contents of the temp file.
+* Javascript will be validated within this action `Terrific/ExporterBundle/Actions/ValidateJS`. This action will get a list of all necessary javascript assets from the `PageManager` class. After retrieving this list it temporary removes the min filters and place the content for *each part* of the asset within a temporary file. After saving that file the `jslint` command will looking for a suitable configuration file and starts to verify the contents of the temp file.
 * An example call could look like this: `$ jshint --jslint-reporter --config /sf2-project/app/config/jshint.json /tmp/folder`
 
 
-### `Terrific/ExporterBundle/Actions/ValidateCSS` ###
+### `ValidateCSS` ###
 
-* Stylesheets will be validated using this actions. This action also retrieves a list of all potential used style assets from the `PageManager` class. After retrieving this list the minfilter will be removed for dumping the content for *each part* of the asset to a temp file.
+* Stylesheets will be validated using this action (`Terrific/ExporterBundle/Actions/ValidateCSS`). This action also retrieves a list of all potential used style assets from the `PageManager` class. After retrieving this list the minfilter will be removed for dumping the content for *each part* of the asset to a temp file.
 * Example for the csslint validation command: `$ csslint --format=lint-xml --errors=[from cfg] --warning=[from cfg] --ignore=[from cfg] /tmpdir/foldername`
 
 
-### `Terrific/ExporterBundle/Actions/ValidateModules` ###
+### `ValidateModules` ###
 
-* First of all this action has a additional requirement on the configuration. This configuration must have enabled the options `validate_html` and `export_modules`. If one of them is not activated this action will be skipped.
+* First of all this action (`Terrific/ExporterBundle/Actions/ValidateModules`) has a additional requirement on the configuration. This configuration must have enabled the options `validate_html` and `export_modules`. If one of them is not activated this action will be skipped.
 * After starting this action it retrieves a list of all module combinations `module <-> skin <-> view` from the `PageManager` class.
 * The modules are exported without any HTML from the view, just the plain modules.
 * After exporting this HTML to a temp file the action tries to send this file to the [W3CValidator](http://validator.w3.org/). Internet connection ist required to start this action.
 * To generate a valid HTML `ValidateModule` uses a template file. This template file `module-template.tpl.html` can be replaced by placing a file with the same name in your `app/config folder`. Within this file just two variables are special `\%MODULE_NAME\%` and `\%MODULE_CONTENT\%`. Both variables are replaced with the corresponding content before sending to the W3CValidator.
 
 
-### `Terrific/ExporterBundle/Actions/ValidateViews` ###
+### `ValidateViews` ###
 
-* This action handles the validation for the views just like the `ValidateModules` action. The difference between this both action are that `ValidateViews` requires other configuration options to start: `export_views` and `validate_html`.
+* This action (`Terrific/ExporterBundle/Actions/ValidateViews`) handles the validation for the views just like the `ValidateModules` action. The difference between this both action are that `ValidateViews` requires other configuration options to start: `export_views` and `validate_html`.
 * The views also have all source code from the used modules within this view. This `ValdationAction` also uses the W3CValidator.
 
 
-### `Terrific/ExporterBundle/Actions/GenerateSprites` ###
+### `GenerateSprites` ###
 
-* `GenerateSprites` needs some more configuration than the other actions. Each sprite which should be generated must have an entry within the config file. If there is/are no configured sprite(s) the action will just be skipped.
+* `Terrific/ExporterBundle/Actions/GenerateSprites` needs some more configuration than the other actions. Each sprite which should be generated must have an entry within the config file. If there is/are no configured sprite(s) the action will just be skipped.
 * To generate a sprite this action uses the `montage` tool from the ImageMagick toolset.
 * After retrieving a filelist for merging as a sprite the action will sort this files by name. This offers you the possibility to order you images within your sprite. Filenames like `0000_arrow.png` are best practice.
 * If this file is part of the export, which should be the normal usecase, this action has to *run before* `ExportImages`.
@@ -568,25 +569,25 @@ Example for a sprite generation call:
         ${list of files} ${target}
 
 
-### `Terrific/ExporterBundle/Actions/ExportImages` ###
+### `ExportImages` ###
 
-* All *images which are used* within the exported views should be exported by `ExportImages`.
+* All *images which are used* within the exported views should be exported by `Terrific/ExporterBundle/Actions/ExportImages`.
 * To control which image is part of the export you have to encapsulate each image within the **Twig's `asset()`** function.
 * **Image path's which are not generated using this function won't be part the export!***
 * The images used within the CSS file(s) will also be exported - but there is it no possible to control which should be part of the export.
 * This action have to **run before** `OptimizeImages`.
 
 
-### `Terrific/ExporterBundle/Actions/ExportAssets` ###
+### `ExportAssets` ###
 
-* This action just simply do dumps of all used assets (CSS and JavaScript).
+* This action (`Terrific/ExporterBundle/Actions/ExportAssets`) just simply do dumps of all used assets (CSS and JavaScript).
 * It also retrieves a list of used assets from the `PageManager` and dumps the assets to the exporting files.
 * This time the exported assets are also get minified if it's configured! If the `build_local_paths` options is enabled the paths within the CSS files are change to match the exporting paths.
 * **Paths within JavaScript files currently won't get changed!**
 
 
-### `Terrific/ExporterBundle/Actions/OptimizeImages` ###
-* All images within the export path are optimized. So the startup of the `OptimizeImages` action depends on the `ExportImages` action.
+### `OptimizeImages` ###
+* All images within the export path are optimized. So the startup of the `Terrific/ExporterBundle/Actions/OptimizeImages` action depends on the `ExportImages` action.
 * After retrieving a list of all image files in the export, the action will optimize file by file depending on the file extension.
 * After running this command it will print the amount of bytes saved for each file and as total amount.
 
@@ -597,22 +598,22 @@ Example commands for optimizing images:
 * `$ jpegopim -q /exportpath/img/picture.jpg`
 
 
-### `Terrific/ExporterBundle/Actions/ExportModules` ###
-* Retrieves a list of all module combinations `module <-> skin <-> view` and exports the HTML for all modules in a seperate folder within the exporting path.
+### `ExportModules` ###
+* This action (`Terrific/ExporterBundle/Actions/ExportModules`) retrieves a list of all module combinations `module <-> skin <-> view` and exports the HTML for all modules in a seperate folder within the exporting path.
 
 
-### `Terrific/ExporterBundle/Actions/ExportViews` ###
-* Retrieves a list of all controller methods which are annotated with `@Export`.
+### `ExportViews` ###
+* This action (`Terrific/ExporterBundle/Actions/ExportViews`) retrieves a list of all controller methods which are annotated with `@Export`.
 * **Remeber: If there is no such a method the exporter simply won't just export anything.**
 
 
-### `Terrific/ExporterBundle/Actions/ExportChangelogs` ###
-* This action just copies your changelog files (`file_extensions: log, txt, md`) to the exporting path.
+### `ExportChangelogs` ###
+* This action (`Terrific/ExporterBundle/Actions/ExportChangelogs`) just copies your changelog files (`file_extensions: log, txt, md`) to the exporting path.
 * To append all changelogs, create a folder under `build/changelogs` or setup your `changelog_path` option. If this folder is not available no changelogs will appended.
 
 
-### `Terrific/ExporterBundle/Actions/ExportDiffs` ###
-* `ExportDiffs` will generate diff files for each view and append it to your export.
+### `ExportDiffs` ###
+* `Terrific/ExporterBundle/Actions/ExportDiffs` will generate diff files for each view and append it to your export.
 * The exporter needs an additional information given as console parameter to find the last export. This argument is called `--last-export=[directory]` and must be set to the last export package.
 * The diff path is customized in the export environment within the `pathtemplates: diff: "/changelogs/diff"`.
 
@@ -780,6 +781,10 @@ During the complexity of a project and this exporter there will always some cons
 5. Templates engines other than Twig
     Currently not supported during the usage of the twig template lexer to find used assets within the templates.
 
+
+# Some notes
+
+* Don't forget to generate an update to the TOC for this documentation. Node.js [doctoc](https://npmjs.org/package/doctoc) generates TOC for markdown files of local git repo: `$ doctoc README.md`.
 
 ***
 
