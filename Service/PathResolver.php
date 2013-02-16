@@ -366,7 +366,7 @@ namespace Terrific\ExporterBundle\Service {
 
 
         /**
-         * @param $file
+         * @param $file File name and extension
          */
         public function locate($file, $assertedPath = "") {
             $this->initialize();
@@ -390,7 +390,7 @@ namespace Terrific\ExporterBundle\Service {
                 $assertedPath = $nPath;
             }
 
-            var_dump($file);
+            // var_dump($file);
             $locatedFiles = $this->fileLocator->locate($file, null, false);
 
             $ret = array();
@@ -475,7 +475,7 @@ namespace Terrific\ExporterBundle\Service {
                     $fs = $this->container->get("filesystem");
 
                     $root_dir = $this->container->getParameter("kernel.root_dir");
-                    
+
                     // Hard coded location paths for WHERE should be searched
                     $locations = array(
                         $root_dir . "/../web/img",
