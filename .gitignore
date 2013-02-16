@@ -1,5 +1,52 @@
-.idea
-.DS_Store
-/Resources/material
+#------------------------------------------------------------------------------
+# FOLDERS (e.g. temp, export)
+#------------------------------------------------------------------------------
+/public/temp/
+/EXPORT/
+app/bootstrap*
+app/cache/**
+app/logs/**
+web/bundles/**
+web/css/compiled/**
+web/js/compiled/**
 /development/
-/vendor
+# Vendors
+vendor/
+vendor_master/
+vendor_backup/
+# Resources
+/Resources/material
+# Build and Export Path
+# build/*
+#------------------------------------------------------------------------------
+# FILE GLOBS
+#------------------------------------------------------------------------------
+*.bak
+**/Thumbs.db
+*~
+#------------------------------------------------------------------------------
+# SPECIFIC FILES
+#------------------------------------------------------------------------------
+# Aptana project file
+.project
+# Eclipse file
+.buildpath
+# Apple iOS specific hidden directory meta data
+.DS_Store
+atlassian-ide-plugin.xml
+.htaccess
+.cache
+.config
+.idea/
+.metadata
+.settings
+.vagrant
+# Geany IDE project file
+.geany
+# Sublime Text 2 project files
+*.sublime-project
+*.sublime-workspace
+# PHP Composer executable
+# composer.phar
+# PHP Composer .lock file - prevent merge conflicts with STA server
+composer.lock
