@@ -67,7 +67,11 @@ namespace Terrific\ExporterBundle\Helper {
                             $matches = array();
 
                             if (preg_match('/url\(([^\)]+)/', $token->Value, $matches)) {
-                                $images[] = trim($matches[1], '"\'');
+                                //@TODO: debug?
+                                $tempfilename = trim($matches[1], '"\'');
+                                if(strtolower(substr($tempfilename, 0, 5)) !== "data:"){
+                                    $images[] = $tempfilename;
+                                }
                             }
 
                             break;
