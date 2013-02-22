@@ -662,15 +662,18 @@ namespace Terrific\ExporterBundle\Service {
                 $exportAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ExporterBundle\Annotation\Export');
 
                 if ($exportAnnotation) {
+                    // Check if current export environment matches controller annotation environment settings 
                     if (!$exportAnnotation->matchEnvironment($this->kernel->getEnvironment())) {
                         continue;
                     }
 
                     $route->setExportable(true);
 
+                    // Check if languages are set in controller annotation
                     if (count($exportAnnotation->getLocales()) > 0) {
                         /** @var $locale LocaleExport */
                         foreach ($exportAnnotation->getLocales() as $locale) {
+                            // Check if current locale matches controller annotation locale settings 
                             if ($locale->matchEnvironment($this->kernel->getEnvironment())) {
                                 $route->addLocale($locale->getLocale(), $locale->getName());
                             }

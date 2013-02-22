@@ -2,6 +2,7 @@
 
 - [Terrific Exporter Bundle for the Terrific Composer - Documentation](#terrific-exporter-bundle-for-the-terrific-composer---documentation)
 - [Changelog](#changelog)
+- [Todo](#todo)
 - [Installation](#installation)
 	- [Requirements](#requirements)
 	- [Dependency management](#dependency-management)
@@ -60,7 +61,9 @@
 			- [`XmlLintHelper`](#xmllinthelper)
 			- [`GitHelper`](#githelper)
 		- [Build own actions](#build-own-actions)
+		- [Add new file type extensions to the Exporter](#add-new-file-type-extensions-to-the-exporter)
 	- [Known Problems](#known-problems)
+- [FAQ](#faq)
 - [Some notes](#some-notes)
 - [Authors](#authors)
 
@@ -69,6 +72,10 @@
 # Changelog #
 
 * Ported documentation from `doc/build/` LaTeX files to this Markdown `README.md` and extended with additional information. Please keep in mind, that `doc/Documantation.pdf` is out of date.
+
+# Todo #
+
+* Update exmaple config !
 
 # Installation #
 
@@ -271,18 +278,32 @@ All configuration settings are going beyond a `terrific_exporter` node within yo
 14. `pathtemplates: <set of string values>`
     * The `pathtemplates` option allows you to customize the paths within your export package. All paths begin with a starting `/`. Each given directory will begin relative to the given `export_path`. So a values like `/img/common` will end up in `/exportpath/img/common`. The optional `\%module\%` variable within will be resolved by the `PathResolver` into a module name. This variable only get matched in `module\_*` options.
     * It is possible to set paths for the following type of files:
-        * `image: (default: ’/img/common’)`
-        * `font: (default: ’/fonts’)`
-        * `css: (default: ’/css’)`
-        * `js: (default: ’/js’)`
-        * `view: (default: ’/views’)`
-        * `changelog: (default: ’/changelogs’)`
-        * `diff: (default: ’/changelogs/diff’)`
-        * `module_image: (default: ’/img/%module%’)`
-        * `module_font: (default: ’/fonts/%module%’)`
-        * `module_css: (default: ’/css/%module%’)`
-        * `module_js: (default: ’/js/%module%’)`
-        * `module_view: (default: ’/views/%module%’)`
+
+        * Global scope:
+            * `image: (default: ’/img/common’)`
+            * `font: (default: ’/fonts’)`
+            * `css: (default: ’/css’)`
+            * `js: (default: ’/js’)`
+            * `view: (default: ’/views’)`
+            * `changelog: (default: ’/changelogs’)`
+            * `diff: (default: ’/changelogs/diff’)`
+            * `flash: (default: '/flash')`
+            * `silverlight: (default: '/silverlight')`
+            * `icon: (default: '/)`
+            * `video: (default: '/media/video')`
+            * `audio: (default: '/media/audio')`
+
+        * Module scope:
+            * `module_image: (default: ’/img/%module%’)`
+            * `module_font: (default: ’/fonts/%module%’)`
+            * `module_css: (default: ’/css/%module%’)`
+            * `module_js: (default: ’/js/%module%’)`
+            * `module_view: (default: ’/views/%module%’)`
+            * `module_flash: (default: '/flash/%module%')`
+            * `module_silverlight: (default: '/silverlight/%module%')`
+            * `module_video: (default: '/media/video/%module%')`
+            * `module_audio: (default: '/media/audio/%module%')`
+
     * Actions: `Actions/ExportModules`, `Actions/ExportAssets`, `Actions/ExportViews`
 
 14. `sprites: >list of objects>`
@@ -295,65 +316,77 @@ All configuration settings are going beyond a `terrific_exporter` node within yo
 
 ## Example configuration ##
 
+* If you use `%%module%%` placeholder be aware of using two `%`.
+
     # /app/config/config_export.yml
 
     ...
 
     # Terrific Exporter Configuration
-    terrific_exporter:
-        build_local_paths:      false
-        build_js_doc:           false
-        build_settings:         "build/build.ini"
-        build_path:             "build"
-        export_type:            "zip"       # ZIP file or folder?
-        export_with_version:    false       # ZIP file with version numbers?
-        autoincrement_build:    false       # Auto increment version build numbers for ZIP file or set it manually in build.ini?
-        validate_js:            false
-        validate_css:           false
-        validate_html:          false
-        optimize_images:        false
-        export_views:           true
-        export_modules:         true
+terrific_exporter:
+    build_local_paths:      false
+    build_js_doc:           false
+    build_settings:         "build/build.ini"
+    build_path:             "build"
+    validate_js:            false
+    validate_css:           false
+    validate_html:          false
+    optimize_images:        false
+    export_views:           true
+    export_modules:         true
+    # ZIP file or folder?
+    export_type:            "zip"
+    # ZIP file with version numbers?
+    export_with_version:    false
+    # Auto increment version build numbers for ZIP file or set it manually in build.ini?
+    autoincrement_build:    false
+    build_actions:
+        # 1. Clear old files and directories
+        - Terrific\ExporterBundle\Actions\ClearAction
+        # 2. Run custom exports first
+        # - Custom\ExporterBundle\Actions\CopyAssets
+        # 3. Run built-in exports (if you need them)
+        - Terrific\ExporterBundle\Actions\BuildJSDoc
+        - Terrific\ExporterBundle\Actions\ValidateJS
+        - Terrific\ExporterBundle\Actions\ValidateCSS
+        - Terrific\ExporterBundle\Actions\ValidateModules
+        - Terrific\ExporterBundle\Actions\ValidateViews
+        - Terrific\ExporterBundle\Actions\GenerateSprites
+        - Terrific\ExporterBundle\Actions\ExportImages
+        # CSS Files and Paths
+        - Terrific\ExporterBundle\Actions\ExportAssets
+        - Terrific\ExporterBundle\Actions\OptimizeImages
+        - Terrific\ExporterBundle\Actions\ExportModules
+        - Terrific\ExporterBundle\Actions\ExportViews
+        - Terrific\ExporterBundle\Actions\ExportChangelogs
+    pathtemplates:
+        image:                  "/img"
+        font:                   "/fonts"
+        css:                    "/css"
+        js:                     "/js"
+        view:                   "/html"
+        flash:                  "/flash"
+        silverlight:            "/silverlight"
+        icon:                   "/"
+        video:                  "/media/video"
+        audio:                  "/media/audio"
+        changelog:              "/changelogs"
+        diff:                   "/changelogs/diff"
+        module_image:           "/img/%%module%%"
+        module_font:            "/fonts"
+        module_css:             "/css/%%module%%"
+        module_js:              "/js/%%module%%"
+        module_view:            "/html/%%module%%"
+        module_flash:           "/flash/%%module%%"
+        module_silverlight:     "/silverlight/%%module%%"
+        module_video:           "/media/video/%%module%%"
+        module_audio:           "/media/audio/%%module%%"
 
-        build_actions:
-            # 1. Clear old files and directories
-            - Terrific\ExporterBundle\Actions\ClearAction
-            # 2. Run custom exports first
-            - Custom\ExporterBundle\Actions\CopyAssets
-            # 3. Run built-in exports (if you need them)
-            - Terrific\ExporterBundle\Actions\BuildJSDoc
-            - Terrific\ExporterBundle\Actions\ValidateJS
-            - Terrific\ExporterBundle\Actions\ValidateCSS
-            - Terrific\ExporterBundle\Actions\ValidateModules
-            - Terrific\ExporterBundle\Actions\ValidateViews
-            - Terrific\ExporterBundle\Actions\GenerateSprites
-            - Terrific\ExporterBundle\Actions\ExportImages
-            # CSS Files and Paths
-            - Terrific\ExporterBundle\Actions\ExportAssets
-            - Terrific\ExporterBundle\Actions\OptimizeImages
-            - Terrific\ExporterBundle\Actions\ExportModules
-            - Terrific\ExporterBundle\Actions\ExportViews
-            - Terrific\ExporterBundle\Actions\ExportChangelogs
-
-        pathtemplates:
-            image:     "/bilder/commonxyz"
-            font:      "/schriften"
-            css:       "/styles"
-            js:        "/scripts"
-            view:      "/html"
-            changelog: "/changelogs"
-            diff:      "/changelogs/diff"
-            module_image: "/module/%%module%%/bilder"
-            module_font:  "/module/%%module%%/schriften"
-            module_css:   "/module/%%module%%/styles"
-            module_js:    "/module/%%module%%/scripts"
-            module_view:  "/module/%%module%%/html"
-
-        sprites:
-            - {
-                directory: "PROD/internet_sprite_icons",
-                target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
-            }
+    sprites:
+        - {
+            directory: "PROD/internet_sprite_icons",
+            target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
+        }
 
 
 ### YUIDoc ###
@@ -758,7 +791,19 @@ To make it more easy to implement your own action you can just use a predefined 
 
 To get further information on implementing own actions just take a look on the API documentation.
 
-***
+### Add new file type extensions to the Exporter ###
+
+To add new file type extensions to the Exporter you need to edit `TerrificExporterBundle/Service/PathResolver.php`:
+
+1. Add new type constants to class, e.g. `const TYPE_IMAGE = 1;` and assign a new **bit** position (just double the last assign value).
+2. Add new standard path settings in constructor `__construct()` according to global and module context, e.g. `$this->pathTemplate[(self::TYPE_AUDIO | self::SCOPE_GLOBAL)] = '/media/audio';`
+3. Extend switch case function `getType` which returns the resource type for the given file extension, like:
+
+        case "SWF":
+            return self::TYPE_FLASH;
+
+4. Extend the `setContainer()` with new `pathtemplate` config options.
+5. At last you need to update the definition of the used configuration options in `TerrificExporterBundle/DependencyInjection/Configuration/Configuration.php` in function `getConfigTreeBuilder` in node `->arrayNode("pathtemplates")->children()`.
 
 ## Known Problems ##
 
@@ -782,9 +827,27 @@ During the complexity of a project and this exporter there will always some cons
     Currently not supported during the usage of the twig template lexer to find used assets within the templates.
 
 
+# FAQ #
+1. Q: Some of my JavaScript files located in folder `web/js/yourfolder/` were not exported. What's wrong?
+
+    A: Please note, the your `*.js` files should be located in folder `web/js/dependencies` seperated into the subfolders `libraries`, `plugins` and `utils`.
+
+        web/js/dependencies/
+            libraries/*.js
+            plugins/*.js
+            ultil/*.js
+
+    Folders will be exported only if they have files in it. If you need to adjust the dependencies folder structure, you need to edit the function `addDependencies` in `TerrificExporterBundle/Actions/ExportAssets.php`.
+
+2. Q: In my export there are multiple CSS/JS files, like `base.css` and `default.css`. Where are they from? How to get rid of them?
+
+    A: These files are comming from the [TerrificCoreBundle](https://github.com/brunschgi/TerrificCoreBundle) located `Terrific/CoreBundle/Resources/views/base.html.twig`. You just need to replace the `base.html.twig` with your custom edited `base.html.twig` file. Generarly the file inherits from `Terrific/CoreBundle/Resources/views/base.html.twig` so be aware of the changes if `TerrificCoreBundle` is updated. Maybe you need to adjust some settings in yor base Twig file.
+
+
 # Some notes
 
 * Don't forget to generate an update to the TOC for this documentation. Node.js [doctoc](https://npmjs.org/package/doctoc) generates TOC for markdown files of local git repo: `$ doctoc README.md`.
+
 
 ***
 

@@ -126,6 +126,11 @@ namespace Terrific\ExporterBundle\Helper {
                 $target = $folder . ".zip";
             }
 
+            // Check if zip file exists
+            if ($fs->exists($target)) {
+                throw new IOException(sprintf("Zip target file [%s] already exists.", $target));
+            }
+
             $zip = new ZipArchive();
 
             if ($zip->open($target, ZipArchive::CREATE) !== true) {

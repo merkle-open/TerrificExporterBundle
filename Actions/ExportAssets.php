@@ -51,13 +51,15 @@ namespace Terrific\ExporterBundle\Actions {
         }
 
         /**
-         *
+         * Copy asset dependencies (with complete folder structure) to destination defined in PathResolver.php
+         * @param array $param Copy of all configuration settings
          */
         protected function addDependencies($param) {
             /** @var $pathResolver PathResolver */
             $pathResolver = $this->container->get("terrific.exporter.pathresolver");
 
             $f = new Finder();
+
             $jsPath = $this->container->getParameter("kernel.root_dir") . "/../web/js/dependencies";
             if (file_exists($jsPath)) {
                 $f->in($jsPath);
@@ -70,6 +72,7 @@ namespace Terrific\ExporterBundle\Actions {
 
             /** @var $file SplFileInfo */
             foreach ($f->name("*.js")->name("*.css") as $file) {
+                // Get target paths for assets
                 $resolve = $pathResolver->resolve($file->getPathname());
                 $this->saveToPath($file->getPathname(), $param["exportPath"] . "/" . $resolve);
             }

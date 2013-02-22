@@ -153,7 +153,9 @@ namespace Terrific\ExporterBundle\Command {
         }
 
         /**
-         *
+         * Function build the export zip file.
+         * @param  array  $config All config parameters
+         * @return void
          */
         protected function buildZipFile(array $config) {
             $file = FileHelper::buildZip($config["exportPath"], null, true);
@@ -188,7 +190,7 @@ namespace Terrific\ExporterBundle\Command {
 
                 $this->printTimings($timer, $actionStack);
 
-
+                // Build zip file
                 if (!empty($config["export_type"]) && strtolower($config["export_type"]) === "zip") {
                     $this->buildZipFile($config);
                 }

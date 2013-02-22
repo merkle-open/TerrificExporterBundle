@@ -11,6 +11,7 @@ namespace Terrific\ExporterBundle\Actions {
     use Symfony\Component\Console\Output\OutputInterface;
     use Terrific\ExporterBundle\Object\ActionResult;
     use Symfony\Component\Filesystem\Exception\IOException;
+    use Terrific\ExporterBundle\Service\Log;
 
     /**
      *
@@ -48,7 +49,21 @@ namespace Terrific\ExporterBundle\Actions {
             $fs = $this->container->get("filesystem");
 
             try {
-                $fs->remove($params["exportPath"]);
+                // Check if export folder exists and delete it (build.ini)
+                if ($fs->exists($params["exportPath"])) {
+                    $fs->remove($params["exportPath"]);
+                    Log::info("Deleted old export path: %s.", $params["exportPath"]);
+                }
+
+                // Build zip file name (build.ini)
+                $target = $params["exportPath"] . ".zip";
+                Log::info("Zip file name created: %s.", array($target));
+
+                // Check if zip exists and delete it
+                if ($fs->exists($target)) {
+                    $fs->remove($target);
+                    Log::info("Deleted old zip file: %s.", array($target));
+                }
                 return new ActionResult(ActionResult::OK);
             } catch (IOException $ex) {
                 return new ActionResult(ActionResult::STOP);

@@ -78,6 +78,12 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                     ->scalarNode("css")->defaultValue("/css")->end()
                     ->scalarNode("js")->defaultValue("/js")->end()
                     ->scalarNode("view")->defaultValue("/views")->end()
+                    ->scalarNode("flash")->defaultValue("/flash")->end()
+                    ->scalarNode("silverlight")->defaultValue("/silverlight")->end()
+                    ->scalarNode("icon")->defaultValue("/")->end()
+                    ->scalarNode("video")->defaultValue("/media/video")->end()
+                    ->scalarNode("audio")->defaultValue("/media/audio")->end()
+
                     ->scalarNode("changelog")->defaultValue("/changelogs")->end()
                     ->scalarNode("diff")->defaultValue("/changelogs/diff")->end()
 
@@ -86,6 +92,10 @@ namespace Terrific\ExporterBundle\DependencyInjection\Configuration {
                     ->scalarNode("module_css")->defaultValue("/css/%module%")->end()
                     ->scalarNode("module_js")->defaultValue("/js/%module%")->end()
                     ->scalarNode("module_view")->defaultValue("/views/%module%")->end()
+                    ->scalarNode("module_flash")->defaultValue("/flash/%module%")->end()
+                    ->scalarNode("module_silverlight")->defaultValue("/silverlight/%module%")->end()
+                    ->scalarNode("module_video")->defaultValue("/media/video/%module%")->end()
+                    ->scalarNode("module_audio")->defaultValue("/media/audio/%module%")->end()
 
                 ->end()->end()
 

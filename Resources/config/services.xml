@@ -19,10 +19,6 @@
     <services>
         <service id="terrific.exporter.build_options" class="%terrifc.exporter.build_options.class%"/>
 
-        <service id="terrific.exporter.filter.html" class="Terrific\ExporterBundle\Filter\ExportPathHTMLFilter">
-            <argument>%kernel.root_dir%/../</argument>
-        </service>
-
         <service id="terrific.exporter.pathresolver" class="%terrific.exporter.pathresolver.class%">
             <call method="setContainer">
                 <argument type="service" id="service_container"/>

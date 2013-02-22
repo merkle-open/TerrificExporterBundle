@@ -22,16 +22,26 @@ namespace Terrific\ExporterBundle\Service {
      *
      */
     class PathResolver implements ContainerAwareInterface {
-        const TYPE_IMAGE = 0x00;
-        const TYPE_FONT = 0x01;
-        const TYPE_VIEW = 0x02;
-        const TYPE_CSS = 0x04;
-        const TYPE_JS = 0x08;
-        const TYPE_DIFF = 0x10;
-        const TYPE_CHANGELOG = 0x20;
+        // Bitfield
+        
+        // Scopes
+        const SCOPE_MODULE      = 1;
+        const SCOPE_GLOBAL      = 2;
+        // Put an other scope here if needed ...
 
-        const SCOPE_GLOBAL = 0x200;
-        const SCOPE_MODULE = 0x100;
+        // File types
+        const TYPE_IMAGE        = 8;
+        const TYPE_FONT         = 16;
+        const TYPE_VIEW         = 32;
+        const TYPE_CSS          = 64;
+        const TYPE_JS           = 128;
+        const TYPE_DIFF         = 256;
+        const TYPE_CHANGELOG    = 512;
+        const TYPE_FLASH        = 1024;     // .swf (Shockwave Flash)
+        const TYPE_SILVERLIGHT  = 2048;     // .xap (Silverlight zip archive)
+        const TYPE_ICON         = 4096;     // .ico image/vnd.microsoft.icon + image/x-icon
+        const TYPE_VIDEO        = 8192;     // .mp4, .flv, .ogv, .webm, .mpg, .mpeg, .mov
+        const TYPE_AUDIO        = 16384;    // .mp3, .ogg, .wav, .acc
 
         /** @var ContainerInterface */
         protected $container;
@@ -170,21 +180,32 @@ namespace Terrific\ExporterBundle\Service {
                 if (isset($config["pathtemplates"])) {
                     $config = $config["pathtemplates"];
 
+                    // Extend pathname config options
+
                     $a = array();
                     $a[(self::TYPE_IMAGE | self::SCOPE_GLOBAL)] = 'image';
                     $a[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = 'font';
                     $a[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = 'css';
                     $a[(self::TYPE_JS | self::SCOPE_GLOBAL)] = 'js';
                     $a[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = 'view';
+                    $a[(self::TYPE_FLASH | self::SCOPE_GLOBAL)] = 'flash';
+                    $a[(self::TYPE_SILVERLIGHT | self::SCOPE_GLOBAL)] = 'silverlight';
+                    $a[(self::TYPE_ICON | self::SCOPE_GLOBAL)] = 'icon';
+                    $a[(self::TYPE_VIDEO | self::SCOPE_GLOBAL)] = 'video';
+                    $a[(self::TYPE_AUDIO | self::SCOPE_GLOBAL)] = 'audio';
+
+                    $a[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = 'changelogs';
+                    $a[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = 'diff';
+
                     $a[(self::TYPE_IMAGE | self::SCOPE_MODULE)] = 'module_image';
                     $a[(self::TYPE_FONT | self::SCOPE_MODULE)] = 'module_font';
                     $a[(self::TYPE_CSS | self::SCOPE_MODULE)] = 'module_css';
                     $a[(self::TYPE_JS | self::SCOPE_MODULE)] = 'module_js';
                     $a[(self::TYPE_VIEW | self::SCOPE_MODULE)] = 'module_view';
-                    $a[(self::TYPE_VIEW | self::SCOPE_MODULE)] = 'module_view';
-                    $a[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
-                    $a[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
-
+                    $a[(self::TYPE_FLASH | self::SCOPE_MODULE)] = 'module_flash';
+                    $a[(self::TYPE_SILVERLIGHT | self::SCOPE_MODULE)] = 'module_silverlight';
+                    $a[(self::TYPE_VIDEO | self::SCOPE_MODULE)] = 'module_video';
+                    $a[(self::TYPE_AUDIO | self::SCOPE_MODULE)] = 'module_audio';
 
                     foreach ($a as $key => $val) {
                         if (!empty($config[$val])) {
@@ -289,30 +310,60 @@ namespace Terrific\ExporterBundle\Service {
 
             $ext = strtoupper(pathinfo($file, PATHINFO_EXTENSION));
 
+            // Extend this with types defined in const above
             switch ($ext) {
                 case "GIF":
                 case "JPG":
+                case "JPEG":
                 case "PNG":
+                case "SVG":
                     return self::TYPE_IMAGE;
-                    break;
 
                 case "EOT":
                 case "TTF":
                 case "WOFF":
                     return self::TYPE_FONT;
-                    break;
 
                 case "CSS":
                     return self::TYPE_CSS;
-                    break;
 
                 case "JS":
                     return self::TYPE_JS;
-                    break;
 
                 case "HTML":
                     return self::TYPE_VIEW;
-                    break;
+
+                case "SWF":
+                    return self::TYPE_FLASH;
+
+                case "XAP":
+                    return self::TYPE_SILVERLIGHT;
+
+                case "ICO":
+                    return self::TYPE_ICON;
+
+                case "MP4":
+                case "M4V":
+                case "FLV":
+                case "F4V":
+                case "OGV":
+                case "WEBM":
+                case "MPG":
+                case "MPEG":
+                case "MOV":
+                case "3GP":
+                case "RM":  // Real Media video
+                    return self::TYPE_VIDEO;
+
+                case "MP3":
+                case "OGG":
+                case "WAV":
+                case "AAC":
+                case "M4A":
+                case "WMA":
+                case "F4A":
+                case "F4B": // Audiobook for flash player
+                    return self::TYPE_AUDIO;
 
                 case "DIFF":
                     return self::TYPE_DIFF;
@@ -323,6 +374,8 @@ namespace Terrific\ExporterBundle\Service {
                 case "LOG":
                     return self::TYPE_CHANGELOG;
                     break;
+
+
             }
         }
 
@@ -515,19 +568,31 @@ namespace Terrific\ExporterBundle\Service {
         public function __construct() {
             $this->pathTemplate = array();
 
+            // Extend this ... if you need some more. Don't forget to update the getType function.
+            // Global context
             $this->pathTemplate[(self::TYPE_IMAGE | self::SCOPE_GLOBAL)] = '/img/common';
             $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = '/fonts';
             $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = '/css';
             $this->pathTemplate[(self::TYPE_JS | self::SCOPE_GLOBAL)] = '/js';
             $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = '/views';
+            $this->pathTemplate[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
+            $this->pathTemplate[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
+            $this->pathTemplate[(self::TYPE_FLASH | self::SCOPE_GLOBAL)] = '/flash';
+            $this->pathTemplate[(self::TYPE_SILVERLIGHT | self::SCOPE_GLOBAL)] = '/silverlight';
+            $this->pathTemplate[(self::TYPE_ICON | self::SCOPE_GLOBAL)] = '/';
+            $this->pathTemplate[(self::TYPE_VIDEO | self::SCOPE_GLOBAL)] = '/media/video';
+            $this->pathTemplate[(self::TYPE_AUDIO | self::SCOPE_GLOBAL)] = '/media/audio';
+            
+            // Module context
             $this->pathTemplate[(self::TYPE_IMAGE | self::SCOPE_MODULE)] = '/img/%module%';
             $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_MODULE)] = '/fonts/%module%';
             $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_MODULE)] = '/css/%module%';
             $this->pathTemplate[(self::TYPE_JS | self::SCOPE_MODULE)] = '/js/%module%';
             $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_MODULE)] = '/views/%module%';
-            $this->pathTemplate[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
-            $this->pathTemplate[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
-
+            $this->pathTemplate[(self::TYPE_FLASH | self::SCOPE_MODULE)] = '/flash/%module%';
+            $this->pathTemplate[(self::TYPE_SILVERLIGHT | self::SCOPE_MODULE)] = '/silverlight/%module%';
+            $this->pathTemplate[(self::TYPE_VIDEO | self::SCOPE_MODULE)] = '/media/video/%module%';
+            $this->pathTemplate[(self::TYPE_AUDIO | self::SCOPE_MODULE)] = '/media/audio/%module%';
 
             $this->modules = array();
             $this->moduleManager = null;
