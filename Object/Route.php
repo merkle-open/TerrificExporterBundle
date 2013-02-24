@@ -159,6 +159,7 @@ namespace Terrific\ExporterBundle\Object {
                 $searchIMG = in_array("IMG", $types);
 
                 $ret = array();
+
                 foreach ($this->assets as $asset) {
                     if (($searchJS && FileHelper::isJavascript($asset)) || ($searchCSS && FileHelper::isStylesheet($asset) || $searchIMG && FileHelper::isImage($asset))) {
                         $ret[] = $asset;

@@ -131,7 +131,7 @@ namespace Terrific\ExporterBundle\Actions {
                 }
 
                 return new ActionResult(ActionResult::OK);
-            } else if ($this->logger) {
+            } else if ($this->logger !== null) {
                 $this->logger->debug("Cannot find Terrific Modulemanager in DIC.");
             }
         }

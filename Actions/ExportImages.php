@@ -173,7 +173,7 @@ namespace Terrific\ExporterBundle\Actions {
             Log::info("Exported %d Images from Views", array($count));
             $timer->lap("STOP-ViewImageExport");
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->debug(sprintf("ViewImageExport took %s seconds", $timer->getTime("START-ViewImageExport", "STOP-ViewImageExport")));
             }
 
@@ -182,7 +182,7 @@ namespace Terrific\ExporterBundle\Actions {
             Log::info("Exported %d Images from Modules", array($count));
             $timer->lap("STOP-ModuleImageExport");
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->debug(sprintf("ModuleImageExport took %s seconds", $timer->getTime("START-ModuleImageExport", "STOP-ModuleImageExport")));
             }
 
@@ -191,7 +191,7 @@ namespace Terrific\ExporterBundle\Actions {
             Log::info("Exported %d Images from CSS", array($count));
             $timer->lap("STOP-CSSImageExport");
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->debug(sprintf("CSSImageExport took %s seconds", $timer->getTime("START-CSSImageExport", "STOP-CSSImageExport")));
             }
 

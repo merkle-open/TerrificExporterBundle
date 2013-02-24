@@ -52,7 +52,7 @@ namespace Terrific\ExporterBundle\Actions {
                 // Check if export folder exists and delete it (build.ini)
                 if ($fs->exists($params["exportPath"])) {
                     $fs->remove($params["exportPath"]);
-                    Log::info("Deleted old export path: %s.", $params["exportPath"]);
+                    Log::info("Deleted old export path: %s.", array($params["exportPath"]));
                 }
 
                 // Build zip file name (build.ini)

@@ -144,7 +144,7 @@ namespace Terrific\ExporterBundle\Command {
                 $refClass = $actionStack[$i];
 
                 $msg = vsprintf("Action [%s] completed after %s seconds.", array($refClass->getName(), $timer->getTime("START-" . $refClass->getShortName(), "STOP-" . $refClass->getShortName())));
-                if ($this->logger) {
+                if ($this->logger !== null) {
                     $this->logger->info($msg);
                 }
 

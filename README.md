@@ -2,7 +2,6 @@
 
 - [Terrific Exporter Bundle for the Terrific Composer - Documentation](#terrific-exporter-bundle-for-the-terrific-composer---documentation)
 - [Changelog](#changelog)
-- [Todo](#todo)
 - [Installation](#installation)
 	- [Requirements](#requirements)
 	- [Dependency management](#dependency-management)
@@ -65,17 +64,21 @@
 	- [Known Problems](#known-problems)
 - [FAQ](#faq)
 - [Some notes](#some-notes)
+- [Todo](#todo)
 - [Authors](#authors)
 
 # Terrific Exporter Bundle for the Terrific Composer - Documentation #
 
 # Changelog #
 
-* Ported documentation from `doc/build/` LaTeX files to this Markdown `README.md` and extended with additional information. Please keep in mind, that `doc/Documantation.pdf` is out of date.
-
-# Todo #
-
-* Update exmaple config !
+* v2.0.8
+    * Added possibility to export nested modules.
+    * Added new MIME types to export (e.g. `WEB FLV SWF MP4 OGG ...`)
+    * Documented code.
+    * Added new paths to check for assets.
+    * Fixed a bug with base64 encoded images in CSS files.
+    * Ported documentation from `doc/build/` LaTeX files to this Markdown `README.md` and extended with additional information. Please keep in mind, that `doc/Documantation.pdf` is out of date.
+* v2.0.7
 
 # Installation #
 
@@ -316,77 +319,77 @@ All configuration settings are going beyond a `terrific_exporter` node within yo
 
 ## Example configuration ##
 
-* If you use `%%module%%` placeholder be aware of using two `%`.
+If you use `%%module%%` placeholder be aware of using two `%`.
 
     # /app/config/config_export.yml
 
     ...
 
     # Terrific Exporter Configuration
-terrific_exporter:
-    build_local_paths:      false
-    build_js_doc:           false
-    build_settings:         "build/build.ini"
-    build_path:             "build"
-    validate_js:            false
-    validate_css:           false
-    validate_html:          false
-    optimize_images:        false
-    export_views:           true
-    export_modules:         true
-    # ZIP file or folder?
-    export_type:            "zip"
-    # ZIP file with version numbers?
-    export_with_version:    false
-    # Auto increment version build numbers for ZIP file or set it manually in build.ini?
-    autoincrement_build:    false
-    build_actions:
-        # 1. Clear old files and directories
-        - Terrific\ExporterBundle\Actions\ClearAction
-        # 2. Run custom exports first
-        # - Custom\ExporterBundle\Actions\CopyAssets
-        # 3. Run built-in exports (if you need them)
-        - Terrific\ExporterBundle\Actions\BuildJSDoc
-        - Terrific\ExporterBundle\Actions\ValidateJS
-        - Terrific\ExporterBundle\Actions\ValidateCSS
-        - Terrific\ExporterBundle\Actions\ValidateModules
-        - Terrific\ExporterBundle\Actions\ValidateViews
-        - Terrific\ExporterBundle\Actions\GenerateSprites
-        - Terrific\ExporterBundle\Actions\ExportImages
-        # CSS Files and Paths
-        - Terrific\ExporterBundle\Actions\ExportAssets
-        - Terrific\ExporterBundle\Actions\OptimizeImages
-        - Terrific\ExporterBundle\Actions\ExportModules
-        - Terrific\ExporterBundle\Actions\ExportViews
-        - Terrific\ExporterBundle\Actions\ExportChangelogs
-    pathtemplates:
-        image:                  "/img"
-        font:                   "/fonts"
-        css:                    "/css"
-        js:                     "/js"
-        view:                   "/html"
-        flash:                  "/flash"
-        silverlight:            "/silverlight"
-        icon:                   "/"
-        video:                  "/media/video"
-        audio:                  "/media/audio"
-        changelog:              "/changelogs"
-        diff:                   "/changelogs/diff"
-        module_image:           "/img/%%module%%"
-        module_font:            "/fonts"
-        module_css:             "/css/%%module%%"
-        module_js:              "/js/%%module%%"
-        module_view:            "/html/%%module%%"
-        module_flash:           "/flash/%%module%%"
-        module_silverlight:     "/silverlight/%%module%%"
-        module_video:           "/media/video/%%module%%"
-        module_audio:           "/media/audio/%%module%%"
+    terrific_exporter:
+        build_local_paths:      false
+        build_js_doc:           false
+        build_settings:         "build/build.ini"
+        build_path:             "build"
+        validate_js:            false
+        validate_css:           false
+        validate_html:          false
+        optimize_images:        false
+        export_views:           true
+        export_modules:         true
+        # ZIP file or folder?
+        export_type:            "zip"
+        # ZIP file with version numbers?
+        export_with_version:    false
+        # Auto increment version build numbers for ZIP file or set it manually in build.ini?
+        autoincrement_build:    false
+        build_actions:
+            # 1. Clear old files and directories
+            - Terrific\ExporterBundle\Actions\ClearAction
+            # 2. Run custom exports first
+            # - Custom\ExporterBundle\Actions\CopyAssets
+            # 3. Run built-in exports (if you need them)
+            - Terrific\ExporterBundle\Actions\BuildJSDoc
+            - Terrific\ExporterBundle\Actions\ValidateJS
+            - Terrific\ExporterBundle\Actions\ValidateCSS
+            - Terrific\ExporterBundle\Actions\ValidateModules
+            - Terrific\ExporterBundle\Actions\ValidateViews
+            - Terrific\ExporterBundle\Actions\GenerateSprites
+            - Terrific\ExporterBundle\Actions\ExportImages
+            # CSS Files and Paths
+            - Terrific\ExporterBundle\Actions\ExportAssets
+            - Terrific\ExporterBundle\Actions\OptimizeImages
+            - Terrific\ExporterBundle\Actions\ExportModules
+            - Terrific\ExporterBundle\Actions\ExportViews
+            - Terrific\ExporterBundle\Actions\ExportChangelogs
+        pathtemplates:
+            image:                  "/img"
+            font:                   "/fonts"
+            css:                    "/css"
+            js:                     "/js"
+            view:                   "/html"
+            flash:                  "/flash"
+            silverlight:            "/silverlight"
+            icon:                   "/"
+            video:                  "/media/video"
+            audio:                  "/media/audio"
+            changelog:              "/changelogs"
+            diff:                   "/changelogs/diff"
+            module_image:           "/img/%%module%%"
+            module_font:            "/fonts"
+            module_css:             "/css/%%module%%"
+            module_js:              "/js/%%module%%"
+            module_view:            "/html/%%module%%"
+            module_flash:           "/flash/%%module%%"
+            module_silverlight:     "/silverlight/%%module%%"
+            module_video:           "/media/video/%%module%%"
+            module_audio:           "/media/audio/%%module%%"
 
-    sprites:
-        - {
-            directory: "PROD/internet_sprite_icons",
-            target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
-        }
+        sprites:
+            - {
+                directory: "PROD/internet_sprite_icons",
+                target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
+            }
 
 
 ### YUIDoc ###
@@ -429,7 +432,9 @@ The exporter will use the `yuidoc` configuration file named `yuidoc.json` within
 * Remember to clear the cache (`$ rm -rf app/cache/*`) after you've changed the `config_export.yml` file(s).
 
 ### Export ###
-To startup an export use the following command: `$ app/console build:export --env=export --no-debug`.
+To startup an export use the following command(s):
+* `$ php app/console build:export --env=export --no-debug`
+* `$ php app/console build:export --env=export --no-debug --no-image-optimization --no-js-doc --no-validation`
 
 ### Export command line options ###
 
@@ -731,6 +736,14 @@ A service which uses the online W3CValidator to validate content or complete fil
 
     $pageManager->findRoutes(true);
 
+FYI: `PageManager` uses the following resources:
+    * Doctrine Annotation Reader
+    * Router
+    * Twig environment
+    * Monolog
+    * ModuleManager (TerrificCoreBundle)
+    * Translator
+    * customized Route object
 
 ### Helpers ###
 
@@ -848,9 +861,11 @@ During the complexity of a project and this exporter there will always some cons
 
 * Don't forget to generate an update to the TOC for this documentation. Node.js [doctoc](https://npmjs.org/package/doctoc) generates TOC for markdown files of local git repo: `$ doctoc README.md`.
 
+# Todo #
 
 ***
 
 # Authors
 * [Bruno Lorenz](https://github.com/senuphtyz) (Main Developer - The 'brain' behind this monster!)
 * [Eduard Seifert](https://github.com/eduardseifert) (Contributer)
+* [Lars-Olof Krause](https://github.com/LOK-Soft) (Contributer)

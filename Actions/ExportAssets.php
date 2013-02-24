@@ -78,6 +78,34 @@ namespace Terrific\ExporterBundle\Actions {
             }
         }
 
+        /**
+         * Saves special assets (not JS or CSS)
+         * 
+         * @param  PathResolver $pathResolver  [description]
+         * @param  array        $ignoredAssets [description]
+         * @param  array        $assetList     [description]
+         * @return [type]                      [description]
+         */
+        protected function exportSpecialAssets(PathResolver $pathResolver, array $ignoredAssets, array $assetList, array $params) {
+
+            var_dump($assetList);
+
+            foreach($assetList as $asset) {
+                if(!in_array($asset, $ignoredAssets)) {
+
+                    // Export asset if it is not an image.
+                    if(!FileHelper::isImage($asset)) {
+
+                        $asset = $pathResolver->locate(basename($asset), $asset);
+                        $assetPath =  $params["exportPath"] . "/" .$pathResolver->resolve($asset);
+                        $this->saveToPath($asset, $assetPath);
+
+                        Log::info("Exported asset [%s]", array(basename($asset)));
+                    }
+                } 
+            }
+        }
+
 
         /**
          * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -100,25 +128,31 @@ namespace Terrific\ExporterBundle\Actions {
             /** @var $timer TimerService */
             $timer = $this->container->get("terrific.exporter.timerservice");
 
-            // retrieve only assets matching the current export
+            // Retrieve only assets matching the current export only in HTML!
             $assetList = $pageManager->retrieveAllAssets(true);
 
             /** @var $cssPathFilter CSSPathRewriteFilter */
             $cssPathFilter = $this->container->get("terrific.exporter.filter.exportpathfilter");
 
-            if ($this->logger) {
-                $this->logger->info("Using asset list: " . implode(", ", $assetList));
+            if ($this->logger !== null) {
+                $this->logger->info("Using asset list:\n\t" . implode("\n\t", $assetList) . "\n");
             }
 
             $exportedFonts = array();
+
+            $ignoredAssets = array();
 
             $results = true;
             foreach ($assetManager->getNames() as $name) {
                 /** @var $asset FileAsset */
                 $asset = $assetManager->get($name);
 
+                $ignoredAssets[] = $name;
+
                 if (in_array($asset->getTargetPath(), $assetList)) {
-                    $this->logger->info("Exporting asset " . basename($asset->getTargetPath()));
+                    if ($this->logger !== null) {
+                        $this->logger->info("Exporting asset: [" . basename($asset->getTargetPath()) . "]");
+                    }
 
                     $nPath = $params["exportPath"] . "/" . $pathResolver->resolve($asset->getTargetPath());
 
@@ -128,6 +162,7 @@ namespace Terrific\ExporterBundle\Actions {
                     $results &= $this->saveToPath($file, $nPath);
                     $ePoint = $timer->lap();
 
+                    // TODO: Was wird exportiert? Nur die fonts, oder?
                     if (FileHelper::isStylesheet($asset->getTargetPath())) {
                         $beforeRewriteContent = $asset->dump();
                         // Parse CSS
@@ -157,10 +192,12 @@ namespace Terrific\ExporterBundle\Actions {
                     }
 
                     Log::info("Exported asset [%s]", array(basename($asset->getTargetPath())));
-                    $this->logger->info(sprintf("Exporting took %s seconds", $timer->getTime($sPoint, $ePoint)));
+                    $this->logger->info(sprintf("Exporting took %s seconds.\n", $timer->getTime($sPoint, $ePoint)));
                 }
             }
 
+
+            $this->exportSpecialAssets($pathResolver, $ignoredAssets, $assetList, $params);
             $this->addDependencies($params);
 
             if (!$results) {

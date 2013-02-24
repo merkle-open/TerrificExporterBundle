@@ -92,7 +92,7 @@ namespace Terrific\ExporterBundle\Service {
 
         public function validateFile($file) {
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->debug("Sending file to W3C Validator: " . basename($file));
             }
 
@@ -149,7 +149,7 @@ namespace Terrific\ExporterBundle\Service {
                     return $this->sendValidationRequest($postFields, true);
                 }
 
-                if ($this->logger) {
+                if ($this->logger !== null) {
                     $this->logger->err($ex->getMessage());
                     $this->logger->err($ex->getTraceAsString());
                 }

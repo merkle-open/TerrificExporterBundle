@@ -181,11 +181,15 @@ namespace Terrific\ExporterBundle\Service {
 
 
         /**
-         *
+         * Find assets in HTML templates.
+         * @param  string $filePath
+         * @param  array  $in
+         * @return array  $in
          */
         protected function findAssetsByFile($filePath, array $in = array()) {
             $this->initialize();
 
+            // Just to save a lot of time, MD5 used
             $md5 = md5($filePath);
 
             if (isset($this->assetCache[$md5]) && is_array($this->assetCache[$md5])) {
@@ -208,7 +212,8 @@ namespace Terrific\ExporterBundle\Service {
 
                 if (($this->moduleManager != null) && ($token instanceof \Twig_Token)) {
 
-
+                    // @TODO: Hard coded modules ...
+                    // Maybe adjustment neede for later <artcile> ?
                     if (strpos($token->getValue(), "<div") !== false) {
                         $classMatches = array();
                         $conMatches = array();
@@ -244,7 +249,7 @@ namespace Terrific\ExporterBundle\Service {
                     }
                 }
 
-
+                // Twiggisch ... 
                 if ($token->getValue() === "extends") {
                     $newTpl = $stream->getCurrent()->getValue();
                     list($bundle, $controller, $view) = explode(":", $newTpl);
@@ -262,13 +267,29 @@ namespace Terrific\ExporterBundle\Service {
                     $inBlock = false;
                 }
 
+                // Assetic example: {{ asset('img/01.jpg') }}
+                // REMEMBER! Combinations like {{ asset('img/' ~ '01.jpg') }} won't be exported!
+                // 1st token: asset
                 if ($token->getValue() === "asset") {
+                    // 2nd token: ''
+                    // 3rd token: uri img/01.jpg
+                    // look() jumps over to 3rd token
                     $url = $stream->look()->getValue();
 
                     $in[] = $url;
                 }
 
-                if ($token->getValue() == "tc" && $stream->getCurrent()->getValue() == "." && $stream->look()->getValue() == "module") {
+                // Twiggisch ...
+                // Please note tokens are searched for "tc". Custom modules are not recognized.
+                // {{ tc.module( 'Dummy', 'dummy', [], [], { 'tag':'article', 'role':'article' }, { 'title':'NAVIGATION' } ) }}
+                
+                $isModuleToken = false;
+                $isModuleToken |= ($token->getValue() === "tc" && $stream->getCurrent()->getValue() === "." && $stream->look()->getValue() === "module");
+                $isModuleToken |= ($token->getValue() === "rc" && $stream->getCurrent()->getValue() === "." && $stream->look()->getValue() === "bundleModule");
+                // Extend it here if you need it ...
+
+                if ($isModuleToken) {
+                    // Parsing tc call ...l
                     while ($token->getValue() != "(") {
                         $token = $stream->next();
                     }
@@ -324,16 +345,20 @@ namespace Terrific\ExporterBundle\Service {
                     $routeModule = new RouteModule($module, $view, $skins, $connectors);
                     $in[] = $routeModule;
 
+                    // TODO: Only Terrific Modules 
+                    // ... maybe you need to adjust this to use it with other bundles.
                     try {
                         $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
                         $moduleIn = $this->findAssetsByFile($tpl);
                         $routeModule->setAssets($moduleIn);
                     } catch (InvalidArgumentException $ex) {
-
+                        if ($this->logger !== null) {
+                            $this->logger->debug(sprintf("Cannot find module: @TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
+                        }
                     }
                 }
 
-
+                // Get Assetic output=""
                 if ($inBlock) {
                     if ($token->getValue() === "output") {
                         $in[] = $stream->look()->getValue();
@@ -341,18 +366,22 @@ namespace Terrific\ExporterBundle\Service {
                 }
             }
 
-            if ($this->logger) {
-                $this->logger->debug(sprintf("Found assets [ %s ] for template '%s':", implode(", ", $in), basename($filePath)));
+            if ($this->logger !== null) {
+                $this->logger->debug(sprintf("Found assets for for template '%s':\n[\n\t%s\n]\n", basename($filePath), implode(",\n\t", $in)));
             }
 
 
             $this->assetCache[$md5] = $in;
+
             return $in;
         }
 
 
         /**
-         * @param \Symfony\Component\Routing\Route $route
+         * [findAssets description]
+         * @param  \Symfony\Component\Routing\Route $sRoute Standard.
+         * @param  Route                            $route  Custom data object.
+         * @return void
          */
         protected function findAssets(\Symfony\Component\Routing\Route $sRoute, Route $route) {
             /** @var $tplAnnotation Template */
@@ -365,16 +394,20 @@ namespace Terrific\ExporterBundle\Service {
                 $tplDir = str_replace("Controller", "", $route->getMethod()->getDeclaringClass()->getShortName());
 
                 try {
+                    // @TODO: To use this with other bundles than TerrificComposition, you
+                    // need to customize this area. Get the registered bundles from kernel 
+                    // and loop over them ... or whatever ;-)
                     $tpl = $this->kernel->locateResource(sprintf("@TerrificComposition/Resources/views/%s/%s.html.twig", $tplDir, $tpl));
+                    // e.g. Default/index.html
                     $route->setTemplate($tpl);
                 } catch (InvalidArgumentException $ex) {
-                    if ($this->logger) {
+                    if ($this->logger !== null) {
                         $this->logger->debug(sprintf("Cannot locate template for %s::%s", $route->getMethod()->getDeclaringClass()->getShortName(), $route->getMethod()->getName()));
                     }
                 }
             }
 
-            // search assets in templates
+            // Search assets in templates
             if ($route->getTemplate() !== "") {
                 $assets = $this->findAssetsByFile($route->getTemplate());
                 $route->addAssets($assets);
@@ -495,7 +528,7 @@ namespace Terrific\ExporterBundle\Service {
             /** @var $route Route */
             foreach ($this->routeList as $route) {
                 if (!$exportablesOnly || ($exportablesOnly && $route->isExportable())) {
-                    $ret = array_merge($ret, $route->getAssets());
+                    $ret = array_merge($ret, $route->getAllAssets());
                 }
             }
 
@@ -625,7 +658,11 @@ namespace Terrific\ExporterBundle\Service {
         }
 
         /**
-         * @param \Terrific\ExporterBundle\Object\Route $route
+         * Get url parametes from controller, like:
+         * Route("/finder/{_locale}", name="finder", defaults={"_locale" = "de"})
+         * 
+         * @param  \Terrific\ExporterBundle\Object\Route $route
+         * @return void
          */
         protected function buildUrlParameters(Route $route) {
             $url = $route->getUrl();
@@ -650,7 +687,7 @@ namespace Terrific\ExporterBundle\Service {
 
             $this->initialized = true;
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->info("PageManager init");
             }
 
@@ -673,7 +710,7 @@ namespace Terrific\ExporterBundle\Service {
                     if (count($exportAnnotation->getLocales()) > 0) {
                         /** @var $locale LocaleExport */
                         foreach ($exportAnnotation->getLocales() as $locale) {
-                            // Check if current locale matches controller annotation locale settings 
+                            // Check if current locale matches controller annotation locale settings
                             if ($locale->matchEnvironment($this->kernel->getEnvironment())) {
                                 $route->addLocale($locale->getLocale(), $locale->getName());
                             }
@@ -681,8 +718,10 @@ namespace Terrific\ExporterBundle\Service {
                     }
                 }
 
+                // Get @Export name or generate and set it into object
                 $route->setExportName($this->findNameByRoute($route));
                 $this->buildUrlParameters($route);
+                
                 $this->findAssets($sRoute, $route);
                 $this->routeList[] = $route;
             }

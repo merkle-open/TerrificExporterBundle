@@ -16,6 +16,9 @@ namespace Terrific\ExporterBundle\Object {
         /** @var string */
         private $module;
 
+        /** @var array */
+        private $modules = array();
+
         /** @var string */
         private $template;
 
@@ -28,6 +31,21 @@ namespace Terrific\ExporterBundle\Object {
         /** @var array */
         private $connectors;
 
+        /**
+         * @param array $modules
+         */
+        public function setModules($modules)
+        {
+            $this->modules = $modules;
+        }
+
+        /**
+         * @return array
+         */
+        public function getModules()
+        {
+            return $this->modules;
+        }
 
         /**
          * @param $connector
@@ -64,16 +82,26 @@ namespace Terrific\ExporterBundle\Object {
          * @param array $assets
          */
         public function setAssets($assets) {
-            $this->assets = $assets;
-            $this->assets = array_unique($this->assets);
+            $assets = array_unique($assets);
+            $this->addAssets($assets);
         }
 
         /**
          * @return array
          */
         public function getAssets(array $types = array()) {
+            $assets = $this->assets;
+
+            // RouteModule in RouteModule
+            /** @var $mod RouteModule */
+            foreach($this->modules as $mod) {
+                $assets = array_merge($assets, $mod->getAssets($types));
+            }
+
+            $assets = array_unique($assets);
+
             if (count($types) == 0) {
-                return $this->assets;
+                return $assets;
             } else {
                 array_walk($types, function ($itm) {
                     $itm = strtoupper($itm);
@@ -85,7 +113,7 @@ namespace Terrific\ExporterBundle\Object {
                 $searchIMG = in_array("IMG", $types);
 
                 $ret = array();
-                foreach ($this->assets as $asset) {
+                foreach ($assets as $asset) {
                     if (($searchJS && FileHelper::isJavascript($asset)) || ($searchCSS && FileHelper::isStylesheet($asset) || $searchIMG && FileHelper::isImage($asset))) {
                         $ret[] = $asset;
                     }
@@ -133,6 +161,30 @@ namespace Terrific\ExporterBundle\Object {
          */
         public function __toString() {
             return sprintf("RouteModule[%s::%s::%s]", $this->module, $this->template, implode(",", $this->skins));
+        }
+
+        /**
+         * @param $asset
+         */
+        public function addAssets(array $assets) {
+            $ret = array();
+
+            foreach ($assets as $a) {
+                if ($a instanceof RouteModule) {
+                    $this->addModule($a);
+                } else {
+                    $this->assets[] = $a;
+                }
+            }
+
+            $this->assets = array_unique($this->assets);
+        }
+
+        /**
+         * @param $module
+         */
+        public function addModule(RouteModule $module) {
+            $this->modules[$module->getId()] = $module;
         }
 
         /**

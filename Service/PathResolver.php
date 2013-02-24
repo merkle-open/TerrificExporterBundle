@@ -98,7 +98,7 @@ namespace Terrific\ExporterBundle\Service {
         public function setModules($modules) {
             $this->modules = $modules;
             if ($this->logger !== null) {
-                $this->logger->debug("Set modulelist : " . implode(",", $this->modules));
+                $this->logger->debug("Set module list:\n\t" . implode(",\n\t", $this->modules) . "\n");
             }
         }
 
@@ -452,8 +452,8 @@ namespace Terrific\ExporterBundle\Service {
 
                 $found = (strpos($file, $assertedPath) !== false);
 
-                if ($this->logger) {
-                    $this->logger->debug(sprintf("Search for '%s' in '%s' => %s", $assertedPath, $file, ($found ? 'true' : 'false')));
+                if ($this->logger !== null) {
+                    $this->logger->debug(sprintf("Search for\n\t['%s'] in\n\t['%s'] => %s", $assertedPath, $file, ($found ? 'true' : 'false')));
                 }
 
                 if ($found) {
@@ -465,7 +465,7 @@ namespace Terrific\ExporterBundle\Service {
                 return $ret[0];
             }
 
-            if ($this->logger) {
+            if ($this->logger !== null) {
                 $this->logger->err(print_r($locatedFiles, true));
             }
             throw new \Exception("Cannot identify single path for asset: " . $file);
@@ -510,7 +510,7 @@ namespace Terrific\ExporterBundle\Service {
             if ($this->logger !== null) {
                 $type = $this->getConstantName($type);
                 $scope = $this->getConstantName($scope);
-                $this->logger->debug("Resolve path ['${sourcePath}'] => ['${ret}'] type=${type}, scope=${scope}");
+                $this->logger->debug("Resolving path\n\t['${sourcePath}'] => ['${ret}'],\n\ttype = ${type},\n\tscope = ${scope}");
             }
 
             return $ret;
@@ -531,16 +531,20 @@ namespace Terrific\ExporterBundle\Service {
 
                     // Hard coded location paths for WHERE should be searched
                     $locations = array(
+                        $root_dir . "/../web",
                         $root_dir . "/../web/img",
                         $root_dir . "/../web/font",
-                        $root_dir . "/../web/fonts"
+                        $root_dir . "/../web/fonts",
+                        $root_dir . "/../web/video"
                     );
 
                     $root_dir .= "/../src/Terrific/Module";
                     foreach ($this->modules as $module) {
                         $locations[] = $root_dir . "/${module}/Resources/public/img";
+                        $locations[] = $root_dir . "/${module}/Resources/public/flash";
                         $locations[] = $root_dir . "/${module}/Resources/public/font";
                         $locations[] = $root_dir . "/${module}/Resources/public/fonts";
+                        $locations[] = $root_dir . "/${module}/Resources/public/video";
                     }
 
                     $locations = array_filter($locations, function ($itm) use ($fs) {
@@ -554,9 +558,10 @@ namespace Terrific\ExporterBundle\Service {
                         $locations[] = $dir->getPathname();
                     }
 
-                    if ($this->logger) {
-                        $this->logger->debug(sprintf("Use pathlist for location [ %s ].", implode(", ", $locations)));
+                    if ($this->logger !== null) {
+                        $this->logger->debug(sprintf("Use pathlist for location \n[\n\t%s\n].\n", implode(",\n\t", $locations)));
                     }
+
                     $this->fileLocator = new FileLocator($locations);
                 }
             }
