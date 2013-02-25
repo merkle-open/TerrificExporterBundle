@@ -207,10 +207,6 @@ namespace Terrific\ExporterBundle\Object {
             $url = $this->url;
 
             foreach ($this->urlParameters as $param) {
-                if (!isset($values[$param])) {
-                    throw new \InvalidArgumentException("Option '${$param}' not found in the given parameter values.");
-                }
-
                 $url = str_replace('{' . $param . '}', $values[$param], $url);
             }
 

@@ -249,7 +249,7 @@ namespace Terrific\ExporterBundle\Service {
                     }
                 }
 
-                // Twiggisch ... 
+                // Twiggisch ...
                 if ($token->getValue() === "extends") {
                     $newTpl = $stream->getCurrent()->getValue();
                     list($bundle, $controller, $view) = explode(":", $newTpl);
@@ -282,7 +282,7 @@ namespace Terrific\ExporterBundle\Service {
                 // Twiggisch ...
                 // Please note tokens are searched for "tc". Custom modules are not recognized.
                 // {{ tc.module( 'Dummy', 'dummy', [], [], { 'tag':'article', 'role':'article' }, { 'title':'NAVIGATION' } ) }}
-                
+
                 $isModuleToken = false;
                 $isModuleToken |= ($token->getValue() === "tc" && $stream->getCurrent()->getValue() === "." && $stream->look()->getValue() === "module");
                 $isModuleToken |= ($token->getValue() === "rc" && $stream->getCurrent()->getValue() === "." && $stream->look()->getValue() === "bundleModule");
@@ -345,7 +345,7 @@ namespace Terrific\ExporterBundle\Service {
                     $routeModule = new RouteModule($module, $view, $skins, $connectors);
                     $in[] = $routeModule;
 
-                    // TODO: Only Terrific Modules 
+                    // TODO: Only Terrific Modules
                     // ... maybe you need to adjust this to use it with other bundles.
                     try {
                         $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
@@ -395,7 +395,7 @@ namespace Terrific\ExporterBundle\Service {
 
                 try {
                     // @TODO: To use this with other bundles than TerrificComposition, you
-                    // need to customize this area. Get the registered bundles from kernel 
+                    // need to customize this area. Get the registered bundles from kernel
                     // and loop over them ... or whatever ;-)
                     $tpl = $this->kernel->locateResource(sprintf("@TerrificComposition/Resources/views/%s/%s.html.twig", $tplDir, $tpl));
                     // e.g. Default/index.html
@@ -660,7 +660,7 @@ namespace Terrific\ExporterBundle\Service {
         /**
          * Get url parametes from controller, like:
          * Route("/finder/{_locale}", name="finder", defaults={"_locale" = "de"})
-         * 
+         *
          * @param  \Terrific\ExporterBundle\Object\Route $route
          * @return void
          */
@@ -693,18 +693,17 @@ namespace Terrific\ExporterBundle\Service {
 
             /** @var $sRoute \Symfony\Component\Routing\Route */
             foreach ($this->router->getRouteCollection()->all() as $sRoute) {
+                $exportable = false;
                 $route = new Route($sRoute);
 
                 /** @var $exportAnnotation Export */
                 $exportAnnotation = $this->reader->getMethodAnnotation($route->getMethod(), 'Terrific\ExporterBundle\Annotation\Export');
 
                 if ($exportAnnotation) {
-                    // Check if current export environment matches controller annotation environment settings 
+                    // Check if current export environment matches controller annotation environment settings
                     if (!$exportAnnotation->matchEnvironment($this->kernel->getEnvironment())) {
                         continue;
                     }
-
-                    $route->setExportable(true);
 
                     // Check if languages are set in controller annotation
                     if (count($exportAnnotation->getLocales()) > 0) {
@@ -712,16 +711,22 @@ namespace Terrific\ExporterBundle\Service {
                         foreach ($exportAnnotation->getLocales() as $locale) {
                             // Check if current locale matches controller annotation locale settings
                             if ($locale->matchEnvironment($this->kernel->getEnvironment())) {
+                                $exportable = true;
                                 $route->addLocale($locale->getLocale(), $locale->getName());
                             }
                         }
+                    } else {
+                        $exportable = true;
                     }
+
+
+                    $route->setExportable($exportable);
                 }
 
                 // Get @Export name or generate and set it into object
                 $route->setExportName($this->findNameByRoute($route));
                 $this->buildUrlParameters($route);
-                
+
                 $this->findAssets($sRoute, $route);
                 $this->routeList[] = $route;
             }
