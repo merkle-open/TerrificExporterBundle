@@ -12,7 +12,7 @@ namespace Terrific\ExporterBundle\Service {
     use Terrific\ComposerBundle\Service\ModuleManager;
     use Terrific\ExporterBundle\Exception\PathResolveException;
     use Symfony\Component\HttpKernel\Log\LoggerInterface;
-    use Symfony\Component\Config\FileLocator;
+    use Terrific\ExporterBundle\Component\FileLocator;
     use Symfony\Component\Filesystem\Filesystem;
     use Symfony\Component\Finder\Finder;
     use Symfony\Component\Finder\SplFileInfo;
@@ -23,25 +23,25 @@ namespace Terrific\ExporterBundle\Service {
      */
     class PathResolver implements ContainerAwareInterface {
         // Bitfield
-        
+
         // Scopes
-        const SCOPE_MODULE      = 1;
-        const SCOPE_GLOBAL      = 2;
+        const SCOPE_MODULE = 1;
+        const SCOPE_GLOBAL = 2;
         // Put an other scope here if needed ...
 
         // File types
-        const TYPE_IMAGE        = 8;
-        const TYPE_FONT         = 16;
-        const TYPE_VIEW         = 32;
-        const TYPE_CSS          = 64;
-        const TYPE_JS           = 128;
-        const TYPE_DIFF         = 256;
-        const TYPE_CHANGELOG    = 512;
-        const TYPE_FLASH        = 1024;     // .swf (Shockwave Flash)
-        const TYPE_SILVERLIGHT  = 2048;     // .xap (Silverlight zip archive)
-        const TYPE_ICON         = 4096;     // .ico image/vnd.microsoft.icon + image/x-icon
-        const TYPE_VIDEO        = 8192;     // .mp4, .flv, .ogv, .webm, .mpg, .mpeg, .mov
-        const TYPE_AUDIO        = 16384;    // .mp3, .ogg, .wav, .acc
+        const TYPE_IMAGE = 8;
+        const TYPE_FONT = 16;
+        const TYPE_VIEW = 32;
+        const TYPE_CSS = 64;
+        const TYPE_JS = 128;
+        const TYPE_DIFF = 256;
+        const TYPE_CHANGELOG = 512;
+        const TYPE_FLASH = 1024; // .swf (Shockwave Flash)
+        const TYPE_SILVERLIGHT = 2048; // .xap (Silverlight zip archive)
+        const TYPE_ICON = 4096; // .ico image/vnd.microsoft.icon + image/x-icon
+        const TYPE_VIDEO = 8192; // .mp4, .flv, .ogv, .webm, .mpg, .mpeg, .mov
+        const TYPE_AUDIO = 16384; // .mp3, .ogg, .wav, .acc
 
         /** @var ContainerInterface */
         protected $container;
@@ -60,6 +60,8 @@ namespace Terrific\ExporterBundle\Service {
 
         /** @var FileLocator */
         protected $fileLocator;
+
+        protected $initialized = false;
 
         /**
          * Setter for logger.
@@ -352,7 +354,7 @@ namespace Terrific\ExporterBundle\Service {
                 case "MPEG":
                 case "MOV":
                 case "3GP":
-                case "RM":  // Real Media video
+                case "RM": // Real Media video
                     return self::TYPE_VIDEO;
 
                 case "MP3":
@@ -431,6 +433,8 @@ namespace Terrific\ExporterBundle\Service {
 
             $assertedPath = ltrim($assertedPath, ".");
 
+            $bundleLookup = null;
+
             if (strpos($assertedPath, "/terrificmodule") !== false) {
                 $modName = $this->getModuleName($assertedPath);
 
@@ -443,6 +447,14 @@ namespace Terrific\ExporterBundle\Service {
                 $assertedPath = $nPath;
             }
 
+            if (strpos($assertedPath, DIRECTORY_SEPARATOR . "bundles" . DIRECTORY_SEPARATOR) === 0) {
+                list($_, $_, $bundleName) = explode(DIRECTORY_SEPARATOR, $assertedPath);
+
+                // found bundle
+                $nPath = str_replace(DIRECTORY_SEPARATOR . "bundles" . DIRECTORY_SEPARATOR . $bundleName . DIRECTORY_SEPARATOR, "", $assertedPath);
+                $bundleLookup = $nPath;
+            }
+
             // var_dump($file);
             $locatedFiles = $this->fileLocator->locate($file, null, false);
 
@@ -450,7 +462,12 @@ namespace Terrific\ExporterBundle\Service {
             foreach ($locatedFiles as $file) {
                 $file = realpath($file);
 
-                $found = (strpos($file, $assertedPath) !== false);
+                if ($bundleLookup !== null) {
+                    $found = (strpos($file, $bundleLookup) !== false);
+                } else {
+                    $found = (strpos($file, $assertedPath) !== false);
+                }
+
 
                 if ($this->logger !== null) {
                     $this->logger->debug(sprintf("Search for\n\t['%s'] in\n\t['%s'] => %s", $assertedPath, $file, ($found ? 'true' : 'false')));
@@ -468,7 +485,7 @@ namespace Terrific\ExporterBundle\Service {
             if ($this->logger !== null) {
                 $this->logger->err(print_r($locatedFiles, true));
             }
-            throw new \Exception("Cannot identify single path for asset: " . $file);
+            throw new \Exception(sprintf("Cannot identify single path for asset: %s [checked against %s]", $file, $assertedPath));
         }
 
         /**
@@ -516,11 +533,41 @@ namespace Terrific\ExporterBundle\Service {
             return $ret;
         }
 
+
+        /**
+         * @param $path
+         */
+        public function addResourcePath($path) {
+            $this->fileLocator->addPath($path);
+        }
+
+
+        /**
+         *
+         *
+         * @param $module
+         * @param $parentModulePath parent path of modules
+         * @return array
+         */
+        public function buildModuleResourcePaths($module, $parentModulePath) {
+            $locations = array();
+
+            $locations[] = $parentModulePath . "/${module}/Resources/public/img";
+            $locations[] = $parentModulePath . "/${module}/Resources/public/flash";
+            $locations[] = $parentModulePath . "/${module}/Resources/public/font";
+            $locations[] = $parentModulePath . "/${module}/Resources/public/fonts";
+            $locations[] = $parentModulePath . "/${module}/Resources/public/video";
+
+            return $locations;
+        }
+
         /**
          *
          */
-        protected function initialize() {
-            if ($this->fileLocator == null) {
+        protected function initialize($reInitialize = false) {
+            if (!$this->initialized || $reInitialize) {
+                $this->initialized = true;
+
                 if ($this->container && count($this->modules)) {
                     $finder = new Finder();
 
@@ -531,20 +578,12 @@ namespace Terrific\ExporterBundle\Service {
 
                     // Hard coded location paths for WHERE should be searched
                     $locations = array(
-                        $root_dir . "/../web",
-                        $root_dir . "/../web/img",
-                        $root_dir . "/../web/font",
-                        $root_dir . "/../web/fonts",
-                        $root_dir . "/../web/video"
+                        $root_dir . "/../web", $root_dir . "/../web/img", $root_dir . "/../web/font", $root_dir . "/../web/fonts", $root_dir . "/../web/video"
                     );
 
                     $root_dir .= "/../src/Terrific/Module";
                     foreach ($this->modules as $module) {
-                        $locations[] = $root_dir . "/${module}/Resources/public/img";
-                        $locations[] = $root_dir . "/${module}/Resources/public/flash";
-                        $locations[] = $root_dir . "/${module}/Resources/public/font";
-                        $locations[] = $root_dir . "/${module}/Resources/public/fonts";
-                        $locations[] = $root_dir . "/${module}/Resources/public/video";
+                        $locations = array_merge($locations, $this->buildModuleResourcePaths($module, $root_dir));
                     }
 
                     $locations = array_filter($locations, function ($itm) use ($fs) {
@@ -562,7 +601,7 @@ namespace Terrific\ExporterBundle\Service {
                         $this->logger->debug(sprintf("Use pathlist for location \n[\n\t%s\n].\n", implode(",\n\t", $locations)));
                     }
 
-                    $this->fileLocator = new FileLocator($locations);
+                    $this->fileLocator->addPath($locations);
                 }
             }
         }
@@ -587,7 +626,7 @@ namespace Terrific\ExporterBundle\Service {
             $this->pathTemplate[(self::TYPE_ICON | self::SCOPE_GLOBAL)] = '/';
             $this->pathTemplate[(self::TYPE_VIDEO | self::SCOPE_GLOBAL)] = '/media/video';
             $this->pathTemplate[(self::TYPE_AUDIO | self::SCOPE_GLOBAL)] = '/media/audio';
-            
+
             // Module context
             $this->pathTemplate[(self::TYPE_IMAGE | self::SCOPE_MODULE)] = '/img/%module%';
             $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_MODULE)] = '/fonts/%module%';
@@ -602,6 +641,8 @@ namespace Terrific\ExporterBundle\Service {
             $this->modules = array();
             $this->moduleManager = null;
             $this->container = null;
+
+            $this->fileLocator = new FileLocator();
         }
     }
 }

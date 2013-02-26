@@ -26,6 +26,7 @@ namespace Terrific\ExporterBundle\Service {
     use Symfony\Component\HttpFoundation\Session\Session;
     use Symfony\Component\Translation\Translator;
     use Terrific\ComposerBundle\Service\ModuleManager;
+    use Terrific\ExporterBundle\Helper\SymfonyHelper;
 
 
     /**
@@ -186,7 +187,7 @@ namespace Terrific\ExporterBundle\Service {
          * @param  array  $in
          * @return array  $in
          */
-        protected function findAssetsByFile($filePath, array $in = array()) {
+        protected function findAssetsByFile($filePath, array $in = array(), Route $parentRoute = null) {
             $this->initialize();
 
             // Just to save a lot of time, MD5 used
@@ -255,7 +256,6 @@ namespace Terrific\ExporterBundle\Service {
                     list($bundle, $controller, $view) = explode(":", $newTpl);
 
                     $pTpl = $this->kernel->locateResource(sprintf("@%s/Resources/views/%s/%s", $bundle, $controller, $view));
-
                     $in = $this->findAssetsByFile($pTpl, $in);
                 }
 
@@ -344,16 +344,36 @@ namespace Terrific\ExporterBundle\Service {
 
                     $routeModule = new RouteModule($module, $view, $skins, $connectors);
                     $in[] = $routeModule;
+                    $bundleName = "";
 
                     // TODO: Only Terrific Modules
                     // ... maybe you need to adjust this to use it with other bundles.
                     try {
-                        $tpl = $this->kernel->locateResource(sprintf("@TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
-                        $moduleIn = $this->findAssetsByFile($tpl);
+
+
+                        if ($parentRoute !== null) {
+                            $bundleName = SymfonyHelper::getBundleFromNamespace($parentRoute->getMethod()->getDeclaringClass());
+
+                            try {
+                                $tpl = $this->kernel->locateResource(sprintf("@%s/Resources/views/%s", $bundleName, $routeModule->getTemplate()));
+                            } catch (InvalidArgumentException $e) {
+                                $tpl = $this->kernel->locateResource($a = sprintf("@%s/Module/%s/Resources/views/%s", $bundleName, $routeModule->getModule(), $routeModule->getTemplate()));
+                            }
+
+                        } else {
+                            $bundleName = sprintf("TerrificModule%s", $routeModule->getModule());
+                            $tpl = $this->kernel->locateResource(sprintf("@%s/Resources/views/%s", $bundleName, $routeModule->getTemplate()));
+                        }
+
+
+                        $moduleIn = $this->findAssetsByFile($tpl, array(), $parentRoute);
                         $routeModule->setAssets($moduleIn);
+
                     } catch (InvalidArgumentException $ex) {
+                        //var_dump(sprintf("Cannot find view: %s/Resources/views/%s", $bundleName, $routeModule->getTemplate()));
+
                         if ($this->logger !== null) {
-                            $this->logger->debug(sprintf("Cannot find module: @TerrificModule%s/Resources/views/%s", $routeModule->getModule(), $routeModule->getTemplate()));
+                            $this->logger->debug(sprintf("Cannot find view: @%s/Resources/views/%s", $bundleName, $routeModule->getTemplate()));
                         }
                     }
                 }
@@ -397,7 +417,17 @@ namespace Terrific\ExporterBundle\Service {
                     // @TODO: To use this with other bundles than TerrificComposition, you
                     // need to customize this area. Get the registered bundles from kernel
                     // and loop over them ... or whatever ;-)
-                    $tpl = $this->kernel->locateResource(sprintf("@TerrificComposition/Resources/views/%s/%s.html.twig", $tplDir, $tpl));
+
+
+                    $bundle = SymfonyHelper::getBundleFromNamespace($route->getMethod()->getDeclaringClass());
+                    if ($bundle === null) {
+                        throw new InvalidArgumentException("Bundlename were not approved.");
+                    }
+
+                    $resource = sprintf("@%s/Resources/views/%s/%s.html.twig", $bundle, $tplDir, $tpl);
+                    //var_dump("Look in " . $resource);
+                    $tpl = $this->kernel->locateResource($resource);
+
                     // e.g. Default/index.html
                     $route->setTemplate($tpl);
                 } catch (InvalidArgumentException $ex) {
@@ -409,7 +439,7 @@ namespace Terrific\ExporterBundle\Service {
 
             // Search assets in templates
             if ($route->getTemplate() !== "") {
-                $assets = $this->findAssetsByFile($route->getTemplate());
+                $assets = $this->findAssetsByFile($route->getTemplate(), array(), $route);
                 $route->addAssets($assets);
             }
         }

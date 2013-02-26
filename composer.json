@@ -1,45 +1,57 @@
 {
-    "name"          : "namics/terrific-exporter-bundle",
-    "description"   : "Exports your terrific frontend",
-    "keywords"      : [
+    "name"        :"namics/terrific-exporter-bundle",
+    "description" :"Exports your terrific frontend",
+    "keywords"    :[
         "frontend",
         "terrific",
         "export"
     ],
-    "type"      : "symfony-bundle",
-    "license"   : "MIT",
-    "authors"   : [
+    "type"        :"symfony-bundle",
+    "license"     :"MIT",
+    "repositories":[
         {
-            "name"      : "Bruno Lorenz",
-            "homepage"  : "https://github.com/senuphtyz"
+            "type":"vcs",
+            "url" :"http://github.com/brunschgi/TerrificCoreBundle"
         },
         {
-            "name"      : "Eduard Seifert",
-            "homepage"  : "https://github.com/eduardseifert"
-        },
-        {
-            "name"      : "Terrific Symfony Community",
-            "homepage"  : "https://github.com/namics/TerrificExporterBundle/contributors"
+            "type":"vcs",
+            "url" :"http://github.com/brunschgi/TerrificComposerBundle"
         }
     ],
-    "require" : {
-        "symfony/framework-bundle"  : "2.1.*",
-        "symfony/form"              : "2.1.*",
-        "symfony/validator"         : "2.1.*",
-        "symfony/finder"            : "2.1.*",
-        "symfony/console"           : "2.1.*",
-        "symfony/process"           : "2.1.*",
-        "natxet/CssMin"             : "dev-master",
-        "kriswallsmith/assetic"     : "dev-master"
+    "authors"     :[
+        {
+            "name"    :"Bruno Lorenz",
+            "homepage":"https://github.com/senuphtyz"
+        },
+        {
+            "name"    :"Eduard Seifert",
+            "homepage":"https://github.com/eduardseifert"
+        },
+        {
+            "name"    :"Terrific Symfony Community",
+            "homepage":"https://github.com/namics/TerrificExporterBundle/contributors"
+        }
+    ],
+    "require"     :{
+        "symfony/framework-bundle"          :"2.1.*",
+        "symfony/form"                      :"2.1.*",
+        "symfony/validator"                 :"2.1.*",
+        "symfony/finder"                    :"2.1.*",
+        "symfony/console"                   :"2.1.*",
+        "symfony/process"                   :"2.1.*",
+        "natxet/CssMin"                     :"dev-master",
+        "kriswallsmith/assetic"             :"dev-master",
+        "brunschgi/terrific-core-bundle"    :"*",
+        "brunschgi/terrific-composer-bundle":"*"
     },
-    "require-dev" : {
-        "symfony/yaml"          : "2.1.*",
-        "symfony/filesystem"    : "2.1.*"
+    "require-dev" :{
+        "symfony/yaml"      :"2.1.*",
+        "symfony/filesystem":"2.1.*"
     },
-    "autoload" : {
-        "psr-0" : {
-            "Terrific\\ExporterBundle" : ""
+    "autoload"    :{
+        "psr-0":{
+            "Terrific\\ExporterBundle":""
         }
     },
-    "target-dir" : "Terrific/ExporterBundle"
+    "target-dir"  :"Terrific/ExporterBundle"
 }
