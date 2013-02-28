@@ -80,29 +80,25 @@ namespace Terrific\ExporterBundle\Actions {
 
         /**
          * Saves special assets (not JS or CSS)
-         * 
+         *
          * @param  PathResolver $pathResolver  [description]
          * @param  array        $ignoredAssets [description]
          * @param  array        $assetList     [description]
          * @return [type]                      [description]
          */
         protected function exportSpecialAssets(PathResolver $pathResolver, array $ignoredAssets, array $assetList, array $params) {
-
-            var_dump($assetList);
-
             foreach($assetList as $asset) {
                 if(!in_array($asset, $ignoredAssets)) {
 
                     // Export asset if it is not an image.
                     if(!FileHelper::isImage($asset)) {
-
                         $asset = $pathResolver->locate(basename($asset), $asset);
                         $assetPath =  $params["exportPath"] . "/" .$pathResolver->resolve($asset);
                         $this->saveToPath($asset, $assetPath);
 
                         Log::info("Exported asset [%s]", array(basename($asset)));
                     }
-                } 
+                }
             }
         }
 
@@ -147,7 +143,7 @@ namespace Terrific\ExporterBundle\Actions {
                 /** @var $asset FileAsset */
                 $asset = $assetManager->get($name);
 
-                $ignoredAssets[] = $name;
+                $ignoredAssets[] = $asset->getTargetPath();
 
                 if (in_array($asset->getTargetPath(), $assetList)) {
                     if ($this->logger !== null) {
@@ -167,21 +163,20 @@ namespace Terrific\ExporterBundle\Actions {
                         $beforeRewriteContent = $asset->dump();
                         // Parse CSS
                         $fonts = AsseticHelper::retrieveFonts($beforeRewriteContent);
-                        
+
                         // var_dump('$fonts: ', $fonts);
 
                         foreach ($fonts as $f) {
                             if (!in_array($f, $exportedFonts)) {
                                 // var_dump('$f: ', $f);
                                 // var_dump('$basename($f): ', basename($f));
-                                
+
                                 $f = FileHelper::cleanRecursivePath($f);
                                 // var_dump('$f: ', $f);
-                                
-                                
+
                                 $font = $pathResolver->locate(basename($f), $f);
                                 // var_dump('$font: ', $font);
-                               
+
                                 $target = $params["exportPath"] . $pathResolver->resolve($font);
                                 $this->saveToPath($font, $target);
 

@@ -115,6 +115,7 @@ namespace Terrific\ExporterBundle\Command {
                 if ($action->isRunnable($params)) {
                     $action->setContainer($this->getContainer());
 
+                    $this->logger->debug("Starting Command : " . $refClass->getShortName());
                     $this->logger->debug("Starting command with params: " . print_r($params, true));
                     Log::info("Start [" . $refClass->getShortName() . "]");
                     Log::blkstart();
