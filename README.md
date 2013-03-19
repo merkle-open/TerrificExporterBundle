@@ -133,11 +133,14 @@ To do a permanent change it is necessary to change `~/.bashrc` or `~/.bash_profi
 
 ### Node.js with YUIDoc, JSHint and CSSLint ###
 
-YUIDoc, JSHint and CSSLint are installed using Node.js. Just go to nodejs.org download the package fits for you operating system and install it. After the installation is done open up a new commandline and install Node.js and the Node.js Pakage Manager.
+YUIDoc, JSHint and CSSLint are installed using [Node.js](http://nodejs.org/). Just go to [nodejs.org](http://nodejs.org/) download the package fits for you operating system and install it. After the installation is done open up a new commandline and install Node.js and the Node.js Pakage Manager.
 
-1. Node.js on most Debian systems: `$ sudo apt-get install nodejs`
-2. Node.js Pakage Manager: `$ sudo apt-get install npm`
-3. YUIDoc, JSHint and CSSLint: `$ sudo npm -g install yuidocjs jshint csslint`
+* Unix/Debian:
+    1. Install Node.js (on most Debian systems): `$ sudo apt-get install nodejs`
+    2. Install Node.js Pakage Manager (NPM): `$ sudo apt-get install npm`
+    3. Install YUIDoc, JSHint and CSSLint via NPM: `$ sudo npm -g install yuidocjs jshint csslint`
+* MacOSX:
+    1. Visit [Node.js auf Mac OS X 10.7 "Lion" Howto ](http://www.asconix.com/howtos/mac-os-x/node-js-mac-os-howto) for further information on how to install Node.js on Mac OSX systems.
 
 For further help and syntax for YUIDoc visit <http://yui.github.com/yuidoc/>.
 
