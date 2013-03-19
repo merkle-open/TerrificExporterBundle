@@ -139,8 +139,14 @@ YUIDoc, JSHint and CSSLint are installed using [Node.js](http://nodejs.org/). Ju
     1. Install Node.js (on most Debian systems): `$ sudo apt-get install nodejs`
     2. Install Node.js Pakage Manager (NPM): `$ sudo apt-get install npm`
     3. Install YUIDoc, JSHint and CSSLint via NPM: `$ sudo npm -g install yuidocjs jshint csslint`
-* MacOSX:
+* MacOSX with [Homebrew](http://www.asconix.com/howtos/mac-os-x/homebrew-mac-os-x-howto):
     1. Visit [Node.js auf Mac OS X 10.7 "Lion" Howto ](http://www.asconix.com/howtos/mac-os-x/node-js-mac-os-howto) for further information on how to install Node.js on Mac OSX systems.
+* MacOSX with [Ports](http://www.macports.org/install.php):
+    1. Install [Mac Ports](http://www.macports.org/install.php)
+    2. `$ sudo port selfupdate`
+    3. Install Node.js: `$ sudo port install nodejs`
+    4. Install NPM: `$ sudo port install npm`
+    5. Install YUIDoc, JSHint and CSSLint via NPM: `$ sudo npm -g install yuidocjs jshint csslint`
 
 For further help and syntax for YUIDoc visit <http://yui.github.com/yuidoc/>.
 
