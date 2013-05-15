@@ -63,7 +63,7 @@
 		- [Add new file type extensions to the Exporter](#add-new-file-type-extensions-to-the-exporter)
 	- [Known Problems](#known-problems)
 - [FAQ](#faq)
-- [Some notes](#some-notes)
+- [Some Notes](#some-notes)
 - [Todo](#todo)
 - [Authors](#authors)
 
@@ -136,9 +136,10 @@ To do a permanent change it is necessary to change `~/.bashrc` or `~/.bash_profi
 YUIDoc, JSHint and CSSLint are installed using [Node.js](http://nodejs.org/). Just go to [nodejs.org](http://nodejs.org/) download the package fits for you operating system and install it. After the installation is done open up a new commandline and install Node.js and the Node.js Pakage Manager.
 
 * Unix/Debian:
-    1. Install Node.js (on most Debian systems): `$ sudo apt-get install nodejs`
-    2. Install Node.js Pakage Manager (NPM): `$ sudo apt-get install npm`
-    3. Install YUIDoc, JSHint and CSSLint via NPM: `$ sudo npm -g install yuidocjs jshint csslint`
+    1. Install Node.js (on most Debian systems): `$ sudo apt-get install nodejs` or `$ sudo apt-get install node-legacy` (if `nodejs` don't work).
+    2. Additionally you may need the `php5-curl` package.
+    3. Install Node.js Pakage Manager (NPM): `$ sudo apt-get install npm`.
+    4. Install YUIDoc, JSHint and CSSLint via NPM: `$ sudo npm -g install yuidocjs jshint csslint`.
 * MacOSX with [Homebrew](http://www.asconix.com/howtos/mac-os-x/homebrew-mac-os-x-howto):
     1. Visit [Node.js auf Mac OS X 10.7 "Lion" Howto ](http://www.asconix.com/howtos/mac-os-x/node-js-mac-os-howto) for further information on how to install Node.js on Mac OSX systems.
 * MacOSX with [Ports](http://www.macports.org/install.php):
@@ -866,7 +867,22 @@ During the complexity of a project and this exporter there will always some cons
     A: These files are comming from the [TerrificCoreBundle](https://github.com/brunschgi/TerrificCoreBundle) located `Terrific/CoreBundle/Resources/views/base.html.twig`. You just need to replace the `base.html.twig` with your custom edited `base.html.twig` file. Generarly the file inherits from `Terrific/CoreBundle/Resources/views/base.html.twig` so be aware of the changes if `TerrificCoreBundle` is updated. Maybe you need to adjust some settings in yor base Twig file.
 
 
-# Some notes
+3. LESS issues
+
+Warning! This construct will be ignored by the TerrificExporter Bundle:
+
+    .sprite-image (@x: 0px, @y: 0px, @url: 'sprites-icons.png', @color: transparent, @scroll: scroll) {
+        background: url('/img/'+@url) no-repeat @x @y @color @scroll;
+    }
+
+Use sth. like this instead:
+
+    .sprites-icons(@x: 0px, @y: 0px, @color: transparent, @scroll: scroll) {
+        background: url(/img/sprites-icons.png) no-repeat @x @y @color @scroll;
+    }
+
+
+# Some Notes
 
 * Don't forget to generate an update to the TOC for this documentation. Node.js [doctoc](https://npmjs.org/package/doctoc) generates TOC for markdown files of local git repo: `$ doctoc README.md`.
 
