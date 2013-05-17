@@ -601,7 +601,12 @@ All builtin actions are documented within these chapter. This maybe have some he
 
 ### `GenerateSprites` ###
 
-* `Terrific/ExporterBundle/Actions/GenerateSprites` needs some more configuration than the other actions. Each sprite which should be generated must have an entry within the config file. If there is/are no configured sprite(s) the action will just be skipped.
+* In order to user sprite generation the config (yml) must contain sprite-defintion:
+    sprites:
+            - {
+                directory: "PROD/internet_sprite_icons",
+                target: "web/img/sprite_icons.png", item: { height: 50, width: 100 }
+            }
 * To generate a sprite this action uses the `montage` tool from the ImageMagick toolset.
 * After retrieving a filelist for merging as a sprite the action will sort this files by name. This offers you the possibility to order you images within your sprite. Filenames like `0000_arrow.png` are best practice.
 * If this file is part of the export, which should be the normal usecase, this action has to *run before* `ExportImages`.
