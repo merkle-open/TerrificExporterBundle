@@ -40,7 +40,7 @@
         "symfony/console"                   :"2.1.*",
         "symfony/process"                   :"2.1.*",
         "natxet/CssMin"                     :"dev-master",
-        "kriswallsmith/assetic"             :"dev-master",
+        "kriswallsmith/assetic"             :"1.1.*@dev",
         "brunschgi/terrific-core-bundle"    :"*",
         "brunschgi/terrific-composer-bundle":"*"
     },
