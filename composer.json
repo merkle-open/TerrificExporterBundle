@@ -21,7 +21,7 @@
         "symfony/console"         :"2.1.*",
         "symfony/process"         :"2.1.*",
         "natxet/CssMin"           :"dev-master",
-        "kriswallsmith/assetic"   :"dev-master"
+        "kriswallsmith/assetic"   :"1.1.*@dev"
     },
     "require-dev":{
         "symfony/yaml"      :"2.1.*",
