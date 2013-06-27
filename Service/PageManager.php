@@ -639,6 +639,17 @@ namespace Terrific\ExporterBundle\Service {
                 }
             }
         }
+        
+        /**
+         * methode to check _controller for assetic entry
+         */
+        private function checkRoute(\Symfony\Component\Routing\Route $route) {
+            $defaults = $route->getDefaults();
+            if (isset($defaults["_controller"]) && strpos($defaults["_controller"], 'assetic') !== false) {
+                return false;
+            }
+            return true;
+        }
 
         /**
          *
@@ -656,6 +667,11 @@ namespace Terrific\ExporterBundle\Service {
 
             /** @var $sRoute \Symfony\Component\Routing\Route */
             foreach ($this->router->getRouteCollection()->all() as $sRoute) {
+            	
+                if(!$this->checkRoute($sRoute)){
+                    continue;
+                }
+            	
                 $route = new Route($sRoute);
 
                 /** @var $exportAnnotation Export */
