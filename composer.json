@@ -20,33 +20,25 @@
     ],
     "authors"     :[
         {
-            "name"    :"Bruno Lorenz",
-            "homepage":"https://github.com/senuphtyz"
-        },
-        {
-            "name"    :"Eduard Seifert",
-            "homepage":"https://github.com/eduardseifert"
-        },
-        {
             "name"    :"Terrific Symfony Community",
             "homepage":"https://github.com/namics/TerrificExporterBundle/contributors"
         }
     ],
-    "require"     :{
-        "symfony/framework-bundle"          :"2.1.*",
-        "symfony/form"                      :"2.1.*",
-        "symfony/validator"                 :"2.1.*",
-        "symfony/finder"                    :"2.1.*",
-        "symfony/console"                   :"2.1.*",
-        "symfony/process"                   :"2.1.*",
+    "require"     :
+        "symfony/framework-bundle"          :"2.2.*",
+        "symfony/form"                      :"2.2.*",
+        "symfony/validator"                 :"2.2.*",
+        "symfony/finder"                    :"2.2.*",
+        "symfony/console"                   :"2.2.*",
+        "symfony/process"                   :"2.2.*",
         "natxet/CssMin"                     :"dev-master",
         "kriswallsmith/assetic"             :"1.1.*@dev",
         "brunschgi/terrific-core-bundle"    :"*",
         "brunschgi/terrific-composer-bundle":"*"
     },
     "require-dev" :{
-        "symfony/yaml"      :"2.1.*",
-        "symfony/filesystem":"2.1.*"
+        "symfony/yaml"      :"2.2.*",
+        "symfony/filesystem":"2.2.*"
     },
     "autoload"    :{
         "psr-0":{
