@@ -24,7 +24,7 @@
             "homepage":"https://github.com/namics/TerrificExporterBundle/contributors"
         }
     ],
-    "require"     :
+    "require"     :{
         "symfony/framework-bundle"          :"2.2.*",
         "symfony/form"                      :"2.2.*",
         "symfony/validator"                 :"2.2.*",
