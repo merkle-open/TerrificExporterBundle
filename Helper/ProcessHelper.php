@@ -23,6 +23,7 @@ namespace Terrific\ExporterBundle\Helper {
         public static function checkCommand($command) {
             $retVal = 0;
             switch ($command) {
+            	case "montage":
                 case "jpegoptim":
                 case "diff":
                 case "trimage":
