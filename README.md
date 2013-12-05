@@ -177,10 +177,14 @@ On RHEL/Fedora/Centos Linux you have to install `jpegoptim` from source.you have
 
 **MacOSX:**
 
-On MacOSX the easiest way to get the whole toolset is to install [ImageOptim](http://imageoptim.com/). This application contains all necessary image optimizing tools needed by the exporter.
+On MacOSX the easiest way to get the whole toolset is to install [ImageOptim](http://imageoptim.com/). This application contains all necessary image optimizing tools needed by the exporter. You can find the binarys of advpng and optipng in the application package (/Applications/ImageOptim.app/Contents/MacOS/).
+You can just symlink the binarys to your /bin folder:
+    $ ln -s /Applications/ImageOptim.app/Contents/MacOS/advpng /bin/advpng
+    $ ln -s /Applications/ImageOptim.app/Contents/MacOS/optipng /bin/optipng
+
 
 `montage` is part of the ImageMagick toolset. Visit [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) to install it.
-You can also choose to install ImageMagick with an MaxOSX Installer from http://cactuslab.com/imagemagick/ . It might be necessary to use the second installer (Requires XQuartz).
+You can also choose to install ImageMagick with an MaxOSX Installer from http://cactuslab.com/imagemagick/ . Use the installer without XQuartz.
 
 ### diff ###
 
