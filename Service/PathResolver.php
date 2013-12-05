@@ -42,6 +42,7 @@ namespace Terrific\ExporterBundle\Service {
         const TYPE_ICON = 4096; // .ico image/vnd.microsoft.icon + image/x-icon
         const TYPE_VIDEO = 8192; // .mp4, .flv, .ogv, .webm, .mpg, .mpeg, .mov
         const TYPE_AUDIO = 16384; // .mp3, .ogg, .wav, .acc
+        const TYPE_JSON = 32768;
 
         /** @var ContainerInterface */
         protected $container;
@@ -189,6 +190,7 @@ namespace Terrific\ExporterBundle\Service {
                     $a[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = 'font';
                     $a[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = 'css';
                     $a[(self::TYPE_JS | self::SCOPE_GLOBAL)] = 'js';
+                    $a[(self::TYPE_JSON | self::SCOPE_GLOBAL)] = 'json';
                     $a[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = 'view';
                     $a[(self::TYPE_FLASH | self::SCOPE_GLOBAL)] = 'flash';
                     $a[(self::TYPE_SILVERLIGHT | self::SCOPE_GLOBAL)] = 'silverlight';
@@ -203,6 +205,7 @@ namespace Terrific\ExporterBundle\Service {
                     $a[(self::TYPE_FONT | self::SCOPE_MODULE)] = 'module_font';
                     $a[(self::TYPE_CSS | self::SCOPE_MODULE)] = 'module_css';
                     $a[(self::TYPE_JS | self::SCOPE_MODULE)] = 'module_js';
+                    $a[(self::TYPE_JSON | self::SCOPE_MODULE)] = 'module_json';
                     $a[(self::TYPE_VIEW | self::SCOPE_MODULE)] = 'module_view';
                     $a[(self::TYPE_FLASH | self::SCOPE_MODULE)] = 'module_flash';
                     $a[(self::TYPE_SILVERLIGHT | self::SCOPE_MODULE)] = 'module_silverlight';
@@ -331,6 +334,9 @@ namespace Terrific\ExporterBundle\Service {
 
                 case "JS":
                     return self::TYPE_JS;
+
+                case "JSON":
+                    return self::TYPE_JSON;
 
                 case "HTML":
                     return self::TYPE_VIEW;
@@ -557,6 +563,7 @@ namespace Terrific\ExporterBundle\Service {
             $locations[] = $parentModulePath . "/${module}/Resources/public/font";
             $locations[] = $parentModulePath . "/${module}/Resources/public/fonts";
             $locations[] = $parentModulePath . "/${module}/Resources/public/video";
+            $locations[] = $parentModulePath . "/${module}/Resources/public/json";
 
             return $locations;
         }
@@ -578,7 +585,7 @@ namespace Terrific\ExporterBundle\Service {
 
                     // Hard coded location paths for WHERE should be searched
                     $locations = array(
-                        $root_dir . "/../web", $root_dir . "/../web/img", $root_dir . "/../web/font", $root_dir . "/../web/fonts", $root_dir . "/../web/video"
+                        $root_dir . "/../web", $root_dir . "/../web/img", $root_dir . "/../web/font", $root_dir . "/../web/fonts", $root_dir . "/../web/video", $root_dir . "/../web/json"
                     );
 
                     $root_dir .= "/../src/Terrific/Module";
@@ -618,6 +625,7 @@ namespace Terrific\ExporterBundle\Service {
             $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_GLOBAL)] = '/fonts';
             $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_GLOBAL)] = '/css';
             $this->pathTemplate[(self::TYPE_JS | self::SCOPE_GLOBAL)] = '/js';
+            $this->pathTemplate[(self::TYPE_JSON | self::SCOPE_GLOBAL)] = '/json';
             $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_GLOBAL)] = '/views';
             $this->pathTemplate[(self::TYPE_CHANGELOG | self::SCOPE_GLOBAL)] = '/changelogs';
             $this->pathTemplate[(self::TYPE_DIFF | self::SCOPE_GLOBAL)] = '/changelogs/diff';
@@ -632,6 +640,7 @@ namespace Terrific\ExporterBundle\Service {
             $this->pathTemplate[(self::TYPE_FONT | self::SCOPE_MODULE)] = '/fonts/%module%';
             $this->pathTemplate[(self::TYPE_CSS | self::SCOPE_MODULE)] = '/css/%module%';
             $this->pathTemplate[(self::TYPE_JS | self::SCOPE_MODULE)] = '/js/%module%';
+            $this->pathTemplate[(self::TYPE_JSON | self::SCOPE_MODULE)] = '/json/%module%';
             $this->pathTemplate[(self::TYPE_VIEW | self::SCOPE_MODULE)] = '/views/%module%';
             $this->pathTemplate[(self::TYPE_FLASH | self::SCOPE_MODULE)] = '/flash/%module%';
             $this->pathTemplate[(self::TYPE_SILVERLIGHT | self::SCOPE_MODULE)] = '/silverlight/%module%';
