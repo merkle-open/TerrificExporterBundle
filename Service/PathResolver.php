@@ -484,9 +484,9 @@ namespace Terrific\ExporterBundle\Service {
                 }
             }
 
-            if (count($ret) == 1) {
+            //if (count($ret) == 1) { //remove termporary due to problems (data is found in module and web folder)
                 return $ret[0];
-            }
+            //}
 
             if ($this->logger !== null) {
                 $this->logger->err(print_r($locatedFiles, true));
