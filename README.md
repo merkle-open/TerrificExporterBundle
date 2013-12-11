@@ -302,6 +302,7 @@ All configuration settings are going beyond a `terrific_exporter` node within yo
             * `font: (default: ’/fonts’)`
             * `css: (default: ’/css’)`
             * `js: (default: ’/js’)`
+            * `json: (default: ’/json’)`
             * `view: (default: ’/views’)`
             * `changelog: (default: ’/changelogs’)`
             * `diff: (default: ’/changelogs/diff’)`
@@ -316,6 +317,7 @@ All configuration settings are going beyond a `terrific_exporter` node within yo
             * `module_font: (default: ’/fonts/%module%’)`
             * `module_css: (default: ’/css/%module%’)`
             * `module_js: (default: ’/js/%module%’)`
+            * `module_json: (default: ’/json/%module%’)`
             * `module_view: (default: ’/views/%module%’)`
             * `module_flash: (default: '/flash/%module%')`
             * `module_silverlight: (default: '/silverlight/%module%')`
